@@ -11,17 +11,15 @@ class UpdateStudent
      */
     public function handle(Student $student, array $data): Student
     {
-        $student->update([
-            'phone' => $data['phone'] ?? $student->phone,
-            'cpr' => $data['cpr'] ?? $student->cpr,
-            'status' => $data['status'] ?? $student->status,
-            'start_date' => $data['start_date'] ?? $student->start_date,
-        ]);
+        $student->phone = $data['phone'] ?? $student->phone;
+        $student->cpr = $data['cpr'] ?? $student->cpr;
+        $student->status = $data['status'] ?? $student->status;
+        $student->start_date = $data['start_date'] ?? $student->start_date;
+        $student->save();
 
-        $student->user->update([
-            'name' => $data['name'] ?? $student->user->name,
-            'email' => $data['email'] ?? $student->user->email,
-        ]);
+        $student->user->name = $data['name'] ?? $student->user->name;
+        $student->user->email = $data['email'] ?? $student->user->email;
+        $student->user->save();
 
         return $student->refresh();
     }

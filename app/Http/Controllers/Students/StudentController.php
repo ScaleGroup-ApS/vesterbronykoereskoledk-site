@@ -10,6 +10,7 @@ use App\Http\Requests\Students\StoreStudentRequest;
 use App\Http\Requests\Students\UpdateStudentRequest;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,14 +44,15 @@ class StudentController extends Controller
             ->with('success', 'Elev oprettet.');
     }
 
-    public function show(Student $student): Response
+    public function show(Request $request, Student $student): Response
     {
         $this->authorize('view', $student);
 
-        $student->load('user');
+        $student->load('user', 'media');
 
         return Inertia::render('students/show', [
             'student' => $student,
+            'canEdit' => $request->user()->isAdmin(),
         ]);
     }
 
