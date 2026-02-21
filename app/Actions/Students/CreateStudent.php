@@ -13,13 +13,13 @@ use Illuminate\Support\Str;
 class CreateStudent
 {
     /**
-     * @param  array{first_name: string, last_name: string, email: string, phone?: string, cpr?: string, start_date?: string}  $data
+     * @param  array{name: string, email: string, phone?: string, cpr?: string, start_date?: string}  $data
      */
     public function handle(array $data): Student
     {
         return DB::transaction(function () use ($data) {
             $user = User::create([
-                'name' => $data['first_name'].' '.$data['last_name'],
+                'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make(Str::random(32)),
                 'role' => UserRole::Student,

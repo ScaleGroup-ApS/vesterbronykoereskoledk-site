@@ -7,27 +7,21 @@ use App\Models\Student;
 class UpdateStudent
 {
     /**
-     * @param  array{first_name?: string, last_name?: string, email?: string, phone?: string, cpr?: string, status?: string, start_date?: string}  $data
+     * @param  array{name?: string, email?: string, phone?: string|null, cpr?: string|null, status?: string, start_date?: string|null}  $data
      */
     public function handle(Student $student, array $data): Student
     {
-        $student->update(array_filter([
-            'phone' => $data['phone'] ?? null,
-            'cpr' => $data['cpr'] ?? null,
-            'status' => $data['status'] ?? null,
-            'start_date' => $data['start_date'] ?? null,
-        ], fn ($value) => $value !== null));
+        $student->update([
+            'phone' => $data['phone'] ?? $student->phone,
+            'cpr' => $data['cpr'] ?? $student->cpr,
+            'status' => $data['status'] ?? $student->status,
+            'start_date' => $data['start_date'] ?? $student->start_date,
+        ]);
 
-        $userUpdates = array_filter([
-            'name' => isset($data['first_name'], $data['last_name'])
-                ? $data['first_name'].' '.$data['last_name']
-                : null,
-            'email' => $data['email'] ?? null,
-        ], fn ($value) => $value !== null);
-
-        if ($userUpdates) {
-            $student->user->update($userUpdates);
-        }
+        $student->user->update([
+            'name' => $data['name'] ?? $student->user->name,
+            'email' => $data['email'] ?? $student->user->email,
+        ]);
 
         return $student->refresh();
     }

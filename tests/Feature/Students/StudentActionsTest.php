@@ -11,8 +11,7 @@ test('CreateStudent creates user and student in transaction', function () {
     $action = new CreateStudent;
 
     $student = $action->handle([
-        'first_name' => 'Jonas',
-        'last_name' => 'Hansen',
+        'name' => 'Jonas Hansen',
         'email' => 'jonas@example.com',
         'phone' => '+4512345678',
         'cpr' => '010190-1234',
@@ -33,8 +32,7 @@ test('UpdateStudent updates student and user data', function () {
     $action = new UpdateStudent;
 
     $updated = $action->handle($student, [
-        'first_name' => 'Updated',
-        'last_name' => 'Name',
+        'name' => 'Updated Name',
         'email' => 'updated@example.com',
         'phone' => '+4587654321',
     ]);
