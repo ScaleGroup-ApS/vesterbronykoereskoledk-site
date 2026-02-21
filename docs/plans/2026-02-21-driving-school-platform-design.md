@@ -1,7 +1,7 @@
-# Driving School Management Platform — Design Document
+# Driving School Management Platform — Design Document (v2)
 
-**Date:** 2026-02-21
-**Stack:** Laravel 12 + Inertia v2 (React 19) + Fortify + MariaDB + Tailwind 4
+**Date:** 2026-02-21 (updated)
+**Stack:** Laravel 12 + Inertia v2 (React 19) + Fortify + MariaDB + Tailwind 4 + Verbs + Spatie Media Library
 
 ## Architecture Decisions
 
@@ -12,22 +12,52 @@ All business logic in Actions (no service classes). Controllers are thin orchest
 app/
 ├── Actions/{Domain}/       Single-responsibility action classes with handle()
 ├── Data/                   Simple DTOs for complex flows
-├── Enums/                  All enums (UserRole, StudentStatus, BookingType, etc.)
+├── Enums/                  All enums
+├── Events/                 Verbs events (StudentEnrolled, BookingCreated, etc.)
+├── States/                 Verbs states (StudentProgressionState, StudentBalanceState)
 ├── Models/                 Eloquent models
 ├── Policies/               Authorization policies
 ├── Http/Controllers/       Thin controllers calling Actions
 ├── Http/Requests/          FormRequest validation
 ├── Jobs/                   Queued jobs
-└── Notifications/          Email notifications
+└── Notifications/          Email + database notifications
 ```
 
 ### Role System: Enum Column on Users
-Three roles: Admin, Instructor, Student. Simple `role` enum column on users table. Middleware for route protection. Policies for fine-grained authorization.
+Three roles: Admin, Instructor, Student. Simple `role` enum column on users table.
 
 ### User + Student Profile
 - **User** model handles authentication for all roles.
-- **Student** model holds domain data (cpr, phone, status, start_date) linked via `user_id` FK.
+- **Student** model holds domain data linked via `user_id` FK.
 - Creating a student creates both a User (role=student) and a Student profile.
+
+### Event Sourcing: Hybrid with Verbs
+- **Verbs events** for: Students, Bookings, Payments, Progression (audit trail matters)
+- **Simple Eloquent CRUD** for: Vehicles, Blog, Offers, Teams (low complexity)
+- Verbs replaces AuditLog — event history IS the audit trail
+
+### Media: Spatie Media Library
+- Replaces custom Document model
+- `HasMedia` trait on Student (collections: "documents", "photos") and BlogPost (collection: "featured")
+- Handles conversions, responsive images, storage abstraction
+
+### Chat: SSE Streaming
+- Conversation model (direct + group types)
+- Laravel 12 native `response()->eventStream()` + `@laravel/stream-react`
+- Team group chat + 1-on-1 DMs
+
+### Notifications: Database Channel
+- Laravel database notification channel for in-app notifications
+- Shared via Inertia as `auth.notifications`
+- Bell icon in UI with unread count
+
+## Dependencies (New)
+
+| Package | Purpose |
+|---------|---------|
+| `thunk/verbs` | Event sourcing for key domain flows |
+| `spatie/laravel-medialibrary` | Media/file management |
+| `@laravel/stream-react` | SSE consumption in React |
 
 ## Data Model
 
@@ -48,10 +78,24 @@ Three roles: Admin, Instructor, Student. Simple `role` enum column on users tabl
 | id | bigint | PK |
 | user_id | bigint | FK → users, unique |
 | phone | string | nullable |
-| cpr | text | AES-256-GCM encrypted |
+| cpr | text | encrypted via custom cast |
 | status | enum | active/inactive/graduated/dropped_out |
 | start_date | date | nullable |
 | deleted_at | timestamp | soft deletes |
+
+Uses Spatie Media Library (`HasMedia`) with collections: `documents`, `photos`.
+
+### Teams
+| Column | Type | Notes |
+|--------|------|-------|
+| id | bigint | PK |
+| name | string | |
+| description | text | nullable |
+| timestamps | | |
+
+Pivot: `student_team` (student_id, team_id)
+
+Flexible grouping — no fixed dates or instructor. Just a way to organize/filter students.
 
 ### Vehicles
 | Column | Type | Notes |
@@ -61,23 +105,22 @@ Three roles: Admin, Instructor, Student. Simple `role` enum column on users tabl
 | plate_number | string | unique |
 | active | boolean | default true |
 
-### Packages
+### Offers (Schema.org Offer, was "Package")
 | Column | Type | Notes |
 |--------|------|-------|
 | id | bigint | PK |
-| name | string | |
-| price | decimal(10,2) | |
+| name | string | schema:name |
+| description | text | schema:description, nullable |
+| price | decimal(10,2) | schema:price |
+| type | enum | primary / addon |
 | theory_lessons | integer | |
 | driving_lessons | integer | |
 | track_required | boolean | |
 | slippery_required | boolean | |
 
-### Student-Package (pivot)
-| Column | Type | Notes |
-|--------|------|-------|
-| student_id | bigint | FK |
-| package_id | bigint | FK |
-| assigned_at | timestamp | |
+Pivot: `offer_student` (offer_id, student_id, assigned_at)
+
+Students get one primary offer + multiple addon offers.
 
 ### Bookings
 | Column | Type | Notes |
@@ -100,15 +143,6 @@ Three roles: Admin, Instructor, Student. Simple `role` enum column on users tabl
 | method | enum | cash/card/mobile_pay/invoice |
 | paid_at | timestamp | |
 
-### Documents
-| Column | Type | Notes |
-|--------|------|-------|
-| id | bigint | PK |
-| student_id | bigint | FK → students |
-| filename | string | original filename |
-| path | string | storage path |
-| mime_type | string | |
-
 ### Blog Posts
 | Column | Type | Notes |
 |--------|------|-------|
@@ -119,84 +153,137 @@ Three roles: Admin, Instructor, Student. Simple `role` enum column on users tabl
 | published_at | timestamp | nullable |
 | seo_description | string | nullable |
 
-### Audit Logs
+Uses Spatie Media Library for featured images (collection: `featured`).
+
+### Conversations
 | Column | Type | Notes |
 |--------|------|-------|
 | id | bigint | PK |
-| user_id | bigint | FK → users, nullable |
-| action | string | created/updated/deleted |
-| auditable_type | string | polymorphic |
-| auditable_id | bigint | polymorphic |
-| old_values | json | nullable |
-| new_values | json | nullable |
+| type | enum | direct / group |
+| team_id | bigint | FK → teams, nullable (for group chats) |
+| name | string | nullable (for group chats) |
+| timestamps | | |
+
+Pivot: `conversation_user` (conversation_id, user_id, last_read_at)
+
+### Messages
+| Column | Type | Notes |
+|--------|------|-------|
+| id | bigint | PK |
+| conversation_id | bigint | FK → conversations |
+| user_id | bigint | FK → users |
+| body | text | |
+| timestamps | | |
+
+### Notifications (Laravel built-in)
+Uses `php artisan make:notifications-table` — standard Laravel notifications table.
+
+## Verbs Events & States
+
+### Events
+| Event | Triggers When | Affects State |
+|-------|---------------|---------------|
+| `StudentEnrolled` | Student created | StudentProgressionState |
+| `StudentStatusChanged` | Status updated | — |
+| `OfferAssigned` | Offer assigned to student | StudentBalanceState |
+| `BookingCreated` | Booking created | StudentProgressionState |
+| `BookingCompleted` | Booking marked complete | StudentProgressionState |
+| `BookingCancelled` | Booking cancelled | StudentProgressionState |
+| `BookingNoShow` | No-show flagged | StudentProgressionState |
+| `PaymentRecorded` | Payment created | StudentBalanceState |
+
+### States
+| State | Derived From | Provides |
+|-------|-------------|----------|
+| `StudentProgressionState` | Booking events | Completed lesson counts by type, exam readiness boolean, missing requirements |
+| `StudentBalanceState` | OfferAssigned + PaymentRecorded | Total owed, total paid, outstanding balance |
 
 ## Enums
 
 - **UserRole:** Admin, Instructor, Student
 - **StudentStatus:** Active, Inactive, Graduated, DroppedOut
+- **OfferType:** Primary, Addon
 - **BookingType:** DrivingLesson, TheoryLesson, TrackDriving, SlipperyDriving, Exam
 - **BookingStatus:** Scheduled, Completed, Cancelled, NoShow
 - **PaymentMethod:** Cash, Card, MobilePay, Invoice
+- **ConversationType:** Direct, Group
 
 ## Key Business Rules
 
-1. **Booking conflicts:** No instructor or vehicle double-booked for overlapping times. Students cannot have overlapping bookings.
-2. **CPR encryption:** AES-256-GCM via custom Eloquent cast. Key derived from APP_KEY.
-3. **Exam readiness:** Student must have completed all required lesson types from their package before being marked ready.
-4. **Balance calculation:** Sum of package prices minus sum of payments.
+1. **Booking conflicts:** No instructor or vehicle double-booked. Students cannot have overlapping bookings.
+2. **CPR encryption:** Custom Eloquent cast using Laravel's encrypt/decrypt.
+3. **Exam readiness:** Derived from Verbs `StudentProgressionState`. Student must have completed all required lesson types from assigned offers.
+4. **Balance calculation:** Derived from Verbs `StudentBalanceState`. Sum of offer prices minus sum of payments.
 5. **Role access:** Admin sees everything. Instructor sees own bookings + assigned students. Student sees own data only.
-6. **No-show auto-flag:** Scheduled job checks past bookings not marked completed/cancelled.
+6. **No-show auto-flag:** Scheduled job fires `BookingNoShow` Verbs event for past unresolved bookings.
+7. **Chat access:** Users can only access conversations they're participants of. Team group chats auto-include team members.
 
 ## Implementation Phases
 
 ### Phase 0 — Foundation
 - 0.1: Auth & Roles (role enum, middleware, policies, admin seed)
-- 0.2: Base Architecture (AuditLog, enums, queue config, CPR encryption cast)
+- 0.2: Enums, CPR encryption cast
+- 0.3: Verbs setup (install, configure)
+- 0.4: White-label theming system
+- 0.5: Disable public registration
+- 0.6: Spatie Media Library setup
+- 0.7: In-app notifications setup (database channel, notification bell)
 
-### Phase 1 — Students
-- 1.1: Student Entity (model, migration, CRUD actions, policy, Inertia pages)
-- 1.2: Document Upload (model, storage, secure download)
+### Phase 1 — Students & Teams
+- 1.1: Student model, migration, factory, CRUD actions, policy, Inertia pages
+- 1.2: Media uploads via Spatie (replace Document model)
+- 1.3: Teams model (CRUD, M:M student assignment)
+- 1.4: Verbs events: StudentEnrolled, StudentStatusChanged
 
-### Phase 2 — Vehicles & Packages
-- 2.1: Vehicle Entity (simple CRUD)
-- 2.2: Package Entity (CRUD, assignment pivot, lesson credit generation)
+### Phase 2 — Vehicles & Offers
+- 2.1: Vehicle model (simple CRUD)
+- 2.2: Offer model (Schema.org, type enum, CRUD)
+- 2.3: Offer assignment + Verbs event: OfferAssigned
 
 ### Phase 3 — Bookings
-- 3.1: Booking Entity (model, conflict detection, CRUD, calendar UI)
-- 3.2: Drag & Drop Update (re-validation on move)
+- 3.1: Booking model, conflict detection, CRUD, calendar UI
+- 3.2: Verbs events: BookingCreated, BookingCompleted, BookingCancelled
+- 3.3: Drag & drop update with conflict re-check
 
 ### Phase 4 — Payments
-- 4.1: Payment Entity (CRUD, balance calculation)
+- 4.1: Payment CRUD
+- 4.2: Verbs event: PaymentRecorded + StudentBalanceState
 
 ### Phase 5 — Progression
-- 5.1: Module Tracking (completion tracking, exam readiness indicator)
+- 5.1: StudentProgressionState (derived from booking events)
+- 5.2: Exam readiness indicator + progression page
 
 ### Phase 6 — Dashboard
-- 6.1: KPI Actions (pass rate, no-show rate, upcoming bookings, balances)
+- 6.1: KPI actions + dashboard page
 
 ### Phase 7 — Blog
-- 7.1: Blog Entity (CRUD, slug generation, public route)
+- 7.1: Blog CRUD with Spatie Media for featured images
 
-### Phase 8 — Reminders
-- 8.1: Booking Reminder Job (24h email, no-show auto-flag)
+### Phase 8 — Reminders & Notifications
+- 8.1: Booking reminder job + BookingNoShow event
+- 8.2: In-app notification types (BookingReminder, PaymentReceived, etc.)
+
+### Phase 9 — Chat
+- 9.1: Conversation + Message models
+- 9.2: Chat controller with SSE streaming
+- 9.3: Chat UI (conversation list, message thread, team group chat)
 
 Each phase follows: Implement → Test → Run tests → Refactor → Commit.
 
 ## White-Label / Theming Strategy
 
-This application is white-labelled — each deployment represents a different driving school with its own branding.
+This application is white-labelled — each deployment represents a different driving school.
 
 ### What's Configurable Per Deployment
 
-1. **Brand colors** — Primary, accent, and sidebar colors via CSS custom properties (already using oklch tokens in `app.css`)
-2. **Logo** — App logo component (`app-logo.tsx`, `app-logo-icon.tsx`) loads from storage or config
-3. **App name** — Already configurable via `config('app.name')`
-4. **Font** — Optional override of `--font-sans` CSS variable
+1. **Brand colors** — Primary, accent, sidebar via CSS custom properties (oklch tokens)
+2. **Logo** — Loaded from Spatie Media or config, fallback to default SVG
+3. **App name** — `config('app.name')`
+4. **Font** — Optional `--font-sans` override
 
-### Implementation Approach
+### Implementation
 
-- **Config-driven theming**: Add `config/branding.php` with color overrides, logo path, font choice
-- **CSS injection**: `HandleInertiaRequests` middleware shares branding config; a `<ThemeProvider>` component generates CSS custom property overrides from the config
-- **No rebuild required**: Colors are CSS variables, so changing `.env` values regenerates the theme without rebuilding frontend assets
-- **Logo**: Stored in `storage/app/public/branding/` — fallback to default SVG if not present
-- **Dark mode**: Both light and dark variants configurable per brand
+- `config/branding.php` with env-driven color overrides
+- `HandleInertiaRequests` shares branding config
+- `<ThemeProvider>` component injects CSS variable overrides
+- No rebuild required — colors are runtime CSS variables
