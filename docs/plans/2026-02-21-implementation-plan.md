@@ -603,6 +603,78 @@ git add -A && git commit -m "feat: disable public registration (users created by
 
 ---
 
+### Task 0.7: White-Label Theming System
+
+**Files:**
+- Create: `config/branding.php`
+- Create: `resources/js/components/theme-provider.tsx`
+- Modify: `app/Http/Middleware/HandleInertiaRequests.php` (share branding)
+- Modify: `resources/js/layouts/app-layout.tsx` (wrap with ThemeProvider)
+- Modify: `.env.example` (add branding vars)
+- Test: `tests/Feature/BrandingTest.php`
+
+**Step 1: Create branding config**
+
+```php
+// config/branding.php
+<?php
+
+return [
+    'name' => env('BRAND_NAME', config('app.name')),
+    'logo_path' => env('BRAND_LOGO_PATH', null),
+    'colors' => [
+        'primary' => env('BRAND_COLOR_PRIMARY', null),
+        'sidebar' => env('BRAND_COLOR_SIDEBAR', null),
+        'accent' => env('BRAND_COLOR_ACCENT', null),
+    ],
+];
+```
+
+**Step 2: Share branding via Inertia middleware**
+
+In `HandleInertiaRequests::share()`, add:
+```php
+'branding' => [
+    'name' => config('branding.name'),
+    'logo' => config('branding.logo_path')
+        ? asset('storage/' . config('branding.logo_path'))
+        : null,
+    'colors' => array_filter(config('branding.colors')),
+],
+```
+
+**Step 3: Create ThemeProvider component**
+
+React component that reads `branding.colors` from shared props and injects CSS custom property overrides via a `<style>` tag. Falls back to defaults if no overrides.
+
+**Step 4: Update app-logo.tsx**
+
+Check for `branding.logo` in shared props. If present, render `<img>`. Otherwise, render the default SVG.
+
+**Step 5: Write test**
+
+```php
+// tests/Feature/BrandingTest.php
+test('branding config is shared via Inertia', function () {
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->has('branding'));
+});
+```
+
+**Step 6: Run tests and commit**
+
+```bash
+vendor/bin/pint --dirty --format agent
+php artisan test --compact --filter=BrandingTest
+git add -A && git commit -m "feat: add white-label theming system with config-driven colors"
+```
+
+---
+
 ## Phase 1: Students Module
 
 ### Task 1.1: Student Model, Migration, and Factory

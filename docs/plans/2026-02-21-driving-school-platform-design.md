@@ -181,3 +181,22 @@ Three roles: Admin, Instructor, Student. Simple `role` enum column on users tabl
 - 8.1: Booking Reminder Job (24h email, no-show auto-flag)
 
 Each phase follows: Implement → Test → Run tests → Refactor → Commit.
+
+## White-Label / Theming Strategy
+
+This application is white-labelled — each deployment represents a different driving school with its own branding.
+
+### What's Configurable Per Deployment
+
+1. **Brand colors** — Primary, accent, and sidebar colors via CSS custom properties (already using oklch tokens in `app.css`)
+2. **Logo** — App logo component (`app-logo.tsx`, `app-logo-icon.tsx`) loads from storage or config
+3. **App name** — Already configurable via `config('app.name')`
+4. **Font** — Optional override of `--font-sans` CSS variable
+
+### Implementation Approach
+
+- **Config-driven theming**: Add `config/branding.php` with color overrides, logo path, font choice
+- **CSS injection**: `HandleInertiaRequests` middleware shares branding config; a `<ThemeProvider>` component generates CSS custom property overrides from the config
+- **No rebuild required**: Colors are CSS variables, so changing `.env` values regenerates the theme without rebuilding frontend assets
+- **Logo**: Stored in `storage/app/public/branding/` — fallback to default SVG if not present
+- **Dark mode**: Both light and dark variants configurable per brand
