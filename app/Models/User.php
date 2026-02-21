@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -51,6 +52,11 @@ class User extends Authenticatable
             'role' => UserRole::class,
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    public function student(): HasOne
+    {
+        return $this->hasOne(Student::class);
     }
 
     public function isAdmin(): bool
