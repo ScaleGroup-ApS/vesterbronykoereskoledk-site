@@ -41,6 +41,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'branding' => [
+                'name' => config('branding.name'),
+                'logo' => config('branding.logo_path')
+                    ? asset('storage/'.config('branding.logo_path'))
+                    : null,
+                'colors' => array_filter(config('branding.colors')),
+            ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
