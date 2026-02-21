@@ -3,6 +3,7 @@
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
+use App\Http\Controllers\Vehicles\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +18,7 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('students', StudentController::class);
     Route::resource('teams', TeamController::class);
+    Route::resource('vehicles', VehicleController::class)->except(['show']);
 
     Route::post('students/{student}/media', [StudentMediaController::class, 'store'])->name('students.media.store');
     Route::get('students/{student}/media/{media}', [StudentMediaController::class, 'show'])->name('students.media.show');

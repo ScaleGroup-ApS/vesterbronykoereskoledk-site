@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, GraduationCap, LayoutGrid, Users } from 'lucide-react';
+import { BookOpen, Car, Folder, GraduationCap, LayoutGrid, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,6 +17,7 @@ import AppLogo from './app-logo';
 import { dashboard } from '@/routes';
 import { index as studentsIndex } from '@/routes/students';
 import { index as teamsIndex } from '@/routes/teams';
+import { index as vehiclesIndex } from '@/routes/vehicles';
 
 const mainNavItems: NavItem[] = [
     {
@@ -33,6 +34,11 @@ const mainNavItems: NavItem[] = [
         title: 'Hold',
         href: teamsIndex(),
         icon: Users,
+    },
+    {
+        title: 'Køretøjer',
+        href: vehiclesIndex(),
+        icon: Car,
     },
 ];
 
