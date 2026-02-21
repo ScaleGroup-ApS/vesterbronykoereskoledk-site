@@ -4,6 +4,7 @@ namespace App\Actions\Students;
 
 use App\Enums\StudentStatus;
 use App\Enums\UserRole;
+use App\Events\StudentEnrolled;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -25,13 +26,21 @@ class CreateStudent
                 'role' => UserRole::Student,
             ]);
 
-            return Student::create([
+            $student = Student::create([
                 'user_id' => $user->id,
                 'phone' => $data['phone'] ?? null,
                 'cpr' => $data['cpr'] ?? null,
                 'status' => StudentStatus::Active,
                 'start_date' => $data['start_date'] ?? now()->toDateString(),
             ]);
+
+            StudentEnrolled::fire(
+                student_id: $student->id,
+                student_name: $user->name,
+                start_date: $student->start_date->toDateString(),
+            );
+
+            return $student;
         });
     }
 }
