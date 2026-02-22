@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, CalendarDays, Car, CreditCard, Folder, GraduationCap, LayoutGrid, Tag, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, Car, CreditCard, Folder, GraduationCap, LayoutGrid, MessageSquare, Tag, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -21,6 +21,7 @@ import { index as vehiclesIndex } from '@/routes/vehicles';
 import { index as offersIndex } from '@/routes/offers';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as paymentsIndex } from '@/routes/payments';
+import { index as chatIndex } from '@/routes/chat';
 
 const mainNavItems: NavItem[] = [
     {
@@ -57,6 +58,11 @@ const mainNavItems: NavItem[] = [
         title: 'Betalinger',
         href: paymentsIndex(),
         icon: CreditCard,
+    },
+    {
+        title: 'Chat',
+        href: chatIndex(),
+        icon: MessageSquare,
     },
 ];
 
