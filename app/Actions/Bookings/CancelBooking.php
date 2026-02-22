@@ -16,6 +16,7 @@ class CancelBooking
         BookingCancelled::fire(
             student_id: $booking->student_id,
             booking_id: $booking->id,
+            type: $booking->type->value,
             reason: $reason,
         );
 
