@@ -1,0 +1,143 @@
+import { Head, useForm } from '@inertiajs/react';
+import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+import { index } from '@/routes/offers';
+import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
+
+type Offer = {
+    id: number;
+    name: string;
+    description: string | null;
+    price: string;
+    type: string;
+    theory_lessons: number;
+    driving_lessons: number;
+    track_required: boolean;
+    slippery_required: boolean;
+};
+
+type OfferType = { value: string; label: string };
+
+export default function OfferEdit({ offer, offerTypes }: { offer: Offer; offerTypes: OfferType[] }) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Tilbud', href: index().url },
+        { title: offer.name, href: '#' },
+    ];
+
+    const form = useForm({
+        name: offer.name,
+        description: offer.description ?? '',
+        price: offer.price,
+        type: offer.type,
+        theory_lessons: String(offer.theory_lessons),
+        driving_lessons: String(offer.driving_lessons),
+        track_required: offer.track_required,
+        slippery_required: offer.slippery_required,
+    });
+
+    function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        form.submit(update(offer));
+    }
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={`Rediger ${offer.name}`} />
+
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                <Heading title={`Rediger ${offer.name}`} />
+
+                <form onSubmit={handleSubmit} className="max-w-lg space-y-6">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Navn</Label>
+                        <Input
+                            id="name"
+                            value={form.data.name}
+                            onChange={(e) => form.setData('name', e.target.value)}
+                            required
+                        />
+                        <InputError message={form.errors.name} />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="type">Type</Label>
+                        <select
+                            id="type"
+                            value={form.data.type}
+                            onChange={(e) => form.setData('type', e.target.value)}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                        >
+                            {offerTypes.map((t) => (
+                                <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="price">Pris (kr.)</Label>
+                        <Input
+                            id="price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={form.data.price}
+                            onChange={(e) => form.setData('price', e.target.value)}
+                            required
+                        />
+                        <InputError message={form.errors.price} />
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                            <Label htmlFor="theory_lessons">Teorilektioner</Label>
+                            <Input
+                                id="theory_lessons"
+                                type="number"
+                                min="0"
+                                value={form.data.theory_lessons}
+                                onChange={(e) => form.setData('theory_lessons', e.target.value)}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="driving_lessons">Køretimer</Label>
+                            <Input
+                                id="driving_lessons"
+                                type="number"
+                                min="0"
+                                value={form.data.driving_lessons}
+                                onChange={(e) => form.setData('driving_lessons', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="track_required"
+                                checked={form.data.track_required}
+                                onCheckedChange={(v) => form.setData('track_required', v === true)}
+                            />
+                            <Label htmlFor="track_required">Bane krævet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="slippery_required"
+                                checked={form.data.slippery_required}
+                                onCheckedChange={(v) => form.setData('slippery_required', v === true)}
+                            />
+                            <Label htmlFor="slippery_required">Glat bane krævet</Label>
+                        </div>
+                    </div>
+
+                    <Button disabled={form.processing}>Gem ændringer</Button>
+                </form>
+            </div>
+        </AppLayout>
+    );
+}
