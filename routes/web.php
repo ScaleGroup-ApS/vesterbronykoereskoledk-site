@@ -15,8 +15,12 @@ use App\Http\Controllers\Vehicles\VehicleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Models\Offer;
+
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return Inertia::render('welcome', [
+        'offers' => Offer::all(),
+    ]);
 })->name('home');
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
