@@ -4,6 +4,7 @@ namespace App\Actions\Payments;
 
 use App\Events\PaymentRecorded;
 use App\Models\Payment;
+use App\Notifications\PaymentReceivedNotification;
 
 class RecordPayment
 {
@@ -20,6 +21,9 @@ class RecordPayment
             amount: (float) $payment->amount,
             method: $payment->method->value,
         );
+
+        $payment->load('student.user');
+        $payment->student->user->notify(new PaymentReceivedNotification($payment));
 
         return $payment;
     }

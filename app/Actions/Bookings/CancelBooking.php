@@ -5,6 +5,7 @@ namespace App\Actions\Bookings;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Models\Booking;
+use App\Notifications\BookingCancelledNotification;
 
 class CancelBooking
 {
@@ -19,6 +20,9 @@ class CancelBooking
             type: $booking->type->value,
             reason: $reason,
         );
+
+        $booking->load('student.user');
+        $booking->student->user->notify(new BookingCancelledNotification($booking));
 
         return $booking->refresh();
     }
