@@ -8,6 +8,7 @@ use App\Actions\Students\UpdateStudent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Students\StoreStudentRequest;
 use App\Http\Requests\Students\UpdateStudentRequest;
+use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class StudentController extends Controller
             ->paginate(15);
 
         return Inertia::render('students/index', [
-            'students' => $students,
+            'students' => StudentResource::collection($students),
         ]);
     }
 
