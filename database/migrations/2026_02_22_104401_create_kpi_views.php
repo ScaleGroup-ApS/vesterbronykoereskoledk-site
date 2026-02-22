@@ -12,7 +12,6 @@ return new class extends Migration
         Schema::table('bookings', function (Blueprint $table) {
             $table->index(['status', 'starts_at'], 'bookings_status_starts_at_index');
         });
-
         Schema::table('students', function (Blueprint $table) {
             $table->index(['status', 'deleted_at'], 'students_status_deleted_at_index');
         });
@@ -52,7 +51,7 @@ return new class extends Migration
                 (
                     SELECT ROUND(
                         IFNULL(
-                            CAST(SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) AS REAL) /
+                            SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) * 1.0 /
                             NULLIF(SUM(CASE WHEN status IN ('completed', 'no_show') THEN 1 ELSE 0 END), 0) * 100,
                             0
                         ), 1
@@ -84,7 +83,7 @@ return new class extends Migration
                 ) AS upcoming_bookings,
                 ROUND(
                     IFNULL(
-                        CAST(SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) AS REAL) /
+                        SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) * 1.0 /
                         NULLIF(SUM(CASE WHEN status IN ('completed', 'no_show') THEN 1 ELSE 0 END), 0) * 100,
                         0
                     ), 1
