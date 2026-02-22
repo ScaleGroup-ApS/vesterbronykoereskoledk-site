@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentMediaController;
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('teams', TeamController::class);
     Route::resource('vehicles', VehicleController::class)->except(['show']);
     Route::resource('offers', OfferController::class)->except(['show']);
+    Route::resource('bookings', BookingController::class)->except(['show', 'edit']);
 
     Route::post('students/{student}/media', [StudentMediaController::class, 'store'])->name('students.media.store');
     Route::get('students/{student}/media/{media}', [StudentMediaController::class, 'show'])->name('students.media.show');
