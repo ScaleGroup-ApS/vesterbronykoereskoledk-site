@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { dashboard, login } from '@/routes';
+import { show as bookOffer } from '@/routes/enrollment';
 import { CheckCircle2, Car, ShieldCheck, Clock, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -229,7 +230,7 @@ export default function Welcome({ offers = [] }: { offers?: Offer[] }) {
                                         )}
                                     </ul>
                                     {offer.type === 'primary' ? (
-                                        <Link href={String(login())} className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90">
+                                        <Link href={bookOffer.url(offer.id)} className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90">
                                             Tilmeld dig nu <ArrowRight className="ml-2 h-5 w-5" />
                                         </Link>
                                     ) : (

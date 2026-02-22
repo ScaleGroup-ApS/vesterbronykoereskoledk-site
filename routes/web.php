@@ -5,6 +5,7 @@ use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
@@ -12,10 +13,9 @@ use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\Vehicles\VehicleController;
+use App\Models\Offer;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Models\Offer;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -24,6 +24,9 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('book/{offer}', [EnrollmentController::class, 'show'])->name('enrollment.show');
+Route::post('book/{offer}', [EnrollmentController::class, 'store'])->name('enrollment.store');
 
 // Public blog show (no auth)
 Route::get('blog/{slug}', [BlogPostController::class, 'show'])->name('blog.show');
