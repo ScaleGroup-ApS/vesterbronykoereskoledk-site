@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
-import { CalendarDays, TrendingDown, Users, Wallet } from 'lucide-react';
+import { CalendarDays, Clock, CreditCard, TrendingDown, Users, Wallet } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 
@@ -22,6 +23,12 @@ type InstructorKpis = {
 
 type Kpis = AdminKpis | InstructorKpis | Record<string, never>;
 
+type PendingEnrollment = {
+    id: number;
+    status: 'pending_payment' | 'pending_approval';
+    payment_method: 'stripe' | 'cash';
+} | null;
+
 function KpiCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
     return (
         <div className="rounded-xl border p-5">
@@ -38,7 +45,7 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ElementType; label:
     );
 }
 
-export default function Dashboard({ kpis }: { kpis: Kpis }) {
+export default function Dashboard({ kpis, pendingEnrollment }: { kpis: Kpis; pendingEnrollment: PendingEnrollment }) {
     const isAdmin = 'total_students' in kpis;
     const isInstructor = 'upcoming_bookings' in kpis && !isAdmin;
 
@@ -46,6 +53,26 @@ export default function Dashboard({ kpis }: { kpis: Kpis }) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+                {pendingEnrollment && (
+                    <Alert>
+                        {pendingEnrollment.payment_method === 'stripe' ? (
+                            <CreditCard className="size-4" />
+                        ) : (
+                            <Clock className="size-4" />
+                        )}
+                        <AlertTitle>
+                            {pendingEnrollment.payment_method === 'stripe'
+                                ? 'Afventer betaling'
+                                : 'Afventer godkendelse'}
+                        </AlertTitle>
+                        <AlertDescription>
+                            {pendingEnrollment.payment_method === 'stripe'
+                                ? 'Din tilmelding afventer betalingsbekræftelse fra Stripe. Kontakt os, hvis du har problemer.'
+                                : 'Din tilmelding afventer godkendelse fra en instruktør. Du vil modtage besked, når den er behandlet.'}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {isAdmin && (
                         <>
@@ -85,7 +112,7 @@ export default function Dashboard({ kpis }: { kpis: Kpis }) {
                             />
                         </>
                     )}
-                    {!isAdmin && !isInstructor && (
+                    {!isAdmin && !isInstructor && !pendingEnrollment && (
                         <div className="col-span-full rounded-xl border px-4 py-6 text-center text-sm text-muted-foreground">
                             Ingen KPI-data tilgængelig.
                         </div>
