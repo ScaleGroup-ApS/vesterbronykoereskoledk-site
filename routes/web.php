@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Blog\BlogPostController;
 use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Offers\OfferController;
@@ -18,7 +19,11 @@ Route::get('/', function () {
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
+// Public blog show (no auth)
+Route::get('blog/{slug}', [BlogPostController::class, 'show'])->name('blog.show');
+
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('blog', BlogPostController::class)->except(['show']);
     Route::resource('students', StudentController::class);
     Route::resource('teams', TeamController::class);
     Route::resource('vehicles', VehicleController::class)->except(['show']);
