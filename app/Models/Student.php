@@ -42,6 +42,11 @@ class Student extends Model implements HasMedia
         return $this->belongsToMany(Team::class)->withTimestamps();
     }
 
+    public function offers(): BelongsToMany
+    {
+        return $this->belongsToMany(Offer::class)->withPivot('assigned_at');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('documents');

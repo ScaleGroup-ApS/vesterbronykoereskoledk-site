@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OfferType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Offer extends Model
 {
@@ -32,5 +33,10 @@ class Offer extends Model
             'track_required' => 'boolean',
             'slippery_required' => 'boolean',
         ];
+    }
+
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class)->withPivot('assigned_at');
     }
 }
