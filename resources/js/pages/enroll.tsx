@@ -1,12 +1,13 @@
+import { useState } from 'react';
 import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Car, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Banknote, Car, CheckCircle2, CreditCard, Info } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { home } from '@/routes';
-import { store } from '@/routes/enrollment';
+import { store } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentController';
 
 interface Offer {
     id: number;
@@ -20,7 +21,11 @@ interface Offer {
     slippery_required: boolean;
 }
 
+type PaymentMethod = 'stripe' | 'cash';
+
 export default function Enroll({ offer }: { offer: Offer }) {
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+
     return (
         <div className="min-h-screen bg-background text-foreground font-sans">
             <Head title={`Tilmeld dig – ${offer.name}`} />
@@ -47,7 +52,7 @@ export default function Enroll({ offer }: { offer: Offer }) {
                 </Link>
 
                 <div className="grid lg:grid-cols-2 gap-12 max-w-5xl">
-                    {/* Offer Summary */}
+                    {/* Enrollment Form */}
                     <div className="order-2 lg:order-1">
                         <h1 className="text-3xl font-bold tracking-tight mb-2">Tilmeld dig nu</h1>
                         <p className="text-muted-foreground mb-8">Opret din konto og kom i gang med kørekortet.</p>
@@ -98,7 +103,10 @@ export default function Enroll({ offer }: { offer: Offer }) {
 
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="cpr">CPR-nummer <span className="text-muted-foreground font-normal">(valgfrit)</span></Label>
+                                            <Label htmlFor="cpr">
+                                                CPR-nummer{' '}
+                                                <span className="text-muted-foreground font-normal">(valgfrit)</span>
+                                            </Label>
                                             <Input
                                                 id="cpr"
                                                 name="cpr"
@@ -108,7 +116,10 @@ export default function Enroll({ offer }: { offer: Offer }) {
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="start_date">Ønsket startdato <span className="text-muted-foreground font-normal">(valgfrit)</span></Label>
+                                            <Label htmlFor="start_date">
+                                                Ønsket startdato{' '}
+                                                <span className="text-muted-foreground font-normal">(valgfrit)</span>
+                                            </Label>
                                             <Input
                                                 id="start_date"
                                                 name="start_date"
@@ -144,13 +155,65 @@ export default function Enroll({ offer }: { offer: Offer }) {
                                         <InputError message={errors.password_confirmation} />
                                     </div>
 
+                                    {/* Payment Method Selection */}
+                                    <div className="grid gap-2">
+                                        <Label>Betalingsmetode</Label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentMethod('stripe')}
+                                                className={[
+                                                    'flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors',
+                                                    paymentMethod === 'stripe'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-border hover:border-muted-foreground/50',
+                                                ].join(' ')}
+                                            >
+                                                <CreditCard className="size-5 text-primary" />
+                                                <span className="font-medium text-sm">Kortbetaling</span>
+                                                <span className="text-xs text-muted-foreground">Via Stripe Checkout</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaymentMethod('cash')}
+                                                className={[
+                                                    'flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors',
+                                                    paymentMethod === 'cash'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-border hover:border-muted-foreground/50',
+                                                ].join(' ')}
+                                            >
+                                                <Banknote className="size-5 text-primary" />
+                                                <span className="font-medium text-sm">Kontant</span>
+                                                <span className="text-xs text-muted-foreground">Betales ved fremmøde</span>
+                                            </button>
+                                        </div>
+                                        <InputError message={errors.payment_method} />
+
+                                        {paymentMethod === 'stripe' && (
+                                            <div className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
+                                                <Info className="mt-0.5 size-4 shrink-0" />
+                                                <span>Du vil blive videresendt til Stripe Checkout for sikker betaling.</span>
+                                            </div>
+                                        )}
+
+                                        {paymentMethod === 'cash' && (
+                                            <div className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
+                                                <Info className="mt-0.5 size-4 shrink-0" />
+                                                <span>Din tilmelding afventer godkendelse fra en instruktør, inden den aktiveres.</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <input type="hidden" name="payment_method" value={paymentMethod} />
+
                                     <Button
                                         type="submit"
                                         className="w-full h-12 text-base"
                                         disabled={processing}
                                     >
                                         {processing && <Spinner />}
-                                        Opret konto og tilmeld
+                                        {paymentMethod === 'stripe' ? 'Gå til betaling' : 'Opret konto og tilmeld'}
                                     </Button>
                                 </>
                             )}

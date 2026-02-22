@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Enrollment;
 
+use App\Enums\EnrollmentPaymentMethod;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,6 +27,7 @@ class StoreEnrollmentRequest extends FormRequest
             'cpr' => ['nullable', 'string', 'max:11'],
             'start_date' => ['nullable', 'date'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'payment_method' => ['required', 'string', Rule::enum(EnrollmentPaymentMethod::class)],
         ];
     }
 }

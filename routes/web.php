@@ -5,6 +5,7 @@ use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Enrollment\EnrollmentApprovalController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
@@ -25,6 +26,7 @@ Route::get('/', function () {
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('book/return', [EnrollmentController::class, 'stripeReturn'])->name('enrollment.stripe-return')->middleware('auth');
 Route::get('book/{offer}', [EnrollmentController::class, 'show'])->name('enrollment.show');
 Route::post('book/{offer}', [EnrollmentController::class, 'store'])->name('enrollment.store');
 
@@ -50,6 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('chat/{conversation}/messages', [MessageController::class, 'index'])->name('chat.messages.index');
     Route::post('chat/{conversation}/messages', [MessageController::class, 'store'])->name('chat.messages.store');
     Route::get('chat/{conversation}/stream', [MessageController::class, 'stream'])->name('chat.messages.stream');
+
+    Route::get('enrollments', [EnrollmentApprovalController::class, 'index'])->name('enrollments.index');
+    Route::post('enrollments/{enrollment}/approve', [EnrollmentApprovalController::class, 'approve'])->name('enrollments.approve');
+    Route::post('enrollments/{enrollment}/reject', [EnrollmentApprovalController::class, 'reject'])->name('enrollments.reject');
 });
 
 require __DIR__.'/settings.php';
