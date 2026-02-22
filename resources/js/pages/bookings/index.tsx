@@ -1,52 +1,65 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Trash2 } from 'lucide-react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin, { EventDropArg, EventResizeDoneArg } from '@fullcalendar/interaction';
+import { EventClickArg } from '@fullcalendar/core';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { index, create, destroy } from '@/routes/bookings';
+import type { BookingEvent } from '@/types/booking';
+import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
+import { index, create, update, destroy } from '@/routes/bookings';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Bookinger', href: index().url },
 ];
 
-type Booking = {
-    id: number;
-    student: { user: { name: string } };
-    instructor: { name: string };
-    vehicle: { name: string } | null;
-    type: string;
-    status: string;
-    starts_at: string;
-    ends_at: string;
-};
+export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }) {
+    const [selected, setSelected] = useState<BookingEvent | null>(null);
 
-type PaginatedBookings = {
-    data: Booking[];
-    links: { prev: string | null; next: string | null };
-    meta: { from: number | null; to: number | null; total: number; last_page: number };
-};
+    const events = bookings.map((b) => ({
+        id: String(b.id),
+        title: b.title,
+        start: b.start,
+        end: b.end,
+        backgroundColor: bookingTypeColors[b.type],
+        borderColor: bookingTypeColors[b.type],
+        opacity: b.status === 'cancelled' ? 0.4 : 1,
+        extendedProps: b,
+    }));
 
-const statusLabels: Record<string, string> = {
-    scheduled: 'Planlagt',
-    completed: 'Gennemført',
-    cancelled: 'Annulleret',
-    no_show: 'Udeblevet',
-};
+    function handleDrop(info: EventDropArg) {
+        const booking = info.event.extendedProps as BookingEvent;
+        router.patch(update(booking).url, {
+            starts_at: info.event.startStr,
+            ends_at: info.event.endStr,
+        }, {
+            onError: () => info.revert(),
+        });
+    }
 
-const typeLabels: Record<string, string> = {
-    driving_lesson: 'Køretime',
-    theory_lesson: 'Teorilektion',
-    track_driving: 'Banekørsel',
-    slippery_driving: 'Glat bane',
-    exam: 'Eksamen',
-};
+    function handleResize(info: EventResizeDoneArg) {
+        const booking = info.event.extendedProps as BookingEvent;
+        router.patch(update(booking).url, {
+            starts_at: info.event.startStr,
+            ends_at: info.event.endStr,
+        }, {
+            onError: () => info.revert(),
+        });
+    }
 
-export default function BookingsIndex({ bookings }: { bookings: PaginatedBookings }) {
-    function handleCancel(booking: Booking) {
-        if (confirm(`Er du sikker på, at du vil annullere denne booking?`)) {
+    function handleEventClick(info: EventClickArg) {
+        setSelected(info.event.extendedProps as BookingEvent);
+    }
+
+    function handleCancel(booking: BookingEvent) {
+        if (confirm('Er du sikker på, at du vil annullere denne booking?')) {
             router.delete(destroy(booking).url);
+            setSelected(null);
         }
     }
 
@@ -65,53 +78,84 @@ export default function BookingsIndex({ bookings }: { bookings: PaginatedBooking
                     </Button>
                 </div>
 
-                <div className="rounded-xl border">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b text-left">
-                                <th className="px-4 py-3 font-medium">Elev</th>
-                                <th className="px-4 py-3 font-medium">Instruktør</th>
-                                <th className="px-4 py-3 font-medium">Type</th>
-                                <th className="px-4 py-3 font-medium">Status</th>
-                                <th className="px-4 py-3 font-medium">Start</th>
-                                <th className="px-4 py-3 font-medium"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookings.data.map((booking) => (
-                                <tr key={booking.id} className="border-b last:border-0">
-                                    <td className="px-4 py-3 font-medium">{booking.student.user.name}</td>
-                                    <td className="px-4 py-3">{booking.instructor.name}</td>
-                                    <td className="px-4 py-3">{typeLabels[booking.type] ?? booking.type}</td>
-                                    <td className="px-4 py-3">
-                                        <Badge variant={booking.status === 'completed' ? 'default' : 'secondary'}>
-                                            {statusLabels[booking.status] ?? booking.status}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
-                                        {new Date(booking.starts_at).toLocaleString('da-DK')}
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleCancel(booking)}
-                                        >
-                                            <Trash2 className="size-4" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {bookings.data.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                                        Ingen bookinger fundet.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {/* Legend */}
+                <div className="flex flex-wrap gap-3 text-sm">
+                    {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
+                        <span key={type} className="flex items-center gap-1.5">
+                            <span
+                                className="inline-block size-3 rounded-sm"
+                                style={{ backgroundColor: bookingTypeColors[type] }}
+                            />
+                            {label}
+                        </span>
+                    ))}
                 </div>
+
+                <div className="rounded-xl border p-4">
+                    <FullCalendar
+                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                        initialView="timeGridWeek"
+                        headerToolbar={{
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                        }}
+                        locale="da"
+                        firstDay={1}
+                        slotMinTime="07:00:00"
+                        slotMaxTime="20:00:00"
+                        height="auto"
+                        editable
+                        events={events}
+                        eventDrop={handleDrop}
+                        eventResize={handleResize}
+                        eventClick={handleEventClick}
+                    />
+                </div>
+
+                {/* Detail panel */}
+                {selected && (
+                    <div className="rounded-xl border p-4">
+                        <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                                <p className="font-medium">{selected.title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {bookingTypeLabels[selected.type]} · {selected.instructor}
+                                    {selected.vehicle && ` · ${selected.vehicle}`}
+                                </p>
+                                {selected.notes && (
+                                    <p className="text-sm text-muted-foreground">{selected.notes}</p>
+                                )}
+                            </div>
+                            <div className="flex gap-2">
+                                {selected.status === 'scheduled' && (
+                                    <>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                router.patch(update(selected).url, { status: 'completed' });
+                                                setSelected(null);
+                                            }}
+                                        >
+                                            Gennemført
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => handleCancel(selected)}
+                                        >
+                                            Annuller
+                                        </Button>
+                                    </>
+                                )}
+                                <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
+                                    ✕
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

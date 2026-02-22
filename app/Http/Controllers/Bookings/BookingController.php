@@ -27,8 +27,19 @@ class BookingController extends Controller
         $this->authorize('viewAny', Booking::class);
 
         $bookings = Booking::with(['student.user', 'instructor', 'vehicle'])
-            ->latest('starts_at')
-            ->paginate(50);
+            ->orderBy('starts_at')
+            ->get()
+            ->map(fn (Booking $booking) => [
+                'id' => $booking->id,
+                'title' => $booking->student->user->name,
+                'start' => $booking->starts_at->toIso8601String(),
+                'end' => $booking->ends_at->toIso8601String(),
+                'type' => $booking->type->value,
+                'status' => $booking->status->value,
+                'instructor' => $booking->instructor->name,
+                'vehicle' => $booking->vehicle?->name,
+                'notes' => $booking->notes,
+            ]);
 
         return Inertia::render('bookings/index', [
             'bookings' => $bookings,
