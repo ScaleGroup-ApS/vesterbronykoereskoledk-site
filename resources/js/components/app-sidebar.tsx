@@ -19,6 +19,7 @@ import { index as studentsIndex } from '@/routes/students';
 import { index as teamsIndex } from '@/routes/teams';
 import { index as vehiclesIndex } from '@/routes/vehicles';
 import { index as offersIndex } from '@/routes/offers';
+import { index as coursesIndex } from '@/routes/courses';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as chatIndex } from '@/routes/chat';
@@ -48,6 +49,11 @@ const mainNavItems: NavItem[] = [
         title: 'Tilbud',
         href: offersIndex(),
         icon: Tag,
+    },
+    {
+        title: 'Kurser',
+        href: coursesIndex(),
+        icon: CalendarDays,
     },
     {
         title: 'Bookinger',
