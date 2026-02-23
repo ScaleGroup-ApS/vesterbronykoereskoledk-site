@@ -32,9 +32,9 @@ class Course extends Model
         return $this->belongsTo(Offer::class);
     }
 
-    public function enrollmentRequests(): HasMany
+    public function enrollments(): HasMany
     {
-        return $this->hasMany(EnrollmentRequest::class);
+        return $this->hasMany(Enrollment::class);
     }
 
     /** @param Builder<Course> $query */
