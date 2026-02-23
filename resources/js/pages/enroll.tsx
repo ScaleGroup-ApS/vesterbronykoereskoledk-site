@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Banknote, Car, CheckCircle2, CreditCard, Info } from 'lucide-react';
+import { ArrowLeft, Banknote, CalendarIcon, Car, CheckCircle2, CreditCard, Info } from 'lucide-react';
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
 import { home } from '@/routes';
 import { store } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentController';
 
@@ -23,8 +28,17 @@ interface Offer {
 
 type PaymentMethod = 'stripe' | 'cash';
 
-export default function Enroll({ offer }: { offer: Offer }) {
+export default function Enroll({
+    offer,
+    availableDates,
+    courses,
+}: {
+    offer: Offer;
+    availableDates: string[];
+    courses: Record<string, number>;
+}) {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
     return (
         <div className="min-h-screen bg-background text-foreground font-sans">
@@ -116,16 +130,40 @@ export default function Enroll({ offer }: { offer: Offer }) {
                                         </div>
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="start_date">
+                                            <Label>
                                                 Ønsket startdato{' '}
                                                 <span className="text-muted-foreground font-normal">(valgfrit)</span>
                                             </Label>
-                                            <Input
-                                                id="start_date"
-                                                name="start_date"
-                                                type="date"
-                                            />
-                                            <InputError message={errors.start_date} />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        className={cn(
+                                                            'flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors hover:bg-accent',
+                                                            !selectedDate && 'text-muted-foreground',
+                                                        )}
+                                                    >
+                                                        <CalendarIcon className="size-4 shrink-0" />
+                                                        {selectedDate
+                                                            ? format(selectedDate, 'd. MMMM yyyy', { locale: da })
+                                                            : 'Vælg en dato'}
+                                                    </button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={selectedDate}
+                                                        onSelect={setSelectedDate}
+                                                        locale={da}
+                                                        disabled={(date) => {
+                                                            const iso = format(date, 'yyyy-MM-dd');
+                                                            return !availableDates.includes(iso);
+                                                        }}
+                                                        fromMonth={new Date()}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <InputError message={errors.course_id} />
                                         </div>
                                     </div>
 
@@ -205,6 +243,13 @@ export default function Enroll({ offer }: { offer: Offer }) {
                                         )}
                                     </div>
 
+                                    {selectedDate && (
+                                        <input
+                                            type="hidden"
+                                            name="course_id"
+                                            value={courses[format(selectedDate, 'yyyy-MM-dd')] ?? ''}
+                                        />
+                                    )}
                                     <input type="hidden" name="payment_method" value={paymentMethod} />
 
                                     <Button
