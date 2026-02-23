@@ -4,14 +4,19 @@ namespace App\Models;
 
 use App\Enums\EnrollmentPaymentMethod;
 use App\Enums\EnrollmentStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EnrollmentRequest extends Model
 {
+    /** @use HasFactory<\Database\Factories\EnrollmentRequestFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'student_id',
         'offer_id',
+        'course_id',
         'payment_method',
         'status',
         'stripe_session_id',
@@ -35,6 +40,11 @@ class EnrollmentRequest extends Model
     public function offer(): BelongsTo
     {
         return $this->belongsTo(Offer::class);
+    }
+
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
     }
 
     public function approvedBy(): BelongsTo
