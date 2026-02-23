@@ -6,7 +6,7 @@ use App\Actions\Offers\AssignOffer;
 use App\Actions\Payments\RecordPayment;
 use App\Enums\EnrollmentStatus;
 use App\Events\StripePaymentCompleted;
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use Illuminate\Validation\ValidationException;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -18,7 +18,7 @@ class CompleteStripeEnrollment
         private readonly RecordPayment $recordPayment,
     ) {}
 
-    public function handle(string $sessionId): EnrollmentRequest
+    public function handle(string $sessionId): Enrollment
     {
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -30,31 +30,31 @@ class CompleteStripeEnrollment
             ]);
         }
 
-        $enrollmentRequest = EnrollmentRequest::with(['student', 'offer'])
-            ->findOrFail($session->metadata->enrollment_request_id);
+        $enrollment = Enrollment::with(['student', 'offer'])
+            ->findOrFail($session->metadata->enrollment_id);
 
-        if ($enrollmentRequest->status === EnrollmentStatus::Completed) {
-            return $enrollmentRequest;
+        if ($enrollment->status === EnrollmentStatus::Completed) {
+            return $enrollment;
         }
 
-        $this->assignOffer->handle($enrollmentRequest->student, $enrollmentRequest->offer);
+        $this->assignOffer->handle($enrollment->student, $enrollment->offer);
 
         $this->recordPayment->handle([
-            'student_id' => $enrollmentRequest->student_id,
-            'amount' => $enrollmentRequest->offer->price,
+            'student_id' => $enrollment->student_id,
+            'amount' => $enrollment->offer->price,
             'method' => 'card',
             'notes' => 'Stripe Checkout Session: '.$sessionId,
         ]);
 
         StripePaymentCompleted::fire(
-            enrollment_request_id: $enrollmentRequest->id,
-            student_id: $enrollmentRequest->student_id,
-            offer_id: $enrollmentRequest->offer_id,
-            payment_method: $enrollmentRequest->payment_method->value,
+            enrollment_id: $enrollment->id,
+            student_id: $enrollment->student_id,
+            offer_id: $enrollment->offer_id,
+            payment_method: $enrollment->payment_method->value,
         );
 
-        $enrollmentRequest->update(['status' => EnrollmentStatus::Completed]);
+        $enrollment->update(['status' => EnrollmentStatus::Completed]);
 
-        return $enrollmentRequest->refresh();
+        return $enrollment->refresh();
     }
 }

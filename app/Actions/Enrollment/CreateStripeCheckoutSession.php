@@ -2,17 +2,17 @@
 
 namespace App\Actions\Enrollment;
 
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
 
 class CreateStripeCheckoutSession
 {
-    public function handle(EnrollmentRequest $enrollmentRequest): string
+    public function handle(Enrollment $enrollment): string
     {
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $enrollmentRequest->load('offer');
+        $enrollment->load('offer');
 
         $session = Session::create([
             'payment_method_types' => ['card'],
@@ -20,9 +20,9 @@ class CreateStripeCheckoutSession
                 [
                     'price_data' => [
                         'currency' => 'dkk',
-                        'unit_amount' => (int) ($enrollmentRequest->offer->price * 100),
+                        'unit_amount' => (int) ($enrollment->offer->price * 100),
                         'product_data' => [
-                            'name' => $enrollmentRequest->offer->name,
+                            'name' => $enrollment->offer->name,
                         ],
                     ],
                     'quantity' => 1,
@@ -30,13 +30,13 @@ class CreateStripeCheckoutSession
             ],
             'mode' => 'payment',
             'success_url' => route('enrollment.stripe-return').'?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('enrollment.show', $enrollmentRequest->offer_id),
+            'cancel_url' => route('enrollment.show', $enrollment->offer_id),
             'metadata' => [
-                'enrollment_request_id' => $enrollmentRequest->id,
+                'enrollment_id' => $enrollment->id,
             ],
         ]);
 
-        $enrollmentRequest->update(['stripe_session_id' => $session->id]);
+        $enrollment->update(['stripe_session_id' => $session->id]);
 
         return $session->url;
     }

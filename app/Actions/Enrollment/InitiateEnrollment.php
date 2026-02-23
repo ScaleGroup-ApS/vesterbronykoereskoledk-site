@@ -8,7 +8,7 @@ use App\Enums\StudentStatus;
 use App\Enums\UserRole;
 use App\Events\EnrollmentRequested;
 use App\Events\StudentEnrolled;
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\Student;
 use App\Models\User;
@@ -19,7 +19,7 @@ class InitiateEnrollment
 {
     /**
      * @param  array{name: string, email: string, password: string, phone?: string|null, cpr?: string|null, start_date?: string|null, payment_method: string}  $data
-     * @return array{0: Student, 1: EnrollmentRequest}
+     * @return array{0: Student, 1: Enrollment}
      */
     public function handle(array $data, Offer $offer): array
     {
@@ -51,7 +51,7 @@ class InitiateEnrollment
                 ? EnrollmentStatus::PendingPayment
                 : EnrollmentStatus::PendingApproval;
 
-            $enrollmentRequest = EnrollmentRequest::create([
+            $enrollment = Enrollment::create([
                 'student_id' => $student->id,
                 'offer_id' => $offer->id,
                 'payment_method' => $paymentMethod,
@@ -59,13 +59,13 @@ class InitiateEnrollment
             ]);
 
             EnrollmentRequested::fire(
-                enrollment_request_id: $enrollmentRequest->id,
+                enrollment_id: $enrollment->id,
                 student_id: $student->id,
                 offer_id: $offer->id,
                 payment_method: $paymentMethod->value,
             );
 
-            return [$student, $enrollmentRequest];
+            return [$student, $enrollment];
         });
     }
 }

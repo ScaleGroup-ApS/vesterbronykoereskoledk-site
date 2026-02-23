@@ -5,7 +5,7 @@ namespace App\Actions\Enrollment;
 use App\Actions\Offers\AssignOffer;
 use App\Enums\EnrollmentStatus;
 use App\Events\EnrollmentApproved;
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use App\Models\User;
 use App\Notifications\EnrollmentApprovedNotification;
 
@@ -15,26 +15,25 @@ class ApproveEnrollment
         private readonly AssignOffer $assignOffer,
     ) {}
 
-    public function handle(EnrollmentRequest $enrollmentRequest, User $approvedBy): EnrollmentRequest
+    public function handle(Enrollment $enrollment, User $approvedBy): Enrollment
     {
-        $enrollmentRequest->load(['student.user', 'offer']);
+        $enrollment->load(['student.user', 'offer']);
 
-        $this->assignOffer->handle($enrollmentRequest->student, $enrollmentRequest->offer);
+        $this->assignOffer->handle($enrollment->student, $enrollment->offer);
 
         EnrollmentApproved::fire(
-            enrollment_request_id: $enrollmentRequest->id,
-            student_id: $enrollmentRequest->student_id,
-            offer_id: $enrollmentRequest->offer_id,
-            payment_method: $enrollmentRequest->payment_method->value,
+            enrollment_id: $enrollment->id,
+            student_id: $enrollment->student_id,
+            offer_id: $enrollment->offer_id,
+            payment_method: $enrollment->payment_method->value,
         );
 
-        $enrollmentRequest->update([
+        $enrollment->update([
             'status' => EnrollmentStatus::Completed,
-            'approved_by_id' => $approvedBy->id,
         ]);
 
-        $enrollmentRequest->student->user->notify(new EnrollmentApprovedNotification($enrollmentRequest));
+        $enrollment->student->user->notify(new EnrollmentApprovedNotification($enrollment));
 
-        return $enrollmentRequest->refresh();
+        return $enrollment->refresh();
     }
 }

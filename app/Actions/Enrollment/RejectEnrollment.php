@@ -4,30 +4,30 @@ namespace App\Actions\Enrollment;
 
 use App\Enums\EnrollmentStatus;
 use App\Events\EnrollmentRejected;
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use App\Notifications\EnrollmentRejectedNotification;
 
 class RejectEnrollment
 {
-    public function handle(EnrollmentRequest $enrollmentRequest, string $rejectionReason): EnrollmentRequest
+    public function handle(Enrollment $enrollment, string $rejectionReason): Enrollment
     {
-        $enrollmentRequest->load('student.user');
+        $enrollment->load('student.user');
 
         EnrollmentRejected::fire(
-            enrollment_request_id: $enrollmentRequest->id,
-            student_id: $enrollmentRequest->student_id,
-            offer_id: $enrollmentRequest->offer_id,
-            payment_method: $enrollmentRequest->payment_method->value,
+            enrollment_id: $enrollment->id,
+            student_id: $enrollment->student_id,
+            offer_id: $enrollment->offer_id,
+            payment_method: $enrollment->payment_method->value,
             rejection_reason: $rejectionReason,
         );
 
-        $enrollmentRequest->update([
+        $enrollment->update([
             'status' => EnrollmentStatus::Rejected,
             'rejection_reason' => $rejectionReason,
         ]);
 
-        $enrollmentRequest->student->user->notify(new EnrollmentRejectedNotification($enrollmentRequest));
+        $enrollment->student->user->notify(new EnrollmentRejectedNotification($enrollment));
 
-        return $enrollmentRequest->refresh();
+        return $enrollment->refresh();
     }
 }
