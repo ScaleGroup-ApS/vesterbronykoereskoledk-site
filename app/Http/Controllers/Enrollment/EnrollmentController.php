@@ -20,9 +20,13 @@ class EnrollmentController extends Controller
 {
     public function show(Offer $offer): Response
     {
+        $courses = $offer->courses()->upcoming()->orderBy('start_date')->get();
+
         return Inertia::render('enroll', [
             'offer' => $offer,
             'stripePublishableKey' => config('services.stripe.publishable_key'),
+            'availableDates' => $courses->map(fn ($c) => $c->start_date->format('Y-m-d'))->values(),
+            'courses' => $courses->mapWithKeys(fn ($c) => [$c->start_date->format('Y-m-d') => $c->id]),
         ]);
     }
 

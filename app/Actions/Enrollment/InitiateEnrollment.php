@@ -8,6 +8,7 @@ use App\Enums\StudentStatus;
 use App\Enums\UserRole;
 use App\Events\EnrollmentRequested;
 use App\Events\StudentEnrolled;
+use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\Student;
@@ -18,12 +19,14 @@ use Illuminate\Support\Facades\Hash;
 class InitiateEnrollment
 {
     /**
-     * @param  array{name: string, email: string, password: string, phone?: string|null, cpr?: string|null, start_date?: string|null, payment_method: string}  $data
+     * @param  array{name: string, email: string, password: string, phone?: string|null, cpr?: string|null, course_id: int, payment_method: string}  $data
      * @return array{0: Student, 1: Enrollment}
      */
     public function handle(array $data, Offer $offer): array
     {
         return DB::transaction(function () use ($data, $offer) {
+            $course = Course::findOrFail($data['course_id']);
+
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -36,7 +39,7 @@ class InitiateEnrollment
                 'phone' => $data['phone'] ?? null,
                 'cpr' => $data['cpr'] ?? null,
                 'status' => StudentStatus::Active,
-                'start_date' => $data['start_date'] ?? now()->toDateString(),
+                'start_date' => $course->start_date->toDateString(),
             ]);
 
             StudentEnrolled::fire(
@@ -54,6 +57,7 @@ class InitiateEnrollment
             $enrollment = Enrollment::create([
                 'student_id' => $student->id,
                 'offer_id' => $offer->id,
+                'course_id' => $course->id,
                 'payment_method' => $paymentMethod,
                 'status' => $status,
             ]);
