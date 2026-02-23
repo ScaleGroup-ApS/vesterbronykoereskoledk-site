@@ -2,14 +2,14 @@
 
 namespace App\Events;
 
-use App\States\EnrollmentRequestState;
+use App\States\EnrollmentState;
 use Thunk\Verbs\Attributes\Autodiscovery\StateId;
 use Thunk\Verbs\Event;
 
 class EnrollmentRequested extends Event
 {
-    #[StateId(EnrollmentRequestState::class)]
-    public int $enrollment_request_id;
+    #[StateId(EnrollmentState::class)]
+    public int $enrollment_id;
 
     public int $student_id;
 
@@ -17,7 +17,7 @@ class EnrollmentRequested extends Event
 
     public string $payment_method;
 
-    public function apply(EnrollmentRequestState $state): void
+    public function apply(EnrollmentState $state): void
     {
         $state->status = 'pending';
         $state->payment_method = $this->payment_method;
