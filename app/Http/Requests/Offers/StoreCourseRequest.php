@@ -17,7 +17,8 @@ class StoreCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'start_date' => ['required', 'date', 'after:today'],
+            'start_at' => ['required', 'date', 'after:now'],
+            'end_at' => ['required', 'date', 'after:start_at'],
         ];
     }
 }

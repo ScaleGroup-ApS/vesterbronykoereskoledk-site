@@ -39,7 +39,7 @@ class InitiateEnrollment
                 'phone' => $data['phone'] ?? null,
                 'cpr' => $data['cpr'] ?? null,
                 'status' => StudentStatus::Active,
-                'start_date' => $course->start_date->toDateString(),
+                'start_date' => $course->start_at->toDateString(),
             ]);
 
             StudentEnrolled::fire(

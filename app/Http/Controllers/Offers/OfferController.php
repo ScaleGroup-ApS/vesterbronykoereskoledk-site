@@ -54,7 +54,7 @@ class OfferController extends Controller
                 'value' => $type->value,
                 'label' => $type->name,
             ]),
-            'courses' => $offer->courses()->orderBy('start_date')->get(),
+            'courses' => $offer->courses()->orderBy('start_at')->get(),
         ]);
     }
 

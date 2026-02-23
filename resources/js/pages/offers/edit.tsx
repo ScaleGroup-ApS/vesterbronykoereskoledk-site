@@ -28,7 +28,8 @@ type OfferType = { value: string; label: string };
 
 type Course = {
     id: number;
-    start_date: string;
+    start_at: string;
+    end_at: string;
     max_students: number | null;
 };
 
@@ -163,7 +164,11 @@ export default function OfferEdit({
                         <ul className="mb-4 divide-y divide-border rounded-md border">
                             {courses.map((course) => (
                                 <li key={course.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                                    <span>{new Date(course.start_date).toLocaleDateString('da-DK', { dateStyle: 'long' })}</span>
+                                    <span>
+                                        {new Date(course.start_at).toLocaleString('da-DK', { dateStyle: 'long', timeStyle: 'short' })}
+                                        {' – '}
+                                        {new Date(course.end_at).toLocaleTimeString('da-DK', { timeStyle: 'short' })}
+                                    </span>
                                     <Form {...destroyCourse({ offer, course })} method="delete">
                                         {({ processing }) => (
                                             <button
@@ -185,10 +190,17 @@ export default function OfferEdit({
                         {({ processing }) => (
                             <>
                                 <input
-                                    type="date"
-                                    name="start_date"
+                                    type="datetime-local"
+                                    name="start_at"
                                     required
-                                    min={new Date().toISOString().split('T')[0]}
+                                    min={new Date().toISOString().slice(0, 16)}
+                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                                />
+                                <input
+                                    type="datetime-local"
+                                    name="end_at"
+                                    required
+                                    min={new Date().toISOString().slice(0, 16)}
                                     className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                                 />
                                 <Button type="submit" variant="outline" size="sm" disabled={processing}>

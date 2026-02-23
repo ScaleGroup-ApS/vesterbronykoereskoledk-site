@@ -20,8 +20,10 @@ function validEnrollmentData(int $courseId): array
 
 test('student can enroll with a valid course_id', function () {
     $offer = Offer::factory()->create();
+    $startAt = now()->addWeeks(2);
     $course = Course::factory()->for($offer)->create([
-        'start_date' => now()->addWeeks(2)->toDateString(),
+        'start_at' => $startAt,
+        'end_at' => $startAt->copy()->addHours(8),
     ]);
 
     $this->post(route('enrollment.store', $offer), validEnrollmentData($course->id))
@@ -32,7 +34,7 @@ test('student can enroll with a valid course_id', function () {
     expect($enrollment->course_id)->toBe($course->id);
 
     $student = Student::first();
-    expect($student->start_date->format('Y-m-d'))->toBe($course->start_date->format('Y-m-d'));
+    expect($student->start_date->format('Y-m-d'))->toBe($course->start_at->format('Y-m-d'));
 });
 
 test('enrollment fails with a course that does not belong to the offer', function () {
@@ -54,8 +56,12 @@ test('enrollment fails with a past course date', function () {
 
 test('enrollment show page passes available dates for the offer', function () {
     $offer = Offer::factory()->create();
-    Course::factory()->for($offer)->create(['start_date' => now()->addWeek()->toDateString()]);
-    Course::factory()->past()->for($offer)->create(); // should be excluded
+    $startAt = now()->addWeek();
+    Course::factory()->for($offer)->create([
+        'start_at' => $startAt,
+        'end_at' => $startAt->copy()->addHours(8),
+    ]);
+    Course::factory()->past()->for($offer)->create();
 
     $this->get(route('enrollment.show', $offer))
         ->assertOk()

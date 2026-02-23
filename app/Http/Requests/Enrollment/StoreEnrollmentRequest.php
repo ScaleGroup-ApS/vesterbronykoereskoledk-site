@@ -33,7 +33,7 @@ class StoreEnrollmentRequest extends FormRequest
                 Rule::exists(\App\Models\Course::class, 'id')->where('offer_id', $offer->id),
                 function (string $attribute, mixed $value, \Closure $fail) {
                     $course = \App\Models\Course::find($value);
-                    if ($course && $course->start_date->isPast()) {
+                    if ($course && $course->start_at->isPast()) {
                         $fail('Den valgte startdato er i fortiden.');
                     }
                 },
