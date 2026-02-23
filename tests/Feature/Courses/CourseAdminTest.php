@@ -5,17 +5,17 @@ use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\User;
 
-test('admin can view courses calendar', function () {
+test('admin can view upcoming courses', function () {
     $admin = User::factory()->create();
     Course::factory()->create();
+    Course::factory()->past()->create();
 
     $this->actingAs($admin)
         ->get(route('courses.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('courses/index')
-            ->has('events', 1)
-            ->has('offers')
+            ->has('courses', 1)
         );
 });
 

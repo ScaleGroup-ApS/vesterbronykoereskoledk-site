@@ -1,96 +1,70 @@
-import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { Head } from '@inertiajs/react';
+import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Heading from '@/components/heading';
+import { Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { show } from '@/actions/App/Http/Controllers/Courses/CourseController';
 
-type CalendarEvent = {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    calendarId: string;
-    offer_id: number;
-};
-
-type OfferMeta = {
+type Course = {
     id: number;
-    name: string;
-    color: string;
+    start_at: string;
+    end_at: string;
+    offer: { id: number; name: string };
+    enrollments_count: number;
+    max_students: number | null;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kurser', href: '#' }];
 
-const localizer = dateFnsLocalizer({
-    format,
-    parse,
-    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-    getDay,
-    locales: { da },
-});
-
-export default function CoursesIndex({
-    events,
-    offers,
-}: {
-    events: CalendarEvent[];
-    offers: OfferMeta[];
-}) {
-    const [view, setView] = useState<View>('month');
-
-    const offerColors = Object.fromEntries(offers.map((o) => [o.id, o.color]));
-
-    const calendarEvents = events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        start: new Date(e.start),
-        end: new Date(e.end),
-        resource: { offer_id: e.offer_id },
-    }));
-
-    function eventPropGetter(event: (typeof calendarEvents)[number]) {
-        const color = offerColors[event.resource.offer_id] ?? '#6366f1';
-        return {
-            style: {
-                backgroundColor: color,
-                borderColor: color,
-                color: '#fff',
-            },
-        };
-    }
-
+export default function CoursesIndex({ courses }: { courses: Course[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kurser" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Heading title="Kurser" />
-                <div className="flex-1 min-h-0">
-                    <Calendar
-                        localizer={localizer}
-                        events={calendarEvents}
-                        defaultView="month"
-                        view={view}
-                        onView={setView}
-                        views={['month', 'week']}
-                        culture="da"
-                        eventPropGetter={eventPropGetter}
-                        onSelectEvent={(event) => router.visit(show({ course: Number(event.id) }).url)}
-                        style={{ height: '100%' }}
-                        messages={{
-                            next: '›',
-                            previous: '‹',
-                            today: 'I dag',
-                            month: 'Måned',
-                            week: 'Uge',
-                            noEventsInRange: 'Ingen kurser i denne periode.',
-                        }}
-                    />
-                </div>
+
+                {courses.length === 0 ? (
+                    <div className="rounded-xl border px-4 py-10 text-center text-sm text-muted-foreground">
+                        Ingen kommende kurser.
+                    </div>
+                ) : (
+                    <div className="rounded-xl border">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b text-left text-muted-foreground">
+                                    <th className="px-4 py-3 font-medium">Dato</th>
+                                    <th className="px-4 py-3 font-medium">Tilbud</th>
+                                    <th className="px-4 py-3 font-medium">Tilmeldte</th>
+                                    <th className="px-4 py-3" />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {courses.map((course) => (
+                                    <tr key={course.id} className="border-b last:border-0">
+                                        <td className="px-4 py-3">
+                                            {format(new Date(course.start_at), 'PPP', { locale: da })}
+                                        </td>
+                                        <td className="px-4 py-3">{course.offer.name}</td>
+                                        <td className="px-4 py-3">
+                                            {course.enrollments_count}
+                                            {course.max_students != null && ` / ${course.max_students}`}
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <Link
+                                                href={show({ course: course.id }).url}
+                                                className="text-primary hover:underline"
+                                            >
+                                                Se kursus
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

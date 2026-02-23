@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Courses;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\UpdateCourseRequest;
 use App\Models\Course;
-use App\Models\Offer;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,35 +13,22 @@ class CourseController extends Controller
 {
     public function index(): Response
     {
-        $palette = ['#2563eb', '#16a34a', '#dc2626', '#9333ea', '#d97706', '#0891b2'];
-
         $courses = Course::query()
             ->with('offer')
+            ->withCount('enrollments')
+            ->upcoming()
             ->orderBy('start_at')
             ->get()
             ->map(fn (Course $course) => [
-                'id' => (string) $course->id,
-                'title' => $course->offer->name,
-                'start' => $course->start_at->format('Y-m-d H:i'),
-                'end' => $course->end_at->format('Y-m-d H:i'),
-                'calendarId' => 'offer-'.$course->offer_id,
-                'offer_id' => $course->offer_id,
+                'id' => $course->id,
+                'start_at' => $course->start_at->toIso8601String(),
+                'end_at' => $course->end_at->toIso8601String(),
+                'offer' => ['id' => $course->offer->id, 'name' => $course->offer->name],
+                'enrollments_count' => $course->enrollments_count,
+                'max_students' => $course->max_students,
             ]);
 
-        $offers = Offer::query()
-            ->whereHas('courses')
-            ->get(['id', 'name'])
-            ->values()
-            ->map(fn (Offer $offer, int $index) => [
-                'id' => $offer->id,
-                'name' => $offer->name,
-                'color' => $palette[$offer->id % count($palette)],
-            ]);
-
-        return Inertia::render('courses/index', [
-            'events' => $courses,
-            'offers' => $offers,
-        ]);
+        return Inertia::render('courses/index', ['courses' => $courses]);
     }
 
     public function show(Course $course): Response
