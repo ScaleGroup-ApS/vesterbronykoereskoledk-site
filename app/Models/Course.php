@@ -15,14 +15,16 @@ class Course extends Model
 
     protected $fillable = [
         'offer_id',
-        'start_date',
+        'start_at',
+        'end_at',
         'max_students',
     ];
 
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
             'max_students' => 'integer',
         ];
     }
@@ -40,6 +42,6 @@ class Course extends Model
     /** @param Builder<Course> $query */
     public function scopeUpcoming(Builder $query): void
     {
-        $query->where('start_date', '>=', now()->toDateString());
+        $query->where('start_at', '>=', now());
     }
 }
