@@ -41,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('offers', OfferController::class)->except(['show']);
     Route::resource('offers.courses', \App\Http\Controllers\Offers\CourseController::class)
         ->only(['store', 'destroy']);
+    Route::get('courses', [\App\Http\Controllers\Courses\CourseController::class, 'index'])->name('courses.index');
+    Route::get('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'show'])->name('courses.show');
+    Route::patch('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'update'])->name('courses.update');
     Route::resource('bookings', BookingController::class)->except(['show', 'edit']);
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
