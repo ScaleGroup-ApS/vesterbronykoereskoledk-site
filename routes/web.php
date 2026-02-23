@@ -39,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('teams', TeamController::class);
     Route::resource('vehicles', VehicleController::class)->except(['show']);
     Route::resource('offers', OfferController::class)->except(['show']);
+    Route::resource('offers.courses', \App\Http\Controllers\Offers\CourseController::class)
+        ->only(['store', 'destroy']);
     Route::resource('bookings', BookingController::class)->except(['show', 'edit']);
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
