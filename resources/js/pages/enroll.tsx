@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
-import { createViewMonthGrid } from '@schedule-x/calendar';
-import '@schedule-x/theme-default/dist/index.css';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { da } from 'date-fns/locale';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { ArrowLeft, Banknote, Car, CheckCircle2, ChevronRight, CreditCard, Info } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -62,24 +63,21 @@ export default function Enroll({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
 
-    const calendarEvents = courseEvents.map((c) => ({
-        id: String(c.id),
-        title: c.title,
-        start: c.start,
-        end: c.end,
-    }));
-
-    const calendar = useCalendarApp({
-        defaultView: createViewMonthGrid().name,
-        views: [createViewMonthGrid()],
-        events: calendarEvents,
-        callbacks: {
-            onEventClick(event: { id: string }) {
-                const course = courseEvents.find((c) => String(c.id) === event.id) ?? null;
-                setSelectedCourse(course);
-            },
-        },
+    const localizer = dateFnsLocalizer({
+        format,
+        parse,
+        startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+        getDay,
+        locales: { da },
     });
+
+    const calendarEvents = courseEvents.map((c) => ({
+        id: c.id,
+        title: c.title,
+        start: new Date(c.start),
+        end: new Date(c.end),
+        resource: c,
+    }));
 
     function handleSubmit() {
         if (!selectedCourse) { return; }
@@ -127,7 +125,7 @@ export default function Enroll({
                     Tilbage til forsiden
                 </Link>
 
-                <div className="grid lg:grid-cols-2 gap-12 max-w-5xl">
+                <div className="grid lg:grid-cols-[3fr_2fr] gap-8 max-w-6xl">
                     {/* Wizard */}
                     <div className="order-2 lg:order-1">
                         <h1 className="text-3xl font-bold tracking-tight mb-2">Tilmeld dig nu</h1>
@@ -159,7 +157,22 @@ export default function Enroll({
                         {step === 1 && (
                             <div className="space-y-4">
                                 <div className="h-[600px]">
-                                    <ScheduleXCalendar calendarApp={calendar} />
+                                    <Calendar
+                                        localizer={localizer}
+                                        events={calendarEvents}
+                                        defaultView="month"
+                                        views={['month']}
+                                        culture="da"
+                                        onSelectEvent={(event) => setSelectedCourse(event.resource as CourseEvent)}
+                                        style={{ height: '100%' }}
+                                        messages={{
+                                            next: '›',
+                                            previous: '‹',
+                                            today: 'I dag',
+                                            month: 'Måned',
+                                            noEventsInRange: 'Ingen hold i denne periode.',
+                                        }}
+                                    />
                                 </div>
                                 {selectedCourse ? (
                                     <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
