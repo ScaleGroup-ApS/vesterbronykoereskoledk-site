@@ -1,4 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, Form } from '@inertiajs/react';
+import { Trash2, Plus } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/offers';
 import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
+import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
 
 type Offer = {
     id: number;
@@ -24,7 +26,21 @@ type Offer = {
 
 type OfferType = { value: string; label: string };
 
-export default function OfferEdit({ offer, offerTypes }: { offer: Offer; offerTypes: OfferType[] }) {
+type Course = {
+    id: number;
+    start_date: string;
+    max_students: number | null;
+};
+
+export default function OfferEdit({
+    offer,
+    offerTypes,
+    courses,
+}: {
+    offer: Offer;
+    offerTypes: OfferType[];
+    courses: Course[];
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tilbud', href: index().url },
         { title: offer.name, href: '#' },
@@ -137,6 +153,52 @@ export default function OfferEdit({ offer, offerTypes }: { offer: Offer; offerTy
 
                     <Button disabled={form.processing}>Gem ændringer</Button>
                 </form>
+
+                <div className="max-w-lg mt-8">
+                    <h2 className="text-lg font-semibold mb-4">Kursusdatoer</h2>
+
+                    {courses.length === 0 ? (
+                        <p className="text-sm text-muted-foreground mb-4">Ingen kursusdatoer endnu.</p>
+                    ) : (
+                        <ul className="mb-4 divide-y divide-border rounded-md border">
+                            {courses.map((course) => (
+                                <li key={course.id} className="flex items-center justify-between px-4 py-2 text-sm">
+                                    <span>{new Date(course.start_date).toLocaleDateString('da-DK', { dateStyle: 'long' })}</span>
+                                    <Form {...destroyCourse({ offer, course })} method="delete">
+                                        {({ processing }) => (
+                                            <button
+                                                type="submit"
+                                                disabled={processing}
+                                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                                aria-label="Slet kursusdato"
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </button>
+                                        )}
+                                    </Form>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                    <Form {...storeCourse(offer)} className="flex gap-2" resetOnSuccess>
+                        {({ processing }) => (
+                            <>
+                                <input
+                                    type="date"
+                                    name="start_date"
+                                    required
+                                    min={new Date().toISOString().split('T')[0]}
+                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                                />
+                                <Button type="submit" variant="outline" size="sm" disabled={processing}>
+                                    <Plus className="size-4 mr-1" />
+                                    Tilføj dato
+                                </Button>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </div>
         </AppLayout>
     );
