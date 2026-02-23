@@ -34,12 +34,12 @@ class EnrollmentController extends Controller
     ): RedirectResponse|SymfonyResponse {
         $validated = $request->validated();
 
-        [$student, $enrollmentRequest] = $initiateEnrollment->handle($validated, $offer);
+        [$student, $enrollment] = $initiateEnrollment->handle($validated, $offer);
 
         Auth::login($student->user);
 
         if (EnrollmentPaymentMethod::from($validated['payment_method']) === EnrollmentPaymentMethod::Stripe) {
-            $checkoutUrl = $createStripeCheckoutSession->handle($enrollmentRequest);
+            $checkoutUrl = $createStripeCheckoutSession->handle($enrollment);
 
             return Inertia::location($checkoutUrl);
         }

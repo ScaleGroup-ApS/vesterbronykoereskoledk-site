@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Dashboard\CalculateKpis;
 use App\Enums\EnrollmentStatus;
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $pendingEnrollment = null;
 
         if ($user->isStudent() && $user->student) {
-            $pending = EnrollmentRequest::query()
+            $pending = Enrollment::query()
                 ->where('student_id', $user->student->id)
                 ->whereNotIn('status', [EnrollmentStatus::Completed, EnrollmentStatus::Rejected])
                 ->latest()

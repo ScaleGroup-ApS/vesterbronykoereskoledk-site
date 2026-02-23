@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +12,7 @@ class EnrollmentApprovedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly EnrollmentRequest $enrollmentRequest) {}
+    public function __construct(public readonly Enrollment $enrollment) {}
 
     /**
      * @return array<int, string>
@@ -27,7 +27,7 @@ class EnrollmentApprovedNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Din tilmelding er godkendt')
             ->greeting("Hej {$notifiable->name}!")
-            ->line("Din tilmelding til {$this->enrollmentRequest->offer->name} er blevet godkendt.")
+            ->line("Din tilmelding til {$this->enrollment->offer->name} er blevet godkendt.")
             ->line('Du er nu officielt tilmeldt og kan tilgå dit dashboard.')
             ->action('Gå til dashboard', route('dashboard'));
     }
@@ -38,8 +38,8 @@ class EnrollmentApprovedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'enrollment_request_id' => $this->enrollmentRequest->id,
-            'offer_name' => $this->enrollmentRequest->offer->name,
+            'enrollment_id' => $this->enrollment->id,
+            'offer_name' => $this->enrollment->offer->name,
         ];
     }
 }

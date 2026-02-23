@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\EnrollmentRequest;
+use App\Models\Enrollment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +12,7 @@ class EnrollmentRejectedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly EnrollmentRequest $enrollmentRequest) {}
+    public function __construct(public readonly Enrollment $enrollment) {}
 
     /**
      * @return array<int, string>
@@ -27,10 +27,10 @@ class EnrollmentRejectedNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Din tilmelding er afvist')
             ->greeting("Hej {$notifiable->name}!")
-            ->line("Din tilmelding til {$this->enrollmentRequest->offer->name} er desværre blevet afvist.")
+            ->line("Din tilmelding til {$this->enrollment->offer->name} er desværre blevet afvist.")
             ->when(
-                $this->enrollmentRequest->rejection_reason,
-                fn (MailMessage $mail) => $mail->line('Årsag: '.$this->enrollmentRequest->rejection_reason),
+                $this->enrollment->rejection_reason,
+                fn (MailMessage $mail) => $mail->line('Årsag: '.$this->enrollment->rejection_reason),
             )
             ->line('Kontakt os venligst for mere information.');
     }
@@ -41,9 +41,9 @@ class EnrollmentRejectedNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'enrollment_request_id' => $this->enrollmentRequest->id,
-            'offer_name' => $this->enrollmentRequest->offer->name,
-            'rejection_reason' => $this->enrollmentRequest->rejection_reason,
+            'enrollment_id' => $this->enrollment->id,
+            'offer_name' => $this->enrollment->offer->name,
+            'rejection_reason' => $this->enrollment->rejection_reason,
         ];
     }
 }
