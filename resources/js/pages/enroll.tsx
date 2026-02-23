@@ -158,7 +158,9 @@ export default function Enroll({
                         {/* Step 1: Calendar */}
                         {step === 1 && (
                             <div className="space-y-4">
-                                <ScheduleXCalendar calendarApp={calendar} />
+                                <div className="h-[600px]">
+                                    <ScheduleXCalendar calendarApp={calendar} />
+                                </div>
                                 {selectedCourse ? (
                                     <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
                                         <CheckCircle2 className="size-4 shrink-0 text-primary" />
