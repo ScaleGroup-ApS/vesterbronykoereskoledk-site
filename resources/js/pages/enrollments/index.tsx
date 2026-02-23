@@ -22,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tilmeldinger', href: index().url },
 ];
 
-type EnrollmentRequest = {
+type Enrollment = {
     id: number;
     student_name: string;
     student_email: string;
@@ -42,8 +42,8 @@ const statusLabels: Record<string, string> = {
     pending_approval: 'Afventer godkendelse',
 };
 
-export default function EnrollmentsIndex({ enrollmentRequests }: { enrollmentRequests: EnrollmentRequest[] }) {
-    const [rejectTarget, setRejectTarget] = useState<EnrollmentRequest | null>(null);
+export default function EnrollmentsIndex({ enrollments }: { enrollments: Enrollment[] }) {
+    const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -65,7 +65,7 @@ export default function EnrollmentsIndex({ enrollmentRequests }: { enrollmentReq
                             </tr>
                         </thead>
                         <tbody>
-                            {enrollmentRequests.map((enrollment) => (
+                            {enrollments.map((enrollment) => (
                                 <tr key={enrollment.id} className="border-b last:border-0">
                                     <td className="px-4 py-3">
                                         <div className="font-medium">{enrollment.student_name}</div>
@@ -118,7 +118,7 @@ export default function EnrollmentsIndex({ enrollmentRequests }: { enrollmentReq
                                     </td>
                                 </tr>
                             ))}
-                            {enrollmentRequests.length === 0 && (
+                            {enrollments.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                                         Ingen afventende tilmeldinger.
