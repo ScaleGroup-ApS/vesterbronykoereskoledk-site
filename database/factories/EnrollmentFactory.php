@@ -9,9 +9,9 @@ use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EnrollmentRequest>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Enrollment>
  */
-class EnrollmentRequestFactory extends Factory
+class EnrollmentFactory extends Factory
 {
     public function definition(): array
     {
@@ -23,7 +23,6 @@ class EnrollmentRequestFactory extends Factory
             'status' => EnrollmentStatus::PendingApproval,
             'stripe_session_id' => null,
             'rejection_reason' => null,
-            'approved_by_id' => null,
         ];
     }
 }

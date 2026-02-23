@@ -4,7 +4,7 @@ namespace App\States;
 
 use Thunk\Verbs\State;
 
-class EnrollmentRequestState extends State
+class EnrollmentState extends State
 {
     public string $status = 'pending';
 
