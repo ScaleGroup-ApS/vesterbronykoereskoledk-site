@@ -2,11 +2,8 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import { bookingTypeColors } from '@/types/booking';
 import type { BreadcrumbItem } from '@/types';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import FullCalendar from '@fullcalendar/react';
-import timeGridPlugin from '@fullcalendar/timegrid';
+import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 import { Head, Link } from '@inertiajs/react';
 
 type DayEvent = {
@@ -22,14 +19,15 @@ type DayEvent = {
     notes: string | null;
 };
 
-const TEAM_COLOR = '#64748b';
+const statusLabels: Record<string, string> = {
+    scheduled: 'Planlagt',
+    completed: 'Gennemført',
+    cancelled: 'Annulleret',
+    no_show: 'Udeblevet',
+};
 
-function getScrollTime(events: DayEvent[]): string {
-    if (events.length === 0) return '08:00:00';
-    const earliest = events.reduce((min, e) => (new Date(e.start) < new Date(min.start) ? e : min));
-    const d = new Date(earliest.start);
-    const totalMinutes = Math.max(0, d.getHours() * 60 + d.getMinutes() - 30);
-    return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}:00`;
+function formatTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
 }
 
 export default function BookingDay({ date, events }: { date: string; events: DayEvent[] }) {
@@ -37,17 +35,6 @@ export default function BookingDay({ date, events }: { date: string; events: Day
         { title: 'Dashboard', href: dashboard().url },
         { title: date, href: '#' },
     ];
-
-    const calendarEvents = events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        start: e.start,
-        end: e.end,
-        backgroundColor: e.team_id !== null ? TEAM_COLOR : (bookingTypeColors[e.type as keyof typeof bookingTypeColors] ?? '#6b7280'),
-        borderColor: e.team_id !== null ? TEAM_COLOR : (bookingTypeColors[e.type as keyof typeof bookingTypeColors] ?? '#6b7280'),
-        opacity: e.status === 'cancelled' ? 0.4 : 1,
-        extendedProps: e,
-    }));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -63,18 +50,54 @@ export default function BookingDay({ date, events }: { date: string; events: Day
                     </Button>
                 </div>
 
-                <div className="rounded-xl border p-4">
-                    <FullCalendar
-                        plugins={[timeGridPlugin, dayGridPlugin]}
-                        initialView="timeGridDay"
-                        initialDate={date}
-                        headerToolbar={false}
-                        locale="da"
-                        firstDay={1}
-                        scrollTime={getScrollTime(events)}
-                        height="auto"
-                        events={calendarEvents}
-                    />
+                <div className="rounded-xl border">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b text-left">
+                                <th className="px-4 py-3 font-medium">Tidspunkt</th>
+                                <th className="px-4 py-3 font-medium">Elev / Hold</th>
+                                <th className="px-4 py-3 font-medium">Type</th>
+                                <th className="px-4 py-3 font-medium">Status</th>
+                                <th className="px-4 py-3 font-medium">Instruktør</th>
+                                <th className="px-4 py-3 font-medium">Køretøj</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {events.map((event) => (
+                                <tr key={event.id} className="border-b last:border-0">
+                                    <td className="px-4 py-3 tabular-nums text-muted-foreground">
+                                        {formatTime(event.start)} – {formatTime(event.end)}
+                                    </td>
+                                    <td className="px-4 py-3 font-medium">{event.title}</td>
+                                    <td className="px-4 py-3">
+                                        <span className="flex items-center gap-1.5">
+                                            <span
+                                                className="inline-block size-2.5 rounded-full"
+                                                style={{
+                                                    backgroundColor:
+                                                        bookingTypeColors[event.type as keyof typeof bookingTypeColors] ??
+                                                        '#6b7280',
+                                                }}
+                                            />
+                                            {bookingTypeLabels[event.type as keyof typeof bookingTypeLabels] ?? event.type}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-muted-foreground">
+                                        {statusLabels[event.status] ?? event.status}
+                                    </td>
+                                    <td className="px-4 py-3 text-muted-foreground">{event.instructor ?? '–'}</td>
+                                    <td className="px-4 py-3 text-muted-foreground">{event.vehicle ?? '–'}</td>
+                                </tr>
+                            ))}
+                            {events.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                                        Ingen bookinger denne dag.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </AppLayout>
