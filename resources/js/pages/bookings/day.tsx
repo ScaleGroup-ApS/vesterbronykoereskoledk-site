@@ -36,8 +36,13 @@ const statusLabels: Record<string, string> = {
 const selectClass =
     'flex h-8 w-full rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm';
 
-function formatTime(iso: string): string {
-    return new Date(iso).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
+function formatDateTime(iso: string): string {
+    return new Date(iso).toLocaleString('da-DK', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 }
 
 export default function BookingDay({
@@ -90,7 +95,7 @@ export default function BookingDay({
                             {events.map((event) => (
                                 <tr key={event.id} className="border-b last:border-0">
                                     <td className="px-4 py-3 tabular-nums text-muted-foreground">
-                                        {formatTime(event.start)} – {formatTime(event.end)}
+                                        {formatDateTime(event.start)} – {formatDateTime(event.end)}
                                     </td>
                                     <td className="px-4 py-3 font-medium">{event.title}</td>
                                     <td className="px-4 py-3">
