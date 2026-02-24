@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { create, day } from '@/routes/bookings';
+import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 import { index as enrollmentsIndex } from '@/routes/enrollments';
 import type { BreadcrumbItem } from '@/types';
 import { EventClickArg } from '@fullcalendar/core';
@@ -171,6 +172,18 @@ export default function Dashboard({
                                     </Link>
                                 </Button>
                             </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3 text-sm">
+                            {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
+                                <span key={type} className="flex items-center gap-1.5">
+                                    <span
+                                        className="inline-block size-3 rounded-sm"
+                                        style={{ backgroundColor: bookingTypeColors[type] }}
+                                    />
+                                    {label}
+                                </span>
+                            ))}
                         </div>
 
                         <div className="rounded-xl border p-4">

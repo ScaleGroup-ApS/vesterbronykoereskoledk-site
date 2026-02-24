@@ -2,7 +2,6 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import { index } from '@/routes/bookings';
 import { bookingTypeColors } from '@/types/booking';
 import type { BreadcrumbItem } from '@/types';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -52,7 +51,7 @@ export default function BookingDay({ date, events }: { date: string; events: Day
                         description="Køretimer og lektioner for dagen"
                     />
                     <Button variant="outline" asChild>
-                        <Link href={index().url}>Alle bookinger</Link>
+                        <Link href={dashboard().url}>Dashboard</Link>
                     </Button>
                 </div>
 
