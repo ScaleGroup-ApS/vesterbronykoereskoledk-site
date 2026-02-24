@@ -4,6 +4,8 @@ use App\Models\Booking;
 use App\Models\Student;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
+
 test('admin can reschedule a booking via drag and drop', function () {
     $admin = User::factory()->create();
     $booking = Booking::factory()->create([
@@ -11,7 +13,7 @@ test('admin can reschedule a booking via drag and drop', function () {
         'ends_at' => '2026-03-10 10:45:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'starts_at' => '2026-03-10 14:00:00',
@@ -43,7 +45,7 @@ test('drag and drop is rejected when new slot conflicts', function () {
         'ends_at' => '2026-03-10 10:45:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->patch(route('bookings.update', $dragged), [
             'starts_at' => '2026-03-10 14:15:00',
             'ends_at' => '2026-03-10 15:00:00',
@@ -63,7 +65,7 @@ test('instructor can drag and drop own bookings', function () {
         'ends_at' => '2026-03-10 10:45:00',
     ]);
 
-    $this->actingAs($instructor)
+    actingAs($instructor)
         ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'starts_at' => '2026-03-10 11:00:00',

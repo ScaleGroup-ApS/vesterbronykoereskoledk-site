@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { router } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { da } from 'date-fns/locale';
@@ -51,17 +50,17 @@ export default function Enroll({
 }) {
     const [step, setStep] = useState<1 | 2 | 3>(1);
     const [selectedCourse, setSelectedCourse] = useState<CourseEvent | null>(null);
-    const [fields, setFields] = useState({
+
+    const form = useForm({
         name: '',
         email: '',
         phone: '',
         cpr: '',
         password: '',
         password_confirmation: '',
-    });
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [processing, setProcessing] = useState(false);
+        course_id: null as number | null,
+        payment_method: 'stripe' as PaymentMethod,
+    }).withPrecognition(store(offer.id));
 
     const localizer = dateFnsLocalizer({
         format,
@@ -79,25 +78,18 @@ export default function Enroll({
         resource: c,
     }));
 
+    function formatCpr(value: string): string {
+        const digits = value.replace(/\D/g, '').slice(0, 10);
+        return digits.length > 6 ? `${digits.slice(0, 6)}-${digits.slice(6)}` : digits;
+    }
+
     function handleSubmit() {
-        if (!selectedCourse) { return; }
-        setProcessing(true);
-        router.post(
-            store(offer.id).url,
-            {
-                course_id: selectedCourse.id,
-                ...fields,
-                payment_method: paymentMethod,
+        if (!form.data.course_id) { return; }
+        form.post(store(offer.id).url, {
+            onError: (errs) => {
+                if (errs.course_id) { setStep(1); }
             },
-            {
-                onError: (errs) => {
-                    setErrors(errs);
-                    setProcessing(false);
-                    if (errs.course_id) { setStep(1); }
-                },
-                onFinish: () => setProcessing(false),
-            },
-        );
+        });
     }
 
     return (
@@ -163,7 +155,11 @@ export default function Enroll({
                                         defaultView="month"
                                         views={['month']}
                                         culture="da"
-                                        onSelectEvent={(event) => setSelectedCourse(event.resource as CourseEvent)}
+                                        onSelectEvent={(event) => {
+                                            const course = event.resource as CourseEvent;
+                                            setSelectedCourse(course);
+                                            form.setData('course_id', course.id);
+                                        }}
                                         style={{ height: '100%' }}
                                         messages={{
                                             next: '›',
@@ -193,7 +189,7 @@ export default function Enroll({
                                 ) : (
                                     <p className="text-sm text-muted-foreground">Klik på en dato i kalenderen for at vælge.</p>
                                 )}
-                                {errors.course_id && <InputError message={errors.course_id} />}
+                                {form.errors.course_id && <InputError message={form.errors.course_id} />}
                                 <Button onClick={() => setStep(2)} disabled={!selectedCourse} className="w-full">
                                     Videre →
                                 </Button>
@@ -207,39 +203,42 @@ export default function Enroll({
                                     <Label htmlFor="name">Fulde navn</Label>
                                     <Input
                                         id="name"
-                                        value={fields.name}
-                                        onChange={(e) => setFields({ ...fields, name: e.target.value })}
+                                        value={form.data.name}
+                                        onChange={(e) => form.setData('name', e.target.value)}
+                                        onBlur={() => form.validate('name')}
                                         required
                                         autoFocus
                                         autoComplete="name"
                                         placeholder="Dit fulde navn"
                                     />
-                                    <InputError message={errors.name} />
+                                    <InputError message={form.errors.name} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">E-mailadresse</Label>
                                     <Input
                                         id="email"
                                         type="email"
-                                        value={fields.email}
-                                        onChange={(e) => setFields({ ...fields, email: e.target.value })}
+                                        value={form.data.email}
+                                        onChange={(e) => form.setData('email', e.target.value)}
+                                        onBlur={() => form.validate('email')}
                                         required
                                         autoComplete="email"
                                         placeholder="din@email.dk"
                                     />
-                                    <InputError message={errors.email} />
+                                    <InputError message={form.errors.email} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="phone">Telefonnummer</Label>
                                     <Input
                                         id="phone"
                                         type="tel"
-                                        value={fields.phone}
-                                        onChange={(e) => setFields({ ...fields, phone: e.target.value })}
+                                        value={form.data.phone}
+                                        onChange={(e) => form.setData('phone', e.target.value)}
+                                        onBlur={() => form.validate('phone')}
                                         autoComplete="tel"
                                         placeholder="+45 12 34 56 78"
                                     />
-                                    <InputError message={errors.phone} />
+                                    <InputError message={form.errors.phone} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="cpr">
@@ -248,37 +247,44 @@ export default function Enroll({
                                     </Label>
                                     <Input
                                         id="cpr"
-                                        value={fields.cpr}
-                                        onChange={(e) => setFields({ ...fields, cpr: e.target.value })}
+                                        value={form.data.cpr}
+                                        onChange={(e) => form.setData('cpr', formatCpr(e.target.value))}
+                                        onBlur={() => form.validate('cpr')}
                                         placeholder="DDMMÅÅ-XXXX"
+                                        pattern="[0-9]{6}-?[0-9]{4}"
+                                        title="CPR-nummer i formatet DDMMÅÅ-XXXX"
+                                        minLength={10}
+                                        maxLength={11}
                                     />
-                                    <InputError message={errors.cpr} />
+                                    <InputError message={form.errors.cpr} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="password">Adgangskode</Label>
                                     <Input
                                         id="password"
                                         type="password"
-                                        value={fields.password}
-                                        onChange={(e) => setFields({ ...fields, password: e.target.value })}
+                                        value={form.data.password}
+                                        onChange={(e) => form.setData('password', e.target.value)}
+                                        onBlur={() => form.validate('password')}
                                         required
                                         autoComplete="new-password"
                                         placeholder="Min. 8 tegn"
                                     />
-                                    <InputError message={errors.password} />
+                                    <InputError message={form.errors.password} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="password_confirmation">Bekræft adgangskode</Label>
                                     <Input
                                         id="password_confirmation"
                                         type="password"
-                                        value={fields.password_confirmation}
-                                        onChange={(e) => setFields({ ...fields, password_confirmation: e.target.value })}
+                                        value={form.data.password_confirmation}
+                                        onChange={(e) => form.setData('password_confirmation', e.target.value)}
+                                        onBlur={() => form.validate('password_confirmation')}
                                         required
                                         autoComplete="new-password"
                                         placeholder="Gentag adgangskode"
                                     />
-                                    <InputError message={errors.password_confirmation} />
+                                    <InputError message={form.errors.password_confirmation} />
                                 </div>
                                 <div className="flex gap-3">
                                     <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
@@ -316,10 +322,10 @@ export default function Enroll({
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
                                             type="button"
-                                            onClick={() => setPaymentMethod('stripe')}
+                                            onClick={() => form.setData('payment_method', 'stripe')}
                                             className={[
                                                 'flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors',
-                                                paymentMethod === 'stripe'
+                                                form.data.payment_method === 'stripe'
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:border-muted-foreground/50',
                                             ].join(' ')}
@@ -330,10 +336,10 @@ export default function Enroll({
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setPaymentMethod('cash')}
+                                            onClick={() => form.setData('payment_method', 'cash')}
                                             className={[
                                                 'flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors',
-                                                paymentMethod === 'cash'
+                                                form.data.payment_method === 'cash'
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:border-muted-foreground/50',
                                             ].join(' ')}
@@ -343,15 +349,15 @@ export default function Enroll({
                                             <span className="text-xs text-muted-foreground">Betales ved fremmøde</span>
                                         </button>
                                     </div>
-                                    <InputError message={errors.payment_method} />
+                                    <InputError message={form.errors.payment_method} />
 
-                                    {paymentMethod === 'stripe' && (
+                                    {form.data.payment_method === 'stripe' && (
                                         <div className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
                                             <Info className="mt-0.5 size-4 shrink-0" />
                                             <span>Du vil blive videresendt til Stripe Checkout for sikker betaling.</span>
                                         </div>
                                     )}
-                                    {paymentMethod === 'cash' && (
+                                    {form.data.payment_method === 'cash' && (
                                         <div className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
                                             <Info className="mt-0.5 size-4 shrink-0" />
                                             <span>Din tilmelding afventer godkendelse fra en instruktør, inden den aktiveres.</span>
@@ -360,12 +366,12 @@ export default function Enroll({
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <Button variant="outline" onClick={() => setStep(2)} disabled={processing} className="flex-1">
+                                    <Button variant="outline" onClick={() => setStep(2)} disabled={form.processing} className="flex-1">
                                         ← Tilbage
                                     </Button>
-                                    <Button onClick={handleSubmit} disabled={processing} className="flex-1 h-12 text-base">
-                                        {processing && <Spinner />}
-                                        {paymentMethod === 'stripe' ? 'Gå til betaling' : 'Opret konto og tilmeld'}
+                                    <Button onClick={handleSubmit} disabled={form.processing} className="flex-1 h-12 text-base">
+                                        {form.processing && <Spinner />}
+                                        {form.data.payment_method === 'stripe' ? 'Gå til betaling' : 'Opret konto og tilmeld'}
                                     </Button>
                                 </div>
                             </div>

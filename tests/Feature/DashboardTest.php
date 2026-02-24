@@ -2,19 +2,20 @@
 
 use App\Models\Booking;
 use App\Models\Enrollment;
+use App\Models\Team;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
 test('guests are redirected to the login page', function () {
-    $response = $this->get(route('dashboard'));
-    $response->assertRedirect(route('login'));
+    get(route('dashboard'))->assertRedirect(route('login'));
 });
 
 test('authenticated users can visit the dashboard', function () {
     $user = User::factory()->create();
-    $this->actingAs($user);
 
-    $response = $this->get(route('dashboard'));
-    $response->assertOk();
+    actingAs($user)->get(route('dashboard'))->assertOk();
 });
 
 test('admin receives day counts and enrollments props', function () {
@@ -22,7 +23,7 @@ test('admin receives day counts and enrollments props', function () {
     Booking::factory()->create();
     Enrollment::factory()->create();
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -38,7 +39,7 @@ test('instructor receives day counts prop with empty enrollments', function () {
     $instructor = User::factory()->instructor()->create();
     Booking::factory()->create();
 
-    $this->actingAs($instructor)
+    actingAs($instructor)
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -50,7 +51,7 @@ test('instructor receives day counts prop with empty enrollments', function () {
 
 test('team bookings on same slot count as one in day counts', function () {
     $admin = User::factory()->create();
-    $team = \App\Models\Team::factory()->create();
+    $team = Team::factory()->create();
     $startsAt = now()->addDay()->setHour(10)->setMinute(0)->setSecond(0);
 
     // Two bookings same team, same slot
@@ -60,7 +61,7 @@ test('team bookings on same slot count as one in day counts', function () {
         'ends_at' => $startsAt->copy()->addHour(),
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -72,13 +73,13 @@ test('team bookings on same slot count as one in day counts', function () {
 test('student visiting dashboard is redirected to student dashboard', function () {
     $student = User::factory()->student()->create();
 
-    $this->actingAs($student)
+    actingAs($student)
         ->get(route('dashboard'))
         ->assertRedirect(route('student.dashboard'));
 });
 
 test('booking can belong to a team', function () {
-    $team = \App\Models\Team::factory()->create();
+    $team = Team::factory()->create();
     $booking = Booking::factory()->create(['team_id' => $team->id]);
 
     expect($booking->fresh()->team)->not->toBeNull();

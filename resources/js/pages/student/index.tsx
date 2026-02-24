@@ -1,10 +1,10 @@
-import { Head } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
+import { Head, router, usePoll } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { da } from 'date-fns/locale';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, CreditCard, Loader2, XCircle } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
-import AppLayout from '@/layouts/app-layout';
+import StudentLayout from '@/layouts/student-layout';
 import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes/student';
 
@@ -27,6 +27,12 @@ type Balance = {
     outstanding: number;
 };
 
+type PendingEnrollment = {
+    status: 'pending_payment' | 'pending_approval';
+    payment_method: 'stripe' | 'cash';
+    offer_price: number;
+} | null;
+
 const bookingTypeLabels: Record<string, string> = {
     driving_lesson: 'Køretest',
     theory_lesson: 'Teoritime',
@@ -45,16 +51,69 @@ const readinessTypeLabels: Record<string, string> = {
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
 
 export default function StudentDashboard({
+    pendingEnrollment,
     booking,
     readiness,
     balance,
 }: {
+    pendingEnrollment: PendingEnrollment;
     booking: Booking;
     readiness: Readiness;
     balance: Balance;
 }) {
+    const wasPending = useRef(!!pendingEnrollment);
+    const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
+
+    useEffect(() => {
+        if (wasPending.current && !pendingEnrollment) {
+            stop();
+            router.reload();
+        }
+        wasPending.current = !!pendingEnrollment;
+    }, [pendingEnrollment]);
+
+    if (pendingEnrollment) {
+        const isStripe = pendingEnrollment.payment_method === 'stripe';
+
+        return (
+            <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 text-center">
+                <Head title={isStripe ? 'Afventer betaling' : 'Afventer godkendelse'} />
+                <div className="max-w-sm space-y-6">
+                    <div className="flex justify-center">
+                        <div className="flex size-20 items-center justify-center rounded-full bg-muted">
+                            {isStripe ? (
+                                <CreditCard className="size-9 text-muted-foreground" />
+                            ) : (
+                                <Clock className="size-9 text-muted-foreground" />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-semibold">
+                            {isStripe ? 'Afventer betaling' : 'Afventer godkendelse'}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                            {isStripe
+                                ? 'Din tilmelding afventer betalingsbekræftelse fra Stripe. Kontakt os, hvis du har problemer.'
+                                : 'Din tilmelding afventer godkendelse fra en instruktør. Du vil modtage besked, når den er behandlet.'}
+                        </p>
+                        <p className="text-lg font-medium">
+                            {Number(pendingEnrollment.offer_price).toLocaleString('da-DK')} kr.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="size-3 animate-spin" />
+                        Checker for opdateringer…
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <StudentLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
 
@@ -67,9 +126,9 @@ export default function StudentDashboard({
                                 {bookingTypeLabels[booking.type] ?? booking.type}
                             </p>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                {format(new Date(booking.starts_at), 'PPPp', { locale: da })}
+                                {format(new Date(booking.starts_at), 'd-M-yyyy HH:mm')}
                                 {' – '}
-                                {format(new Date(booking.ends_at), 'p', { locale: da })}
+                                {format(new Date(booking.ends_at), 'HH:mm')}
                             </p>
                         </div>
                     ) : (
@@ -82,7 +141,7 @@ export default function StudentDashboard({
                     <div className="flex items-center justify-between">
                         <Heading variant="small" title="Fremgang" />
                         <Badge variant={readiness.is_ready ? 'default' : 'secondary'}>
-                            {readiness.is_ready ? '✓ Klar til eksamen' : 'Ikke klar endnu'}
+                            {readiness.is_ready ? '✓ Klar til eksamen' : 'Ikke eksemensklar endnu'}
                         </Badge>
                     </div>
 
@@ -120,6 +179,6 @@ export default function StudentDashboard({
                 </div>
 
             </div>
-        </AppLayout>
+        </StudentLayout>
     );
 }

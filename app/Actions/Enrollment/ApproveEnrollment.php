@@ -3,6 +3,7 @@
 namespace App\Actions\Enrollment;
 
 use App\Actions\Offers\AssignOffer;
+use App\Actions\Payments\RecordPayment;
 use App\Enums\EnrollmentStatus;
 use App\Events\EnrollmentApproved;
 use App\Models\Enrollment;
@@ -13,6 +14,8 @@ class ApproveEnrollment
 {
     public function __construct(
         private readonly AssignOffer $assignOffer,
+        private readonly CreateEnrollmentBooking $createEnrollmentBooking,
+        private readonly RecordPayment $recordPayment,
     ) {}
 
     public function handle(Enrollment $enrollment, User $approvedBy): Enrollment
@@ -20,6 +23,13 @@ class ApproveEnrollment
         $enrollment->load(['student.user', 'offer']);
 
         $this->assignOffer->handle($enrollment->student, $enrollment->offer);
+
+        $this->recordPayment->handle([
+            'student_id' => $enrollment->student_id,
+            'amount' => $enrollment->offer->price,
+            'method' => $enrollment->payment_method->value,
+            'notes' => null,
+        ]);
 
         EnrollmentApproved::fire(
             enrollment_id: $enrollment->id,
@@ -31,6 +41,8 @@ class ApproveEnrollment
         $enrollment->update([
             'status' => EnrollmentStatus::Completed,
         ]);
+
+        $this->createEnrollmentBooking->handle($enrollment);
 
         $enrollment->student->user->notify(new EnrollmentApprovedNotification($enrollment));
 

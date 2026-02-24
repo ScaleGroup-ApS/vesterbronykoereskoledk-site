@@ -19,6 +19,7 @@ class StoreCourseRequest extends FormRequest
         return [
             'start_at' => ['required', 'date', 'after:now'],
             'end_at' => ['required', 'date', 'after:start_at'],
+            'max_students' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

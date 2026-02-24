@@ -4,14 +4,17 @@ use App\Models\Booking;
 use App\Models\Team;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
 test('guests are redirected to login', function () {
-    $this->get('/bookings/day/2026-02-24')->assertRedirect(route('login'));
+    get('/bookings/day/2026-02-24')->assertRedirect(route('login'));
 });
 
 test('admin can view a day page', function () {
     $admin = User::factory()->create();
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get('/bookings/day/2026-02-24')
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('bookings/day'));
@@ -26,7 +29,7 @@ test('individual bookings appear as separate events', function () {
         'ends_at' => $date.' 10:45:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get("/bookings/day/{$date}")
         ->assertOk()
         ->assertInertia(fn ($page) => $page->has('events', 2));
@@ -43,7 +46,7 @@ test('team bookings on same slot are grouped into one event', function () {
         'ends_at' => $date.' 10:30:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get("/bookings/day/{$date}")
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -65,7 +68,7 @@ test('mixed individual and team bookings returned correctly', function () {
         'ends_at' => $date.' 10:30:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->get("/bookings/day/{$date}")
         ->assertOk()
         ->assertInertia(fn ($page) => $page->has('events', 2));

@@ -6,28 +6,24 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Vehicle;
 
+use function Pest\Laravel\actingAs;
+
 test('admin can view bookings index', function () {
     $admin = User::factory()->create();
 
-    $this->actingAs($admin)
-        ->get(route('bookings.index'))
-        ->assertOk();
+    actingAs($admin)->get(route('bookings.index'))->assertOk();
 });
 
 test('instructor can view bookings index', function () {
     $instructor = User::factory()->instructor()->create();
 
-    $this->actingAs($instructor)
-        ->get(route('bookings.index'))
-        ->assertOk();
+    actingAs($instructor)->get(route('bookings.index'))->assertOk();
 });
 
 test('student cannot view bookings index', function () {
     $student = Student::factory()->create();
 
-    $this->actingAs($student->user)
-        ->get(route('bookings.index'))
-        ->assertForbidden();
+    actingAs($student->user)->get(route('bookings.index'))->assertForbidden();
 });
 
 test('admin can create a booking', function () {
@@ -36,7 +32,7 @@ test('admin can create a booking', function () {
     $instructor = User::factory()->instructor()->create();
     $vehicle = Vehicle::factory()->create();
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->post(route('bookings.store'), [
             'student_id' => $student->id,
             'instructor_id' => $instructor->id,
@@ -62,7 +58,7 @@ test('booking store rejects conflict', function () {
         'ends_at' => '2026-03-10 10:45:00',
     ]);
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->post(route('bookings.store'), [
             'student_id' => $student->id,
             'instructor_id' => $instructor->id,
@@ -77,7 +73,7 @@ test('admin can cancel a booking', function () {
     $admin = User::factory()->create();
     $booking = Booking::factory()->create();
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->delete(route('bookings.destroy', $booking))
         ->assertRedirect(route('bookings.index'));
 
@@ -88,7 +84,7 @@ test('admin can mark a booking as completed', function () {
     $admin = User::factory()->create();
     $booking = Booking::factory()->create();
 
-    $this->actingAs($admin)
+    actingAs($admin)
         ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'status' => 'completed',
@@ -106,7 +102,7 @@ test('instructor can only update own bookings', function () {
         'instructor_id' => $otherInstructor->id,
     ]);
 
-    $this->actingAs($instructor)
+    actingAs($instructor)
         ->patch(route('bookings.update', $booking), [
             'notes' => 'test',
         ])

@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\CreateEnrollmentBookings;
 use App\Jobs\FlagNoShows;
 use App\Jobs\SendBookingReminder;
 use Illuminate\Foundation\Inspiring;
@@ -12,3 +13,4 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new SendBookingReminder)->hourly();
 Schedule::job(new FlagNoShows)->dailyAt('02:00');
+Schedule::job(new CreateEnrollmentBookings)->dailyAt('01:00');
