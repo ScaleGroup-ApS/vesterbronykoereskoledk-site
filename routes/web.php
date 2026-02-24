@@ -13,6 +13,7 @@ use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
+use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Models\Offer;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,10 @@ Route::post('book/{offer}', [EnrollmentController::class, 'store'])->name('enrol
 Route::get('blog/{slug}', [BlogPostController::class, 'show'])->name('blog.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('student', StudentDashboardController::class)
+        ->middleware('role:student')
+        ->name('student.dashboard');
+
     Route::resource('blog', BlogPostController::class)->except(['show']);
     Route::resource('students', StudentController::class);
     Route::resource('teams', TeamController::class);

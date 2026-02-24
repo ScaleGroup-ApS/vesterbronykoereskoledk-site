@@ -8,14 +8,19 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Offer;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, CalculateKpis $kpis): Response
+    public function __invoke(Request $request, CalculateKpis $kpis): Response|RedirectResponse
     {
         $user = $request->user();
+
+        if ($user->isStudent()) {
+            return redirect()->route('student.dashboard');
+        }
 
         $pendingEnrollment = null;
 
