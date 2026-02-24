@@ -44,15 +44,10 @@ test('instructor receives courseEvents and offers props', function () {
         );
 });
 
-test('student does not receive courseEvents or offers', function () {
+test('student visiting dashboard is redirected to student dashboard', function () {
     $student = User::factory()->student()->create();
 
     $this->actingAs($student)
         ->get(route('dashboard'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
-            ->where('courseEvents', [])
-            ->where('offers', [])
-        );
+        ->assertRedirect(route('student.dashboard'));
 });
