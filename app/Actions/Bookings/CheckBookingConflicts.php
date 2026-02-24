@@ -15,21 +15,23 @@ class CheckBookingConflicts
     public function handle(
         string $startsAt,
         string $endsAt,
-        User $instructor,
+        ?User $instructor,
         Student $student,
         ?Vehicle $vehicle = null,
         ?int $excludeBookingId = null,
     ): array {
         $conflicts = [];
 
-        $instructorConflict = Booking::query()
-            ->where('instructor_id', $instructor->id)
-            ->overlapping($startsAt, $endsAt)
-            ->when($excludeBookingId, fn ($q) => $q->where('id', '!=', $excludeBookingId))
-            ->exists();
+        if ($instructor !== null) {
+            $instructorConflict = Booking::query()
+                ->where('instructor_id', $instructor->id)
+                ->overlapping($startsAt, $endsAt)
+                ->when($excludeBookingId, fn ($q) => $q->where('id', '!=', $excludeBookingId))
+                ->exists();
 
-        if ($instructorConflict) {
-            $conflicts[] = 'Instruktøren har allerede en booking i dette tidsrum.';
+            if ($instructorConflict) {
+                $conflicts[] = 'Instruktøren har allerede en booking i dette tidsrum.';
+            }
         }
 
         $studentConflict = Booking::query()

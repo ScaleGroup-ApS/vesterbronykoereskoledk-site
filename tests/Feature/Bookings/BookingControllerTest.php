@@ -89,6 +89,7 @@ test('admin can mark a booking as completed', function () {
     $booking = Booking::factory()->create();
 
     $this->actingAs($admin)
+        ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'status' => 'completed',
         ])

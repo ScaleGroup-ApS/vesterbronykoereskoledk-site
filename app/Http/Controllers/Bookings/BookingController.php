@@ -116,12 +116,19 @@ class BookingController extends Controller
 
         $startsAt = $data['starts_at'] ?? $booking->starts_at->toDateTimeString();
         $endsAt = $data['ends_at'] ?? $booking->ends_at->toDateTimeString();
-        $vehicle = isset($data['vehicle_id']) ? Vehicle::find($data['vehicle_id']) : $booking->vehicle;
+
+        $instructor = array_key_exists('instructor_id', $data)
+            ? ($data['instructor_id'] ? User::find($data['instructor_id']) : null)
+            : $booking->instructor;
+
+        $vehicle = array_key_exists('vehicle_id', $data)
+            ? ($data['vehicle_id'] ? Vehicle::find($data['vehicle_id']) : null)
+            : $booking->vehicle;
 
         $conflicts = $conflictChecker->handle(
             startsAt: $startsAt,
             endsAt: $endsAt,
-            instructor: $booking->instructor,
+            instructor: $instructor,
             student: $booking->student,
             vehicle: $vehicle,
             excludeBookingId: $booking->id,
@@ -133,8 +140,7 @@ class BookingController extends Controller
 
         $updateAction->handle($booking, $data);
 
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking opdateret.');
+        return back()->with('success', 'Booking opdateret.');
     }
 
     public function destroy(Booking $booking, CancelBooking $action): RedirectResponse

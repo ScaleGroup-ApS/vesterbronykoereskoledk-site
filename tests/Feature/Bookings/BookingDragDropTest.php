@@ -12,6 +12,7 @@ test('admin can reschedule a booking via drag and drop', function () {
     ]);
 
     $this->actingAs($admin)
+        ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'starts_at' => '2026-03-10 14:00:00',
             'ends_at' => '2026-03-10 14:45:00',
@@ -63,6 +64,7 @@ test('instructor can drag and drop own bookings', function () {
     ]);
 
     $this->actingAs($instructor)
+        ->from(route('bookings.index'))
         ->patch(route('bookings.update', $booking), [
             'starts_at' => '2026-03-10 11:00:00',
             'ends_at' => '2026-03-10 11:45:00',
