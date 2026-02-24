@@ -17,7 +17,7 @@ test('authenticated users can visit the dashboard', function () {
     $response->assertOk();
 });
 
-test('admin receives bookings and enrollments props', function () {
+test('admin receives day counts and enrollments props', function () {
     $admin = User::factory()->create();
     Booking::factory()->create();
     Enrollment::factory()->create();
@@ -27,12 +27,14 @@ test('admin receives bookings and enrollments props', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('dashboard')
-            ->has('bookings', 1)
+            ->has('dayCounts', 1)
+            ->has('dayCounts.0.date')
+            ->has('dayCounts.0.count')
             ->has('enrollments', 1)
         );
 });
 
-test('instructor receives bookings prop with empty enrollments', function () {
+test('instructor receives day counts prop with empty enrollments', function () {
     $instructor = User::factory()->instructor()->create();
     Booking::factory()->create();
 
@@ -41,8 +43,29 @@ test('instructor receives bookings prop with empty enrollments', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('dashboard')
-            ->has('bookings', 1)
+            ->has('dayCounts', 1)
             ->has('enrollments', 0)
+        );
+});
+
+test('team bookings on same slot count as one in day counts', function () {
+    $admin = User::factory()->create();
+    $team = \App\Models\Team::factory()->create();
+    $startsAt = now()->addDay()->setHour(10)->setMinute(0)->setSecond(0);
+
+    // Two bookings same team, same slot
+    Booking::factory()->count(2)->create([
+        'team_id' => $team->id,
+        'starts_at' => $startsAt,
+        'ends_at' => $startsAt->copy()->addHour(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('dayCounts', 1)
+            ->where('dayCounts.0.count', 1)
         );
 });
 
