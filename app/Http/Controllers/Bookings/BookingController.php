@@ -36,7 +36,7 @@ class BookingController extends Controller
                 'end' => $booking->ends_at->toIso8601String(),
                 'type' => $booking->type->value,
                 'status' => $booking->status->value,
-                'instructor' => $booking->instructor->name,
+                'instructor' => $booking->instructor?->name,
                 'vehicle' => $booking->vehicle?->name,
                 'notes' => $booking->notes,
             ]);
@@ -111,8 +111,7 @@ class BookingController extends Controller
                 $cancelAction->handle($booking);
             }
 
-            return redirect()->route('bookings.index')
-                ->with('success', 'Booking opdateret.');
+            return back()->with('success', 'Booking opdateret.');
         }
 
         $startsAt = $data['starts_at'] ?? $booking->starts_at->toDateTimeString();
