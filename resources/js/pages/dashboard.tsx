@@ -286,7 +286,7 @@ export default function Dashboard({
                                     </Button>
                                 </div>
                             </SheetContent>
-                        </Sheet>
+                        </Sheet>}
                     </>
                 )}
             </div>
