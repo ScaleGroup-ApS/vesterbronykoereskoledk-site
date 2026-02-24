@@ -16,7 +16,7 @@ class RecordPayment
         $payment = Payment::create($data);
 
         PaymentRecorded::fire(
-            student_id: $payment->student_id,
+            student_id: (int) $payment->student_id,
             payment_id: $payment->id,
             amount: (float) $payment->amount,
             method: $payment->method->value,

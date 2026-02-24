@@ -9,6 +9,7 @@ test('admin can add a course date to an offer', function () {
     $offer = Offer::factory()->create();
 
     $this->actingAs($admin)
+        ->from(route('offers.edit', $offer))
         ->post(route('offers.courses.store', $offer), [
             'start_at' => '2026-06-01 09:00:00',
             'end_at' => '2026-06-01 17:00:00',

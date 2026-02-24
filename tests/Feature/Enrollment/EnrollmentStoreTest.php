@@ -54,7 +54,7 @@ test('enrollment fails with a past course date', function () {
         ->assertSessionHasErrors('course_id');
 });
 
-test('enrollment show page passes available dates for the offer', function () {
+test('enrollment show page passes course events for the offer', function () {
     $offer = Offer::factory()->create();
     $startAt = now()->addWeek();
     Course::factory()->for($offer)->create([
@@ -66,7 +66,7 @@ test('enrollment show page passes available dates for the offer', function () {
     $this->get(route('enrollment.show', $offer))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('availableDates', 1)
-            ->has('courses')
+            ->has('courseEvents', 1)
+            ->where('courseEvents.0.start', $startAt->format('Y-m-d H:i'))
         );
 });

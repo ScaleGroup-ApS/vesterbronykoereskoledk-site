@@ -10,6 +10,7 @@ import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/courses';
 import { update } from '@/actions/App/Http/Controllers/Courses/CourseController';
 import { destroy } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 
 type Enrollment = {
     id: number;
@@ -96,23 +97,21 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                             />
                             <InputError message={form.errors.max_students} />
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Button type="submit" disabled={form.processing}>
-                                Gem ændringer
-                            </Button>
-                            <Form
-                                {...destroy({ offer: course.offer, course })}
-                                method="delete"
-                                onBefore={() => confirm('Er du sikker på, at du vil slette dette kursus?')}
-                            >
-                                {({ processing }) => (
-                                    <Button type="submit" variant="destructive" disabled={processing}>
-                                        Slet kursus
-                                    </Button>
-                                )}
-                            </Form>
-                        </div>
+                        <Button type="submit" disabled={form.processing}>
+                            Gem ændringer
+                        </Button>
                     </form>
+                    <Form
+                        {...destroy({ offer: course.offer, course })}
+                        method="delete"
+                        onBefore={() => confirm('Er du sikker på, at du vil slette dette kursus?')}
+                    >
+                        {({ processing }) => (
+                            <Button type="submit" variant="destructive" disabled={processing}>
+                                Slet kursus
+                            </Button>
+                        )}
+                    </Form>
                 </div>
 
                 {/* Enrollments table */}
@@ -133,6 +132,7 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                         <th className="px-4 py-2 text-left font-medium">E-mail</th>
                                         <th className="px-4 py-2 text-left font-medium">Betaling</th>
                                         <th className="px-4 py-2 text-left font-medium">Status</th>
+                                        <th className="px-4 py-2" />
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -140,8 +140,24 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                         <tr key={enrollment.id} className="border-b last:border-0">
                                             <td className="px-4 py-2">{enrollment.student.name}</td>
                                             <td className="px-4 py-2 text-muted-foreground">{enrollment.student.email}</td>
-                                            <td className="px-4 py-2">{enrollment.payment_method}</td>
-                                            <td className="px-4 py-2">{enrollment.status}</td>
+                                            <td className="px-4 py-2">{enrollment.payment_method === 'stripe' ? 'Kortbetaling' : 'Kontant'}</td>
+                                            <td className="px-4 py-2">
+                                                {enrollment.status === 'pending_approval' && 'Afventer godkendelse'}
+                                                {enrollment.status === 'pending_payment' && 'Afventer betaling'}
+                                                {enrollment.status === 'completed' && 'Godkendt'}
+                                                {enrollment.status === 'rejected' && 'Afvist'}
+                                            </td>
+                                            <td className="px-4 py-2 text-right">
+                                                {enrollment.status === 'pending_approval' && (
+                                                    <Form {...approve.form({ enrollment })}>
+                                                        {({ processing }) => (
+                                                            <Button type="submit" size="sm" disabled={processing}>
+                                                                Godkend
+                                                            </Button>
+                                                        )}
+                                                    </Form>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

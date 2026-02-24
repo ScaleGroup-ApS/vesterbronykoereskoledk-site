@@ -16,6 +16,7 @@ class Booking extends Model
 
     protected $fillable = [
         'student_id',
+        'team_id',
         'instructor_id',
         'vehicle_id',
         'type',
@@ -48,6 +49,11 @@ class Booking extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     /**

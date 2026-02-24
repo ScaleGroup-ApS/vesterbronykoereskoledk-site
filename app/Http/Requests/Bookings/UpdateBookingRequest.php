@@ -19,7 +19,8 @@ class UpdateBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vehicle_id' => ['nullable', 'integer', 'exists:vehicles,id'],
+            'instructor_id' => ['sometimes', 'nullable', 'integer', 'exists:users,id'],
+            'vehicle_id' => ['sometimes', 'nullable', 'integer', 'exists:vehicles,id'],
             'starts_at' => ['sometimes', 'date'],
             'ends_at' => ['sometimes', 'date', 'after:starts_at'],
             'notes' => ['nullable', 'string'],

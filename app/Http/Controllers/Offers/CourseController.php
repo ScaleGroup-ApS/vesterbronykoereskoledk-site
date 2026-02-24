@@ -14,7 +14,7 @@ class CourseController extends Controller
     {
         $offer->courses()->create($request->validated());
 
-        return redirect()->route('offers.edit', $offer)
+        return redirect()->back()
             ->with('success', 'Kursusdato tilføjet.');
     }
 

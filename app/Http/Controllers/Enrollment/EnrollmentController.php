@@ -24,9 +24,12 @@ class EnrollmentController extends Controller
 
         return Inertia::render('enroll', [
             'offer' => $offer,
-            'stripePublishableKey' => config('services.stripe.publishable_key'),
-            'availableDates' => $courses->map(fn ($c) => $c->start_at->format('Y-m-d'))->values(),
-            'courses' => $courses->mapWithKeys(fn ($c) => [$c->start_at->format('Y-m-d') => $c->id]),
+            'courseEvents' => $courses->map(fn ($c) => [
+                'id' => $c->id,
+                'title' => $offer->name,
+                'start' => $c->start_at->format('Y-m-d H:i'),
+                'end' => $c->end_at->format('Y-m-d H:i'),
+            ])->values(),
         ]);
     }
 

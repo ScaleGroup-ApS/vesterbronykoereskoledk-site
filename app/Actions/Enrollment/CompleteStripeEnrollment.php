@@ -16,6 +16,7 @@ class CompleteStripeEnrollment
     public function __construct(
         private readonly AssignOffer $assignOffer,
         private readonly RecordPayment $recordPayment,
+        private readonly CreateEnrollmentBooking $createEnrollmentBooking,
     ) {}
 
     public function handle(string $sessionId): Enrollment
@@ -54,6 +55,8 @@ class CompleteStripeEnrollment
         );
 
         $enrollment->update(['status' => EnrollmentStatus::Completed]);
+
+        $this->createEnrollmentBooking->handle($enrollment);
 
         return $enrollment->refresh();
     }

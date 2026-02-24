@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use App\Models\Student;
+use App\Models\Team;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,6 +22,7 @@ class BookingFactory extends Factory
 
         return [
             'student_id' => Student::factory(),
+            'team_id' => null,
             'instructor_id' => User::factory()->instructor(),
             'vehicle_id' => Vehicle::factory(),
             'type' => BookingType::DrivingLesson,
@@ -44,5 +46,10 @@ class BookingFactory extends Factory
     public function theory(): static
     {
         return $this->state(fn () => ['type' => BookingType::TheoryLesson, 'vehicle_id' => null]);
+    }
+
+    public function forTeam(Team $team): static
+    {
+        return $this->state(fn () => ['team_id' => $team->id]);
     }
 }
