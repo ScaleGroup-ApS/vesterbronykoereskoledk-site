@@ -24,6 +24,14 @@ type DayEvent = {
 
 const TEAM_COLOR = '#64748b';
 
+function getScrollTime(events: DayEvent[]): string {
+    if (events.length === 0) return '08:00:00';
+    const earliest = events.reduce((min, e) => (new Date(e.start) < new Date(min.start) ? e : min));
+    const d = new Date(earliest.start);
+    const totalMinutes = Math.max(0, d.getHours() * 60 + d.getMinutes() - 30);
+    return `${String(Math.floor(totalMinutes / 60)).padStart(2, '0')}:${String(totalMinutes % 60).padStart(2, '0')}:00`;
+}
+
 export default function BookingDay({ date, events }: { date: string; events: DayEvent[] }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: dashboard().url },
@@ -63,8 +71,7 @@ export default function BookingDay({ date, events }: { date: string; events: Day
                         headerToolbar={false}
                         locale="da"
                         firstDay={1}
-                        slotMinTime="07:00:00"
-                        slotMaxTime="20:00:00"
+                        scrollTime={getScrollTime(events)}
                         height="auto"
                         events={calendarEvents}
                     />
