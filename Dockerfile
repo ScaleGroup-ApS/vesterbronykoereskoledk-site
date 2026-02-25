@@ -91,7 +91,7 @@ COPY --link . .
 RUN mkdir -p storage/framework/{sessions,views,cache}
 RUN mkdir -p storage/logs
 RUN mkdir -p bootstrap/cache
-RUN chown -R ${USER_ID}:${GROUP_ID} storage bootstrap/cache
+RUN chown -R ${USER_ID}:${GROUP_ID} storage bootstrap/cache public
 RUN chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload --optimize
