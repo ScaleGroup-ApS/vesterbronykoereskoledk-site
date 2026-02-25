@@ -94,7 +94,7 @@ RUN mkdir -p bootstrap/cache
 RUN chown -R ${USER_ID}:${GROUP_ID} storage bootstrap/cache
 RUN chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
-RUN composer dump-autoload --optimize --no-dev
+RUN composer dump-autoload --optimize
 
 RUN bun run build
 

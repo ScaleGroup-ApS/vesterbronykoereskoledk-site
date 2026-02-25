@@ -7,7 +7,6 @@ container_mode=${CONTAINER_MODE:-app}
 if [ "$container_mode" = "app" ]; then
     echo "Uno momenti, migrerar databasen..."
     php artisan migrate --force --no-interaction
-    php artisan db:seed
 
     if [ "$APP_ENV" = "production" ]; then
         php artisan config:cache
