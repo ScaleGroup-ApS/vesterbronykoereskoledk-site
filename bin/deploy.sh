@@ -113,6 +113,12 @@ fi
 log_info "Building and deploying images with tag: ${SHORT_SHA} for ${PLATFORM}"
 echo ""
 
+# Step 0: Build frontend assets natively (avoids slow QEMU ARM64 emulation)
+log_info "Building frontend assets natively..."
+bun run build
+log_success "Frontend assets built"
+echo ""
+
 # Step 1: Build base image FIRST since the template depends on it
 build_and_push_image "koereskole-base" "Dockerfile.base"
 

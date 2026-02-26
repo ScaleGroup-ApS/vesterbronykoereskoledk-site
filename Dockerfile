@@ -34,10 +34,6 @@ RUN composer install \
     --no-scripts \
     --no-progress
 
-COPY --link package.json bun.lock* ./
-
-RUN bun install
-
 COPY --link . .
 
 RUN mkdir -p storage/framework/{sessions,views,cache}
@@ -47,8 +43,6 @@ RUN chown -R ${USER_ID}:${GROUP_ID} storage bootstrap/cache public
 RUN chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload --optimize
-
-RUN bun run build
 
 USER ${USER}
 
