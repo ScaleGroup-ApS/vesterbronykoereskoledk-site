@@ -91,7 +91,7 @@ jobs:
       - name: Prepare manifests
         run: |
           sed -i "s/{{NAMESPACE}}/$NAMESPACE/g" infra/deployment.yaml
-          sed -i "s/{{CUSTOMER_SLUG}}/${{ github.event.repository.name }}/g" infra/deployment.yaml
+          sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g" infra/deployment.yaml
           sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g" infra/deployment.yaml
 
       - name: Apply Kubernetes manifests
