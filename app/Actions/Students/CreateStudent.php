@@ -7,8 +7,12 @@ use App\Enums\UserRole;
 use App\Events\StudentEnrolled;
 use App\Models\Student;
 use App\Models\User;
+use App\Mail\StudentMagicLoginMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use MagicLink\Actions\LoginAction;
+use MagicLink\MagicLink;
 use Illuminate\Support\Str;
 
 class CreateStudent
@@ -22,7 +26,7 @@ class CreateStudent
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => Hash::make(Str::random(32)),
+                'password' => null,
                 'role' => UserRole::Student,
             ]);
 
@@ -38,6 +42,13 @@ class CreateStudent
                 student_id: $student->id,
                 student_name: $user->name,
                 start_date: $student->start_date->toDateString(),
+            );
+
+            $action = new LoginAction($user, redirect()->route('student.dashboard'));
+            $url = MagicLink::create($action)->url;
+            
+            Mail::to($user)->send(
+                new StudentMagicLoginMail($user->name, $url)
             );
 
             return $student;
