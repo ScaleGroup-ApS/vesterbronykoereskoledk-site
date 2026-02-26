@@ -10,7 +10,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 REGISTRY="registry.scaleweb.dk"
-NAMESPACE="koereskole-template"
+NAMESPACE=${1:-"koereskole-template"}
 PLATFORM="linux/arm64"
 
 # Print colored message
@@ -139,6 +139,9 @@ if [ -f "infra/deployment.yaml" ]; then
     sed -i "s/{{NAMESPACE}}/$NAMESPACE/g" infra/deployment.yaml.tmp
     sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g" infra/deployment.yaml.tmp
     sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g" infra/deployment.yaml.tmp
+    sed -i "s/{{CUSTOMER_NAME}}/${NAMESPACE}/g" infra/deployment.yaml.tmp
+    sed -i "s/{{CUSTOMER_DOMAIN}}/${NAMESPACE}.dk/g" infra/deployment.yaml.tmp
+    sed -i "s/{{IMAGE_NAME}}/koereskole-template/g" infra/deployment.yaml.tmp
     
     kubectl apply -f infra/deployment.yaml.tmp
     rm -f infra/deployment.yaml.tmp

@@ -18,7 +18,6 @@ spec:
   selector:
     matchLabels:
       app: customer-site
-      customer: "{{CUSTOMER_ID}}"
 
   template:
     metadata:
@@ -28,7 +27,7 @@ spec:
     spec:
       containers:
         - name: customer-site
-          image: registry.scaleweb.dk/{{CUSTOMER_SLUG}}:latest
+          image: registry.scaleweb.dk/{{IMAGE_NAME}}:latest
           imagePullPolicy: Always
           ports:
             - name: http
@@ -168,4 +167,3 @@ spec:
       protocol: TCP
   selector:
     app: customer-site
-    customer: "{{CUSTOMER_ID}}"

@@ -12,6 +12,13 @@ RUN userdel --remove --force www-data || true \
     && groupadd --force -g ${GROUP_ID} ${USER} \
     && useradd -ms /bin/bash --no-log-init --no-user-group -g ${GROUP_ID} -u ${USER_ID} ${USER}
 
+ENV ROOT="/var/www/html"
+ENV USER=${USER}
+ENV WITH_HORIZON=false
+ENV WITH_SCHEDULER=false
+ENV WITH_REVERB=false
+ENV WITH_SSR=false
+
 COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
 COPY --link deployment/supervisord.conf /etc/
 COPY --link deployment/supervisord.frankenphp.conf /etc/supervisor/conf.d/

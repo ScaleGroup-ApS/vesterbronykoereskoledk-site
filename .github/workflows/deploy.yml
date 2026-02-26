@@ -93,6 +93,9 @@ jobs:
           sed -i "s/{{NAMESPACE}}/$NAMESPACE/g" infra/deployment.yaml
           sed -i "s/{{CUSTOMER_SLUG}}/$NAMESPACE/g" infra/deployment.yaml
           sed -i "s/{{CUSTOMER_ID}}/${NAMESPACE}/g" infra/deployment.yaml
+          sed -i "s/{{CUSTOMER_NAME}}/${NAMESPACE}/g" infra/deployment.yaml
+          sed -i "s/{{CUSTOMER_DOMAIN}}/${NAMESPACE}.dk/g" infra/deployment.yaml
+          sed -i "s/{{IMAGE_NAME}}/${{ env.IMAGE_NAME }}/g" infra/deployment.yaml
 
       - name: Apply Kubernetes manifests
         run: kubectl apply -f infra/deployment.yaml
