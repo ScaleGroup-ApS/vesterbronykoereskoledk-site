@@ -3,9 +3,9 @@ import { Pencil, Trash2 } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Student } from '@/types';
-import { index, show, edit, destroy } from '@/routes/teams';
 import { show as studentShow } from '@/routes/students';
+import { index, show, edit, destroy } from '@/routes/teams';
+import type { BreadcrumbItem, Student } from '@/types';
 
 type Team = {
     id: number;

@@ -1,3 +1,10 @@
+import type { EventClickArg } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import FullCalendar from '@fullcalendar/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
+import { CalendarDays, CheckCircle2, Plus, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -15,16 +22,9 @@ import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { create, day } from '@/routes/bookings';
-import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 import { index as enrollmentsIndex } from '@/routes/enrollments';
 import type { BreadcrumbItem } from '@/types';
-import { EventClickArg } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import FullCalendar from '@fullcalendar/react';
-import { Form, Head, Link, router } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, Plus, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
 

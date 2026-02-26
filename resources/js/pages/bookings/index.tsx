@@ -1,18 +1,19 @@
-import { Head, Link, router } from '@inertiajs/react';
-import FullCalendar from '@fullcalendar/react';
+import type { EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import type { EventDropArg, EventResizeDoneArg } from '@fullcalendar/interaction';
+import interactionPlugin from '@fullcalendar/interaction';
+import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin, { EventDropArg, EventResizeDoneArg } from '@fullcalendar/interaction';
-import { EventClickArg } from '@fullcalendar/core';
+import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { index, create, update, destroy } from '@/routes/bookings';
 import type { BreadcrumbItem } from '@/types';
 import type { BookingEvent } from '@/types/booking';
 import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
-import { index, create, update, destroy } from '@/routes/bookings';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Bookinger', href: index().url },

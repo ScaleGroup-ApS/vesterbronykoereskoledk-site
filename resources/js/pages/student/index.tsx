@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
 import { Head, router, usePoll } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, CreditCard, Loader2, XCircle } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import StudentLayout from '@/layouts/student-layout';
-import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes/student';
+import type { BreadcrumbItem } from '@/types';
 
 type Booking = {
     type: string;
@@ -70,7 +70,7 @@ export default function StudentDashboard({
             router.reload();
         }
         wasPending.current = !!pendingEnrollment;
-    }, [pendingEnrollment]);
+    }, [pendingEnrollment, stop]);
 
     if (pendingEnrollment) {
         const isStripe = pendingEnrollment.payment_method === 'stripe';

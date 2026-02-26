@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
+import { useEventStream } from '@laravel/stream-react';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { useEventStream } from '@laravel/stream-react';
-import Heading from '@/components/heading';
-import ConversationList from '@/components/chat/conversation-list';
-import MessageThread from '@/components/chat/message-thread';
-import MessageInput from '@/components/chat/message-input';
-import AppLayout from '@/layouts/app-layout';
 import { index as chatIndex } from '@/actions/App/Http/Controllers/Chat/ConversationController';
 import { index as messagesIndex, store as messagesStore, stream as messagesStream } from '@/actions/App/Http/Controllers/Chat/MessageController';
+import ConversationList from '@/components/chat/conversation-list';
+import MessageInput from '@/components/chat/message-input';
+import MessageThread from '@/components/chat/message-thread';
+import Heading from '@/components/heading';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { Conversation, Message } from '@/types/chat';
 
@@ -44,7 +44,9 @@ export default function ChatIndex({ conversations }: Props) {
     useEffect(() => {
         if (!activeId) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoadingMessages(true);
+         
         setMessages([]);
 
         axios
@@ -55,7 +57,7 @@ export default function ChatIndex({ conversations }: Props) {
             });
 
         return () => close();
-    }, [activeId]);
+    }, [activeId, close]);
 
     const sendMessage = useCallback(
         async (body: string) => {

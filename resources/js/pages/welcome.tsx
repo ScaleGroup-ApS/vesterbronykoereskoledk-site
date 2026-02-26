@@ -1,8 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import { CheckCircle2, Car, ShieldCheck, Clock, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import { dashboard, login } from '@/routes';
 import { show as bookOffer } from '@/routes/enrollment';
-import { CheckCircle2, Car, ShieldCheck, Clock, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface Offer {
     id: number;

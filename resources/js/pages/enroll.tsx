@@ -1,10 +1,11 @@
-import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { da } from 'date-fns/locale';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { ArrowLeft, Banknote, Car, CheckCircle2, ChevronRight, CreditCard, Info } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { store } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { home } from '@/routes';
-import { store } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentController';
 
 interface Offer {
     id: number;

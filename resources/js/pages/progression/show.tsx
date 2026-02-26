@@ -1,10 +1,10 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index as studentsIndex, show as studentShow } from '@/routes/students';
+import type { BreadcrumbItem } from '@/types';
 
 const typeLabels: Record<string, string> = {
     driving_lesson: 'Køretimer',

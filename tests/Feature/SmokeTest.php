@@ -26,7 +26,7 @@ describe('Smoke tests', function () {
             '/offers',
             '/bookings',
             '/payments',
-            '/chat'
+            '/chat',
         ])->assertNoSmoke();
     });
 })->skipOnCi();

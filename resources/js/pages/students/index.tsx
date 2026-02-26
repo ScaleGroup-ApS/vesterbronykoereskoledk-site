@@ -4,8 +4,8 @@ import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, PaginatedStudents } from '@/types';
 import { index, create, show } from '@/routes/students';
+import type { BreadcrumbItem, PaginatedStudents } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

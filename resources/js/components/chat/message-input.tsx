@@ -1,7 +1,8 @@
-import { FormEvent, useState } from 'react';
+import { SendHorizonal } from 'lucide-react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizonal } from 'lucide-react';
 
 type Props = {
     onSend: (body: string) => void;

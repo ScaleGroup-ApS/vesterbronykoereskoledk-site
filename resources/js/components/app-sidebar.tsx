@@ -1,3 +1,5 @@
+import { Link } from '@inertiajs/react';
+import { Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -11,18 +13,12 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
-import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
-import { index as teamsIndex } from '@/routes/teams';
 import { index as vehiclesIndex } from '@/routes/vehicles';
-import { index as enrollmentsIndex } from '@/routes/enrollments';
 import type { NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { CalendarDays, Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, Tag, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [

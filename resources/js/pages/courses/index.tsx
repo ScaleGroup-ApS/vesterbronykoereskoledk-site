@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
+import { show } from '@/actions/App/Http/Controllers/Courses/CourseController';
 import Heading from '@/components/heading';
-import { Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { show } from '@/actions/App/Http/Controllers/Courses/CourseController';
 
 type Course = {
     id: number;

@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Student } from '@/types';
 import { index, show, edit, destroy } from '@/routes/students';
+import type { BreadcrumbItem, Student } from '@/types';
 
 type MediaItem = {
     id: number;

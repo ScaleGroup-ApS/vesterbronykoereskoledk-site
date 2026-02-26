@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import { PenSquare, Plus, Trash2 } from 'lucide-react';
+import { create, destroy } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
+import { index } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { create, destroy } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
-import { index } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Blog', href: index().url },

@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { Form, Head } from '@inertiajs/react';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { index, approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { index, approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tilmeldinger', href: index().url },

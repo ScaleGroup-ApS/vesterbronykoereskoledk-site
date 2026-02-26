@@ -1,13 +1,13 @@
 import { Head } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
+import { index, store } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { index, store } from '@/actions/App/Http/Controllers/Blog/BlogPostController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Blog', href: index().url },

@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Enums\UserRole;
 use App\Enums\OfferType;
-use App\Models\User;
+use App\Enums\UserRole;
 use App\Models\Offer;
+use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -68,9 +68,9 @@ class DatabaseSeeder extends Seeder
         foreach ($packages as $pkgData) {
             $imageUrl = $pkgData['image_url'];
             unset($pkgData['image_url']);
-            
+
             $offer = Offer::create($pkgData);
-            
+
             try {
                 $offer->addMediaFromUrl($imageUrl)->toMediaCollection('default');
             } catch (\Exception $e) {

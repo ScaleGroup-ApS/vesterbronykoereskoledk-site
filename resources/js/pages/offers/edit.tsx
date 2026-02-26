@@ -1,5 +1,7 @@
 import { Head, useForm, Form } from '@inertiajs/react';
 import { Trash2, Plus } from 'lucide-react';
+import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -7,10 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/offers';
-import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
-import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import type { BreadcrumbItem } from '@/types';
 
 type Offer = {
     id: number;

@@ -1,16 +1,16 @@
 import { Head, Link, useForm, Form } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { update } from '@/actions/App/Http/Controllers/Courses/CourseController';
+import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { destroy } from '@/actions/App/Http/Controllers/Offers/CourseController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/courses';
-import { update } from '@/actions/App/Http/Controllers/Courses/CourseController';
-import { destroy } from '@/actions/App/Http/Controllers/Offers/CourseController';
-import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import type { BreadcrumbItem } from '@/types';
 
 type Enrollment = {
     id: number;
