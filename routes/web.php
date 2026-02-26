@@ -12,6 +12,7 @@ use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Students\StudentController;
+use App\Http\Controllers\Students\StudentLoginLinkController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\Vehicles\VehicleController;
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
 
+    Route::post('students/{student}/login-link', StudentLoginLinkController::class)->name('students.login-link');
     Route::post('students/{student}/media', [StudentMediaController::class, 'store'])->name('students.media.store');
     Route::get('students/{student}/media/{media}', [StudentMediaController::class, 'show'])->name('students.media.show');
     Route::delete('students/{student}/media/{media}', [StudentMediaController::class, 'destroy'])->name('students.media.destroy');
