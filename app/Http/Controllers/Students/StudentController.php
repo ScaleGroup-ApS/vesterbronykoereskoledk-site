@@ -68,7 +68,6 @@ class StudentController extends Controller
                         'category' => $this->eventCategory($event),
                         'created_at' => $event->created_at->toISOString(),
                     ])
-                    ->all()
                 : [],
         ]);
     }
