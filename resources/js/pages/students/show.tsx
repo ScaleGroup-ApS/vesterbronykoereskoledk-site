@@ -19,6 +19,21 @@ type MediaItem = {
     created_at: string;
 };
 
+type EventTimelineEntry = {
+    id: string;
+    summary: string;
+    category: 'booking' | 'enrollment' | 'student' | 'payment' | 'other';
+    created_at: string;
+};
+
+const categoryDotColors: Record<string, string> = {
+    booking: 'bg-blue-500',
+    enrollment: 'bg-purple-500',
+    student: 'bg-green-500',
+    payment: 'bg-amber-500',
+    other: 'bg-muted-foreground',
+};
+
 const statusLabels: Record<string, string> = {
     active: 'Aktiv',
     inactive: 'Inaktiv',
@@ -33,7 +48,15 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
     dropped_out: 'destructive',
 };
 
-export default function StudentShow({ student, canEdit }: { student: Student & { media: MediaItem[] }; canEdit: boolean }) {
+export default function StudentShow({
+    student,
+    canEdit,
+    eventTimeline = [],
+}: {
+    student: Student & { media: MediaItem[] };
+    canEdit: boolean;
+    eventTimeline: EventTimelineEntry[];
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Elever', href: index().url },
         { title: student.user.name, href: show(student).url },
@@ -186,6 +209,29 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
                         </form>
                     )}
                 </div>
+
+                {canEdit && (
+                    <div className="max-w-lg space-y-4">
+                        <Heading variant="small" title="Hændelseslog" />
+                        {eventTimeline.length > 0 ? (
+                            <div className="relative border-l pl-6">
+                                {eventTimeline.map((entry) => (
+                                    <div key={entry.id} className="relative mb-4 last:mb-0">
+                                        <span
+                                            className={`absolute -left-6 top-1 size-3 -translate-x-1/2 rounded-full ${categoryDotColors[entry.category] ?? 'bg-muted-foreground'}`}
+                                        />
+                                        <p className="text-sm">{entry.summary}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(entry.created_at).toLocaleString('da-DK')}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Ingen hændelser registreret.</p>
+                        )}
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
