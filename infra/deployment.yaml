@@ -105,7 +105,7 @@ spec:
                   name: ses-credentials
                   key: secret-access-key
             - name: AWS_DEFAULT_REGION
-              value: "eu-west-1"
+              value: "eu-north-1"
 
             # Branding
             - name: BRAND_NAME
