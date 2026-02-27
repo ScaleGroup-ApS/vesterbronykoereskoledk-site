@@ -114,8 +114,9 @@ spec:
         - name: ENABLE_POP3
           value: "0"
 
-        # Direct delivery (no relay) - send directly to recipient MX servers
-        # Requires: port 25 outbound, PTR record, good IP reputation
+        # No outbound relay - all SMTP ports (25, 465, 587, 2587) are blocked by the
+        # cloud provider. Transactional mail is sent via AWS SES HTTP API from the
+        # Laravel app (MAIL_MAILER=ses). This mailserver handles inbound IMAP only.
 
         # TLS/SSL - disabled by default, configure manually or via cert-manager
         # - name: SSL_TYPE
