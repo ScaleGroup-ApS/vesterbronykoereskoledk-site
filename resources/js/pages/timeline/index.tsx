@@ -36,8 +36,13 @@ type TimelineEvent = {
 
 type PaginatedEvents = {
     data: TimelineEvent[];
-    links: { prev: string | null; next: string | null };
-    meta: { from: number | null; to: number | null; total: number; current_page: number; last_page: number };
+    from: number | null;
+    to: number | null;
+    total: number;
+    current_page: number;
+    last_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
 };
 
 const categoryIcons: Record<string, React.ElementType> = {
@@ -94,7 +99,7 @@ export default function TimelineIndex({ events }: { events: PaginatedEvents }) {
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
-                    <Heading title="Hændelseslog" description={`${events.meta.total} hændelser registreret`} />
+                    <Heading title="Hændelseslog" description={`${events.total} hændelser registreret`} />
                 </div>
 
                 {events.data.length === 0 ? (
@@ -144,19 +149,19 @@ export default function TimelineIndex({ events }: { events: PaginatedEvents }) {
                     </div>
                 )}
 
-                {events.meta.last_page > 1 && (
+                {events.last_page > 1 && (
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span>
-                            {events.meta.from}–{events.meta.to} af {events.meta.total}
+                            {events.from}–{events.to} af {events.total}
                         </span>
                         <div className="flex gap-2">
-                            {events.links.prev && (
-                                <a href={events.links.prev} className="rounded-md border px-3 py-1 hover:bg-muted">
+                            {events.prev_page_url && (
+                                <a href={events.prev_page_url} className="rounded-md border px-3 py-1 hover:bg-muted">
                                     Forrige
                                 </a>
                             )}
-                            {events.links.next && (
-                                <a href={events.links.next} className="rounded-md border px-3 py-1 hover:bg-muted">
+                            {events.next_page_url && (
+                                <a href={events.next_page_url} className="rounded-md border px-3 py-1 hover:bg-muted">
                                     Næste
                                 </a>
                             )}
