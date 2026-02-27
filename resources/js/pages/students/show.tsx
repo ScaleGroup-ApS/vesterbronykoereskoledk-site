@@ -214,9 +214,9 @@ export default function StudentShow({
                     <div className="max-w-lg space-y-4">
                         <Heading variant="small" title="Hændelseslog" />
                         {eventTimeline.length > 0 ? (
-                            <div className="relative border-l pl-6">
+                            <ol className="relative border-l pl-6">
                                 {eventTimeline.map((entry) => (
-                                    <div key={entry.id} className="relative mb-4 last:mb-0">
+                                    <li key={entry.id} className="relative mb-4 last:mb-0">
                                         <span
                                             className={`absolute -left-6 top-1 size-3 -translate-x-1/2 rounded-full ${categoryDotColors[entry.category] ?? 'bg-muted-foreground'}`}
                                         />
@@ -224,9 +224,9 @@ export default function StudentShow({
                                         <p className="text-xs text-muted-foreground">
                                             {new Date(entry.created_at).toLocaleString('da-DK')}
                                         </p>
-                                    </div>
+                                    </li>
                                 ))}
-                            </div>
+                            </ol>
                         ) : (
                             <p className="text-sm text-muted-foreground">Ingen hændelser registreret.</p>
                         )}
