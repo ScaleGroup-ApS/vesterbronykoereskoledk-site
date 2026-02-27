@@ -21,7 +21,7 @@ it('sends magic link on student creation and allows login', function () {
         'start_date' => now()->toDateString(),
     ];
 
-    $student = $action->handle($studentData);
+    $student = $action->handle($studentData, app(\App\Actions\Students\SendStudentLoginLink::class));
 
     $magicLink = '';
     Mail::assertSent(StudentMagicLoginMail::class, function ($mail) use (&$magicLink, $student) {

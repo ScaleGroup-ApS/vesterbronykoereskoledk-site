@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, Tag } from 'lucide-react';
+import { Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, ScrollText, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,6 +17,7 @@ import { index as chatIndex } from '@/routes/chat';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
+import { index as timelineIndex } from '@/routes/timeline';
 import { index as vehiclesIndex } from '@/routes/vehicles';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
@@ -71,6 +72,11 @@ const mainNavItems: NavItem[] = [
         title: 'Chat',
         href: chatIndex(),
         icon: MessageSquare,
+    },
+    {
+        title: 'Hændelseslog',
+        href: timelineIndex(),
+        icon: ScrollText,
     },
 ];
 

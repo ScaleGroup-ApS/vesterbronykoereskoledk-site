@@ -15,6 +15,7 @@ use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
+use App\Http\Controllers\Timeline\TimelineController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Models\Offer;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
@@ -70,6 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('enrollments', [EnrollmentApprovalController::class, 'index'])->name('enrollments.index');
     Route::post('enrollments/{enrollment}/approve', [EnrollmentApprovalController::class, 'approve'])->name('enrollments.approve');
     Route::post('enrollments/{enrollment}/reject', [EnrollmentApprovalController::class, 'reject'])->name('enrollments.reject');
+
+    Route::get('timeline', TimelineController::class)->middleware('role:admin')->name('timeline.index');
 });
 
 require __DIR__.'/settings.php';

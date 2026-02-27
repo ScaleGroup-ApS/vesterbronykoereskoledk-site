@@ -2,12 +2,16 @@
 
 use App\Actions\Students\CreateStudent;
 use App\Actions\Students\DeleteStudent;
+use App\Actions\Students\SendStudentLoginLink;
 use App\Actions\Students\UpdateStudent;
 use App\Enums\StudentStatus;
 use App\Enums\UserRole;
 use App\Models\Student;
+use Illuminate\Support\Facades\Mail;
 
 test('CreateStudent creates user and student in transaction', function () {
+    Mail::fake();
+
     $action = new CreateStudent;
 
     $student = $action->handle([
@@ -16,7 +20,7 @@ test('CreateStudent creates user and student in transaction', function () {
         'phone' => '+4512345678',
         'cpr' => '010190-1234',
         'start_date' => '2026-03-01',
-    ]);
+    ], app(SendStudentLoginLink::class));
 
     expect($student)->toBeInstanceOf(Student::class);
     expect($student->user->name)->toBe('Jonas Hansen');

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Students;
 
+use App\Events\StudentLoginLinkSent;
 use App\Mail\StudentMagicLoginMail;
 use App\Models\Student;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,11 @@ class SendStudentLoginLink
 
         Mail::to($user)->send(
             new StudentMagicLoginMail($user->name, $url)
+        );
+
+        StudentLoginLinkSent::fire(
+            student_id: $student->id,
+            student_name: $user->name,
         );
     }
 }
