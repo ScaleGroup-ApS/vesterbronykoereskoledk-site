@@ -140,3 +140,21 @@ test('instructor sees empty eventTimeline on student show page', function () {
             ->has('eventTimeline', 0)
         );
 });
+
+test('student sees empty eventTimeline on own profile', function () {
+    $student = Student::factory()->create();
+
+    StudentEnrolled::fire(
+        student_id: $student->id,
+        student_name: $student->user->name,
+        start_date: $student->start_date->toDateString(),
+    );
+
+    Verbs::commit();
+
+    $this->actingAs($student->user)
+        ->get(route('students.show', $student))
+        ->assertInertia(fn ($page) => $page
+            ->has('eventTimeline', 0)
+        );
+});
