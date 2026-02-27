@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FileText, Pencil, Trash2, Upload } from 'lucide-react';
 import Heading from '@/components/heading';
+import { useLoginLink } from '@/hooks/use-login-link';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,8 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
         { title: 'Elever', href: index().url },
         { title: student.user.name, href: show(student).url },
     ];
+
+    const { sendLoginLink, processing: loginLinkProcessing } = useLoginLink(student);
 
     const uploadForm = useForm<{ file: File | null; collection: string }>({
         file: null,
@@ -79,6 +82,9 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
                     <Heading title={student.user.name} />
                     {canEdit && (
                         <div className="flex gap-2">
+                            <Button variant="outline" type="button" onClick={sendLoginLink} disabled={loginLinkProcessing}>
+                                Send login link
+                            </Button>
                             <Button variant="outline" asChild>
                                 <Link href={edit(student).url}>
                                     <Pencil className="mr-2 size-4" />

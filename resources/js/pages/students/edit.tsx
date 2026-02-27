@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/Students/StudentController';
-import StudentLoginLinkController from '@/actions/App/Http/Controllers/Students/StudentLoginLinkController';
 import Heading from '@/components/heading';
+import { useLoginLink } from '@/hooks/use-login-link';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,7 @@ export default function StudentEdit({ student }: { student: Student }) {
         { title: 'Rediger', href: '#' },
     ];
 
-    const loginLinkForm = useForm({});
-
-    function sendLoginLink() {
-        loginLinkForm.submit(StudentLoginLinkController(student));
-    }
+    const { sendLoginLink, processing: loginLinkProcessing } = useLoginLink(student);
 
     const form = useForm({
         name: student.user.name,
@@ -49,7 +45,7 @@ export default function StudentEdit({ student }: { student: Student }) {
                         variant="outline"
                         type="button"
                         onClick={sendLoginLink}
-                        disabled={loginLinkForm.processing}
+                        disabled={loginLinkProcessing}
                     >
                         Send login link
                     </Button>
