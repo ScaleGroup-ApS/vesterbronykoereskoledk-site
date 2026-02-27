@@ -1,7 +1,9 @@
 <?php
 
+use App\Events\StudentEnrolled;
 use App\Models\Student;
 use App\Models\User;
+use Thunk\Verbs\Facades\Verbs;
 
 test('admin can view students index', function () {
     $admin = User::factory()->create();
@@ -95,4 +97,46 @@ test('student cannot view other student profile', function () {
     $this->actingAs($student1->user)
         ->get(route('students.show', $student2))
         ->assertForbidden();
+});
+
+test('admin sees eventTimeline prop on student show page', function () {
+    $admin = User::factory()->create();
+    $student = Student::factory()->create();
+
+    StudentEnrolled::fire(
+        student_id: $student->id,
+        student_name: $student->user->name,
+        start_date: $student->start_date->toDateString(),
+    );
+
+    Verbs::commit();
+
+    $this->actingAs($admin)
+        ->get(route('students.show', $student))
+        ->assertInertia(fn ($page) => $page
+            ->has('eventTimeline', 1)
+            ->where('eventTimeline.0.summary', 'Elev tilmeldt')
+            ->where('eventTimeline.0.category', 'student')
+            ->has('eventTimeline.0.id')
+            ->has('eventTimeline.0.created_at')
+        );
+});
+
+test('instructor sees empty eventTimeline on student show page', function () {
+    $instructor = User::factory()->instructor()->create();
+    $student = Student::factory()->create();
+
+    StudentEnrolled::fire(
+        student_id: $student->id,
+        student_name: $student->user->name,
+        start_date: $student->start_date->toDateString(),
+    );
+
+    Verbs::commit();
+
+    $this->actingAs($instructor)
+        ->get(route('students.show', $student))
+        ->assertInertia(fn ($page) => $page
+            ->has('eventTimeline', 0)
+        );
 });
