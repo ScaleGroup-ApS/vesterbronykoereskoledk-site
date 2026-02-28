@@ -25,6 +25,7 @@ test('student can visit their dashboard', function () {
             ->has('booking')
             ->has('readiness')
             ->has('balance')
+            ->has('materials')
         );
 });
 

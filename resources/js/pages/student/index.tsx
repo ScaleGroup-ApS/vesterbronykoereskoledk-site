@@ -1,6 +1,6 @@
 import { Head, router, usePoll } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { CheckCircle, Clock, CreditCard, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, CreditCard, Download, FileText, Loader2, XCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,16 @@ type PendingEnrollment = {
     offer_price: number;
 } | null;
 
+type Material = {
+    id: number;
+    name: string;
+    file_name: string;
+    mime_type: string;
+    size: string;
+    url: string;
+    offer_name: string;
+};
+
 const bookingTypeLabels: Record<string, string> = {
     driving_lesson: 'Køretest',
     theory_lesson: 'Teoritime',
@@ -55,11 +65,13 @@ export default function StudentDashboard({
     booking,
     readiness,
     balance,
+    materials,
 }: {
     pendingEnrollment: PendingEnrollment;
     booking: Booking;
     readiness: Readiness;
     balance: Balance;
+    materials: Material[];
 }) {
     const wasPending = useRef(!!pendingEnrollment);
     const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
@@ -177,6 +189,33 @@ export default function StudentDashboard({
                         </div>
                     )}
                 </div>
+
+                {/* Course materials */}
+                {materials.length > 0 && (
+                    <div className="space-y-3">
+                        <Heading variant="small" title="Kursusmateriale" />
+                        <div className="rounded-xl border divide-y">
+                            {materials.map((material) => (
+                                <a
+                                    key={material.id}
+                                    href={material.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="size-4 shrink-0 text-muted-foreground" />
+                                        <span className="text-sm">{material.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs text-muted-foreground">{material.size}</span>
+                                        <Download className="size-4 text-muted-foreground" />
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
             </div>
         </StudentLayout>

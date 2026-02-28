@@ -38,6 +38,11 @@ class Offer extends Model implements HasMedia
         ];
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('materials');
+    }
+
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class)->withPivot('assigned_at');

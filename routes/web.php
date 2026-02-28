@@ -11,6 +11,7 @@ use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\StudentOfferMaterialController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
 use App\Http\Controllers\Students\StudentMediaController;
@@ -41,6 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('student', StudentDashboardController::class)
         ->middleware('role:student')
         ->name('student.dashboard');
+
+    Route::get('student/offers/{offer}/materials/{media}', StudentOfferMaterialController::class)
+        ->middleware('role:student')
+        ->name('student.offers.materials.show');
 
     Route::resource('blog', BlogPostController::class)->except(['show']);
     Route::resource('students', StudentController::class);

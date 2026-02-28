@@ -21,7 +21,7 @@ class StudentDashboardController extends Controller
 
         abort_unless($student, 404);
 
-        $student->load('offers');
+        $student->load(['offers' => fn ($q) => $q->with('media')]);
 
         $booking = Booking::query()
             ->where('student_id', $student->id)
@@ -55,6 +55,17 @@ class StudentDashboardController extends Controller
             ->with('offer')
             ->first();
 
+        $materials = $student->offers->flatMap(fn ($offer) => $offer->getMedia('materials')->map(fn ($media) => [
+            'id' => $media->id,
+            'name' => $media->name,
+            'file_name' => $media->file_name,
+            'mime_type' => $media->mime_type,
+            'size' => $media->human_readable_size,
+            'url' => route('student.offers.materials.show', [$offer->id, $media->id]),
+            'offer_name' => $offer->name,
+        ])
+        )->values()->all();
+
         return Inertia::render('student/index', [
             'pendingEnrollment' => $pendingEnrollment ? [
                 'status' => $pendingEnrollment->status->value,
@@ -64,6 +75,7 @@ class StudentDashboardController extends Controller
             'booking' => $nextLesson,
             'readiness' => $readiness->handle($student),
             'balance' => $balance->handle($student),
+            'materials' => $materials,
         ]);
     }
 }
