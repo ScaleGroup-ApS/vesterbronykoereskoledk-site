@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, ScrollText, Tag } from 'lucide-react';
+import { BookOpen, Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, ScrollText, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as chatIndex } from '@/routes/chat';
+import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
@@ -48,11 +49,11 @@ const mainNavItems: NavItem[] = [
         href: offersIndex(),
         icon: Tag,
     },
-    // {
-    //     title: 'Kurser',
-    //     href: coursesIndex(),
-    //     icon: CalendarDays,
-    // },
+    {
+        title: 'Kurser',
+        href: coursesIndex(),
+        icon: BookOpen,
+    },
     // {
     //     title: 'Tilmeldinger',
     //     href: enrollmentsIndex(),
