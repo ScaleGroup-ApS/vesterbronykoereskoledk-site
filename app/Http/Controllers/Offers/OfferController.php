@@ -55,6 +55,18 @@ class OfferController extends Controller
                 'label' => $type->name,
             ]),
             'courses' => $offer->courses()->orderBy('start_at')->get(),
+            'images' => $offer->getMedia('images')->map(fn ($media) => [
+                'id' => $media->id,
+                'file_name' => $media->file_name,
+                'size' => $media->human_readable_size,
+            ])->values()->all(),
+            'videos' => $offer->getMedia('video')->map(fn ($media) => [
+                'id' => $media->id,
+                'file_name' => $media->file_name,
+                'size' => $media->human_readable_size,
+                'processing' => false,
+                'thumbnail_url' => null,
+            ])->values()->all(),
         ]);
     }
 

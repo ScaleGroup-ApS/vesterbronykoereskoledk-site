@@ -7,6 +7,7 @@ use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Enrollment\EnrollmentApprovalController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Offers\OfferModuleController;
 use App\Http\Controllers\Offers\OfferPageController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLearnController;
 use App\Http\Controllers\Student\StudentOfferMaterialController;
+use App\Http\Controllers\Student\StudentPageMediaController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
@@ -52,6 +54,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:student')
         ->name('student.offers.materials.show');
 
+    Route::get('student/offers/{offer}/pages/{page}/media/{media}', StudentPageMediaController::class)
+        ->middleware('role:student')
+        ->name('student.offers.pages.media.show');
+
     // Student learn
     Route::prefix('offers/{offer}/learn')->middleware('role:student')->name('student.learn.')->group(function () {
         Route::get('{module}/{page?}', [StudentLearnController::class, 'show'])->name('page');
@@ -73,6 +79,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('offers/{offer}/modules/{module}/move-down', [OfferModuleController::class, 'moveDown'])->name('offers.modules.move-down');
 
     Route::resource('offers.modules.pages', OfferPageController::class)->only(['store', 'edit', 'update', 'destroy']);
+    Route::post('media', [MediaController::class, 'store'])->name('media.store');
+    Route::get('media/{media}', [MediaController::class, 'show'])->name('media.show');
+    Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/move-up', [OfferPageController::class, 'moveUp'])->name('offers.modules.pages.move-up');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/move-down', [OfferPageController::class, 'moveDown'])->name('offers.modules.pages.move-down');
 

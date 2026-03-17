@@ -55,7 +55,7 @@ class StudentDashboardController extends Controller
             ->with('offer')
             ->first();
 
-        $materials = $student->offers->flatMap(fn ($offer) => $offer->getMedia('materials')->map(fn ($media) => [
+        $materials = $student->offers->flatMap(fn ($offer) => $offer->getMedia(['images', 'video'])->map(fn ($media) => [
             'id' => $media->id,
             'name' => $media->name,
             'file_name' => $media->file_name,

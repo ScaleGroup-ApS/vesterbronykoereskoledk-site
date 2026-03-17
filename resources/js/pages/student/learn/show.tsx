@@ -1,4 +1,5 @@
 import { Head, Form, Link } from '@inertiajs/react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Circle, ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
 import {
     show as showPage,
@@ -39,11 +40,25 @@ type Attachment = {
     url: string;
 };
 
+type ImageMedia = {
+    id: number;
+    url: string;
+    file_name: string;
+};
+
+type VideoMedia = {
+    id: number;
+    url: string;
+    file_name: string;
+    thumbnail_url: string | null;
+};
+
 type Page = {
     id: number;
     title: string;
     body: string | null;
-    video_url: string | null;
+    images: ImageMedia[];
+    videos: VideoMedia[];
     quiz_questions: QuizQuestion[];
     attachments: Attachment[];
 };
@@ -140,16 +155,33 @@ export default function StudentLearnShow({
                             <h1 className="mt-1 text-2xl font-bold">{page.title}</h1>
                         </div>
 
-                        {/* Video */}
-                        {page.video_url && (
-                            <div className="aspect-video overflow-hidden rounded-xl border">
-                                <iframe
-                                    src={page.video_url}
-                                    className="size-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                            </div>
+                        {/* Images carousel */}
+                        {page.images.length > 0 && (
+                            <MediaCarousel>
+                                {page.images.map((img) => (
+                                    <img
+                                        key={img.id}
+                                        src={img.url}
+                                        alt={img.file_name}
+                                        className="h-full w-full object-contain"
+                                    />
+                                ))}
+                            </MediaCarousel>
+                        )}
+
+                        {/* Videos carousel */}
+                        {page.videos.length > 0 && (
+                            <MediaCarousel>
+                                {page.videos.map((vid) => (
+                                    <video
+                                        key={vid.id}
+                                        src={vid.url}
+                                        poster={vid.thumbnail_url ?? undefined}
+                                        controls
+                                        className="h-full w-full bg-black"
+                                    />
+                                ))}
+                            </MediaCarousel>
                         )}
 
                         {/* Body */}
@@ -211,7 +243,7 @@ export default function StudentLearnShow({
                                 )}
                             </div>
 
-                            <Form {...markComplete({ offer, module, page })} method="post">
+                            <Form {...markComplete.form({ offer, module, page })}>
                                 {({ processing }) => (
                                     <Button type="submit" disabled={processing || isCompleted}>
                                         {isCompleted ? (
@@ -236,6 +268,83 @@ export default function StudentLearnShow({
     );
 }
 
+function MediaCarousel({ children }: { children: React.ReactNode[] }) {
+    const [current, setCurrent] = useState(0);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const count = children.length;
+
+    function goTo(index: number) {
+        const next = Math.max(0, Math.min(index, count - 1));
+        setCurrent(next);
+        trackRef.current?.children[next]?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    }
+
+    if (count === 1) {
+        return (
+            <div className="overflow-hidden rounded-xl border aspect-video bg-black">
+                {children[0]}
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-2">
+            <div className="relative overflow-hidden rounded-xl border aspect-video bg-black">
+                <div
+                    ref={trackRef}
+                    className="flex h-full overflow-x-hidden"
+                    style={{ scrollSnapType: 'x mandatory' }}
+                >
+                    {children.map((child, i) => (
+                        <div
+                            key={i}
+                            className="h-full w-full shrink-0"
+                            style={{ scrollSnapAlign: 'start' }}
+                        >
+                            {child}
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => goTo(current - 1)}
+                    disabled={current === 0}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white disabled:opacity-30 hover:bg-black/80 transition-colors"
+                    aria-label="Forrige"
+                >
+                    <ChevronLeft className="size-5" />
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => goTo(current + 1)}
+                    disabled={current === count - 1}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white disabled:opacity-30 hover:bg-black/80 transition-colors"
+                    aria-label="Næste"
+                >
+                    <ChevronRight className="size-5" />
+                </button>
+            </div>
+
+            {/* Dot indicators */}
+            <div className="flex justify-center gap-1.5">
+                {children.map((_, i) => (
+                    <button
+                        key={i}
+                        type="button"
+                        onClick={() => goTo(i)}
+                        className={`h-1.5 rounded-full transition-all ${
+                            i === current ? 'w-4 bg-foreground' : 'w-1.5 bg-muted-foreground/40'
+                        }`}
+                        aria-label={`Gå til ${i + 1}`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function LearnQuiz({
     offer,
     module,
@@ -247,7 +356,12 @@ function LearnQuiz({
     page: Page;
     latestQuizAttempt: QuizAttempt | null;
 }) {
-    const hasAttempt = latestQuizAttempt !== null;
+    const [shownAttempt, setShownAttempt] = useState(latestQuizAttempt);
+    const hasAttempt = shownAttempt !== null;
+
+    useEffect(() => {
+        setShownAttempt(latestQuizAttempt);
+    }, [latestQuizAttempt]);
 
     return (
         <div className="rounded-xl border p-6">
@@ -256,16 +370,16 @@ function LearnQuiz({
             {hasAttempt && (
                 <div className="mb-6 rounded-lg bg-muted px-4 py-3 text-sm">
                     <p className="font-medium">
-                        Dit resultat: {latestQuizAttempt.score}/{latestQuizAttempt.total} korrekte
+                        Dit resultat: {shownAttempt.score}/{shownAttempt.total} korrekte
                     </p>
                 </div>
             )}
 
-            <Form {...storeQuizAttempt({ offer, module, page })} method="post" className="space-y-6">
+            <Form {...storeQuizAttempt.form({ offer, module, page })} className="space-y-6">
                 {({ processing }) => (
                     <>
                         {page.quiz_questions.map((question, qi) => {
-                            const selectedAnswer = hasAttempt ? latestQuizAttempt.answers[qi] : undefined;
+                            const selectedAnswer = hasAttempt ? shownAttempt.answers[qi] : undefined;
                             const isCorrect = selectedAnswer === question.correct_option;
 
                             return (
@@ -275,7 +389,7 @@ function LearnQuiz({
                                     </p>
                                     <div className="space-y-2">
                                         {question.options.map((opt, oi) => {
-                                            const wasSelected = hasAttempt && latestQuizAttempt.answers[qi] === oi;
+                                            const wasSelected = hasAttempt && shownAttempt.answers[qi] === oi;
                                             const isCorrectOpt = oi === question.correct_option;
 
                                             let optClass = 'flex items-center gap-3 rounded-lg border px-4 py-3 text-sm';
@@ -294,7 +408,7 @@ function LearnQuiz({
                                                         name={`answers[${qi}]`}
                                                         value={oi}
                                                         defaultChecked={wasSelected}
-                                                        required={qi === 0}
+                                                        required={!hasAttempt && qi === 0}
                                                         disabled={hasAttempt}
                                                         className="shrink-0"
                                                     />
@@ -319,13 +433,9 @@ function LearnQuiz({
                         )}
 
                         {hasAttempt && (
-                            <Form {...storeQuizAttempt({ offer, module, page })} method="post">
-                                {({ processing: retryProcessing }) => (
-                                    <Button type="submit" variant="outline" disabled={retryProcessing}>
-                                        Prøv igen
-                                    </Button>
-                                )}
-                            </Form>
+                            <Button type="button" variant="outline" onClick={() => setShownAttempt(null)}>
+                                Prøv igen
+                            </Button>
                         )}
                     </>
                 )}

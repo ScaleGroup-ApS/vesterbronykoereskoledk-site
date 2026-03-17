@@ -13,6 +13,8 @@ import {
 import { edit as editOffer, index as offersIndex } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import Media from '@/components/media';
+import type { ImageMedia, VideoMedia } from '@/components/media';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,30 +31,26 @@ type QuizQuestion = {
     explanation: string | null;
     sort_order: number;
 };
-type Attachment = {
-    id: number;
-    name: string;
-    file_name: string;
-    mime_type: string;
-    size: string;
-};
 type Page = {
     id: number;
     title: string;
     body: string | null;
-    video_url: string | null;
     quiz_questions: QuizQuestion[];
-    attachments: Attachment[];
+    attachments: AttachmentMedia[];
 };
 
 export default function OfferPageEdit({
     offer,
     module,
     page,
+    images,
+    videos,
 }: {
     offer: Offer;
     module: Module;
     page: Page;
+    images: ImageMedia[];
+    videos: VideoMedia[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tilbud', href: offersIndex().url },
@@ -64,15 +62,11 @@ export default function OfferPageEdit({
     const form = useForm({
         title: page.title,
         body: page.body ?? '',
-        video_url: page.video_url ?? '',
-        attachment: null as File | null,
     });
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(updatePage({ offer, module, page }), {
-            forceFormData: true,
-        });
+        form.submit(updatePage({ offer, module, page }));
     }
 
     function confirmDestroyQuestion(question: QuizQuestion) {
@@ -85,9 +79,10 @@ export default function OfferPageEdit({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Rediger side — ${page.title}`} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-8 rounded-xl p-4">
                 <Heading title="Rediger side" />
 
+                {/* ── Main fields ──────────────────────────────────────────── */}
                 <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
                     <div className="grid gap-2">
                         <Label htmlFor="title">Titel</Label>
@@ -112,42 +107,20 @@ export default function OfferPageEdit({
                         <InputError message={form.errors.body} />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="video_url">Video URL</Label>
-                        <Input
-                            id="video_url"
-                            type="url"
-                            value={form.data.video_url}
-                            onChange={(e) => form.setData('video_url', e.target.value)}
-                            placeholder="https://www.youtube.com/embed/…"
-                        />
-                        <InputError message={form.errors.video_url} />
-                    </div>
-
-                    <div className="grid gap-2">
-                        <Label>Vedhæftning</Label>
-                        {page.attachments.length > 0 && (
-                            <ul className="mb-2 divide-y divide-border rounded-md border text-sm">
-                                {page.attachments.map((att) => (
-                                    <li key={att.id} className="flex items-center justify-between px-3 py-2">
-                                        <span>{att.file_name} ({att.size})</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.zip"
-                            onChange={(e) => form.setData('attachment', e.target.files?.[0] ?? null)}
-                            className="text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground">Upload ny fil for at erstatte eksisterende (pdf, doc, docx, zip — maks. 50 MB)</p>
-                        <InputError message={form.errors.attachment} />
-                    </div>
-
                     <Button disabled={form.processing}>Gem ændringer</Button>
                 </form>
 
+                {/* ── Media ────────────────────────────────────────────────── */}
+                <div className="max-w-2xl">
+                    <Media modelType="offer-page" modelId={page.id}>
+                        <Media.Images items={images} />
+                        <Media.Videos items={videos} />
+                        <Media.Attachments items={page.attachments} />
+                        <Media.Upload />
+                    </Media>
+                </div>
+
+                {/* ── Quiz questions ───────────────────────────────────────── */}
                 <div className="max-w-2xl">
                     <h2 className="mb-4 text-lg font-semibold">Quiz-spørgsmål</h2>
 

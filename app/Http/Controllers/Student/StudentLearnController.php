@@ -72,7 +72,22 @@ class StudentLearnController extends Controller
             'file_name' => $media->file_name,
             'mime_type' => $media->mime_type,
             'size' => $media->human_readable_size,
-            'url' => route('student.offers.materials.show', [$offer->id, $media->id]),
+            'url' => route('student.offers.pages.media.show', [$offer, $page, $media]),
+        ])->values()->all();
+
+        $images = $page->getMedia('images')->map(fn ($media) => [
+            'id' => $media->id,
+            'url' => route('student.offers.pages.media.show', [$offer, $page, $media]),
+            'file_name' => $media->file_name,
+        ])->values()->all();
+
+        $videos = $page->getMedia('video')->map(fn ($media) => [
+            'id' => $media->id,
+            'url' => route('student.offers.pages.media.show', [$offer, $page, $media]),
+            'file_name' => $media->file_name,
+            'thumbnail_url' => $media->hasGeneratedConversion('thumbnail')
+                ? $media->getUrl('thumbnail')
+                : null,
         ])->values()->all();
 
         $latestQuizAttempt = $student->quizAttempts()
@@ -84,7 +99,12 @@ class StudentLearnController extends Controller
             'offer' => ['id' => $offer->id, 'name' => $offer->name],
             'module' => ['id' => $module->id, 'title' => $module->title],
             'modules' => $modules,
-            'page' => array_merge($page->toArray(), [
+            'page' => [
+                'id' => $page->id,
+                'title' => $page->title,
+                'body' => $page->body,
+                'images' => $images,
+                'videos' => $videos,
                 'quiz_questions' => $page->quizQuestions->map(fn ($q) => [
                     'id' => $q->id,
                     'question' => $q->question,
@@ -94,7 +114,7 @@ class StudentLearnController extends Controller
                     'sort_order' => $q->sort_order,
                 ])->values()->all(),
                 'attachments' => $attachments,
-            ]),
+            ],
             'completedPageIds' => $completedPageIds,
             'latestQuizAttempt' => $latestQuizAttempt ? [
                 'answers' => $latestQuizAttempt->answers,

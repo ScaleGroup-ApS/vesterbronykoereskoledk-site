@@ -5,6 +5,9 @@ import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import { index as modulesIndex } from '@/actions/App/Http/Controllers/Offers/OfferModuleController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import Media from '@/components/media';
+import type { ImageMedia, VideoMedia } from '@/components/media';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -38,10 +41,14 @@ export default function OfferEdit({
     offer,
     offerTypes,
     courses,
+    images,
+    videos,
 }: {
     offer: Offer;
     offerTypes: OfferType[];
     courses: Course[];
+    images: ImageMedia[];
+    videos: VideoMedia[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tilbud', href: index().url },
@@ -220,6 +227,15 @@ export default function OfferEdit({
                             </>
                         )}
                     </Form>
+                </div>
+
+                <div className="max-w-2xl mt-8">
+                    <h2 className="text-lg font-semibold mb-4">Kursusmaterialer</h2>
+                    <Media modelType="offer" modelId={offer.id}>
+                        <Media.Images items={images} />
+                        <Media.Videos items={videos} />
+                        <Media.Upload collections={['images', 'video']} />
+                    </Media>
                 </div>
             </div>
         </AppLayout>

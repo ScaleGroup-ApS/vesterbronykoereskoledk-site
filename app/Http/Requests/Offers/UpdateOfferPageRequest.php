@@ -19,8 +19,6 @@ class UpdateOfferPageRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'body' => ['nullable', 'string'],
-            'video_url' => ['nullable', 'url', 'max:500'],
-            'attachment' => ['nullable', 'file', 'max:51200', 'mimes:pdf,doc,docx,zip'],
         ];
     }
 }

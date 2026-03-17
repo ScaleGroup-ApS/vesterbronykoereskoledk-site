@@ -40,7 +40,8 @@ class Offer extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('materials');
+        $this->addMediaCollection('images');
+        $this->addMediaCollection('video');
     }
 
     public function modules(): HasMany
