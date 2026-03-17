@@ -1,7 +1,8 @@
-import { Head, useForm, Form } from '@inertiajs/react';
-import { Trash2, Plus } from 'lucide-react';
+import { Head, useForm, Form, Link } from '@inertiajs/react';
+import { Trash2, Plus, BookOpen } from 'lucide-react';
 import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
 import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
+import { index as modulesIndex } from '@/actions/App/Http/Controllers/Offers/OfferModuleController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -154,6 +155,15 @@ export default function OfferEdit({
 
                     <Button disabled={form.processing}>Gem ændringer</Button>
                 </form>
+
+                <div className="max-w-lg">
+                    <Button variant="outline" asChild>
+                        <Link href={modulesIndex({ offer }).url}>
+                            <BookOpen className="size-4 mr-2" />
+                            Moduler & sider
+                        </Link>
+                    </Button>
+                </div>
 
                 <div className="max-w-lg mt-8">
                     <h2 className="text-lg font-semibold mb-4">Kursusdatoer</h2>

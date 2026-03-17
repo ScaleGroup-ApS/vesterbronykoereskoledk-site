@@ -8,10 +8,15 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Enrollment\EnrollmentApprovalController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\Offers\OfferController;
+use App\Http\Controllers\Offers\OfferModuleController;
+use App\Http\Controllers\Offers\OfferPageController;
+use App\Http\Controllers\Offers\OfferPageQuizController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\StudentLearnController;
 use App\Http\Controllers\Student\StudentOfferMaterialController;
+use App\Http\Controllers\Student\StudentQuizAttemptController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
 use App\Http\Controllers\Students\StudentMediaController;
@@ -47,6 +52,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:student')
         ->name('student.offers.materials.show');
 
+    // Student learn
+    Route::prefix('offers/{offer}/learn')->middleware('role:student')->name('student.learn.')->group(function () {
+        Route::get('{module}/{page?}', [StudentLearnController::class, 'show'])->name('page');
+        Route::post('{module}/{page}/complete', [StudentLearnController::class, 'markComplete'])->name('page.complete');
+        Route::post('{module}/{page}/quiz', [StudentQuizAttemptController::class, 'store'])->name('page.quiz.attempt');
+    });
+
     Route::resource('blog', BlogPostController::class)->except(['show']);
     Route::resource('students', StudentController::class);
     Route::resource('teams', TeamController::class);
@@ -54,6 +66,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('offers', OfferController::class)->except(['show']);
     Route::resource('offers.courses', \App\Http\Controllers\Offers\CourseController::class)
         ->only(['store', 'destroy']);
+
+    // Instructor module + page authoring
+    Route::resource('offers.modules', OfferModuleController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+    Route::post('offers/{offer}/modules/{module}/move-up', [OfferModuleController::class, 'moveUp'])->name('offers.modules.move-up');
+    Route::post('offers/{offer}/modules/{module}/move-down', [OfferModuleController::class, 'moveDown'])->name('offers.modules.move-down');
+
+    Route::resource('offers.modules.pages', OfferPageController::class)->only(['store', 'edit', 'update', 'destroy']);
+    Route::post('offers/{offer}/modules/{module}/pages/{page}/move-up', [OfferPageController::class, 'moveUp'])->name('offers.modules.pages.move-up');
+    Route::post('offers/{offer}/modules/{module}/pages/{page}/move-down', [OfferPageController::class, 'moveDown'])->name('offers.modules.pages.move-down');
+
+    Route::resource('offers.modules.pages.questions', OfferPageQuizController::class)->only(['store', 'update', 'destroy']);
     Route::get('courses', [\App\Http\Controllers\Courses\CourseController::class, 'index'])->name('courses.index');
     Route::get('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'show'])->name('courses.show');
     Route::patch('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'update'])->name('courses.update');

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, ScrollText, Tag } from 'lucide-react';
+import { BookOpen, Car, CreditCard, GraduationCap, LayoutGrid, Library, MessageSquare, ScrollText, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -48,6 +48,11 @@ const mainNavItems: NavItem[] = [
         title: 'Tilbud',
         href: offersIndex(),
         icon: Tag,
+    },
+    {
+        title: 'Læringsindhold',
+        href: offersIndex(),
+        icon: Library,
     },
     {
         title: 'Kurser',

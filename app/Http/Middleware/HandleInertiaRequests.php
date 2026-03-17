@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\EnrollmentStatus;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -51,6 +53,37 @@ class HandleInertiaRequests extends Middleware
                 'colors' => array_filter(config('branding.colors')),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'studentLearnUrl' => function () use ($request) {
+                $student = $request->user()?->student;
+
+                if (! $student) {
+                    return null;
+                }
+
+                $enrollment = Enrollment::query()
+                    ->where('student_id', $student->id)
+                    ->where('status', EnrollmentStatus::Completed)
+                    ->with(['offer.modules.pages'])
+                    ->first();
+
+                if (! $enrollment) {
+                    return null;
+                }
+
+                $firstModule = $enrollment->offer->modules->first();
+
+                if (! $firstModule) {
+                    return null;
+                }
+
+                $firstPage = $firstModule->pages->first();
+
+                if (! $firstPage) {
+                    return route('student.learn.page', [$enrollment->offer, $firstModule]);
+                }
+
+                return route('student.learn.page', [$enrollment->offer, $firstModule, $firstPage]);
+            },
         ];
     }
 }

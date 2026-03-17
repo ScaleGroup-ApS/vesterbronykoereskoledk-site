@@ -43,6 +43,11 @@ class Offer extends Model implements HasMedia
         $this->addMediaCollection('materials');
     }
 
+    public function modules(): HasMany
+    {
+        return $this->hasMany(OfferModule::class)->orderBy('sort_order');
+    }
+
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class)->withPivot('assigned_at');

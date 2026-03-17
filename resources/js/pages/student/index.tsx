@@ -1,9 +1,10 @@
-import { Head, router, usePoll } from '@inertiajs/react';
+import { Head, Link, router, usePage, usePoll } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { CheckCircle, Clock, CreditCard, Download, FileText, Loader2, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, CreditCard, Download, FileText, Loader2, XCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import StudentLayout from '@/layouts/student-layout';
 import { dashboard } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
@@ -73,6 +74,7 @@ export default function StudentDashboard({
     balance: Balance;
     materials: Material[];
 }) {
+    const { studentLearnUrl } = usePage<{ studentLearnUrl: string | null }>().props;
     const wasPending = useRef(!!pendingEnrollment);
     const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
 
@@ -128,6 +130,22 @@ export default function StudentDashboard({
         <StudentLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+
+                {/* Learn pages link */}
+                {studentLearnUrl && (
+                    <div className="flex items-center justify-between rounded-xl border p-5">
+                        <div className="flex items-center gap-3">
+                            <BookOpen className="size-5 text-muted-foreground" />
+                            <div>
+                                <p className="font-medium">Kursusmateriale</p>
+                                <p className="text-sm text-muted-foreground">Gennemgå moduler, videoer og quizzer</p>
+                            </div>
+                        </div>
+                        <Button asChild>
+                            <Link href={studentLearnUrl}>Gå til kursus</Link>
+                        </Button>
+                    </div>
+                )}
 
                 {/* Upcoming booking */}
                 <div className="space-y-3">
