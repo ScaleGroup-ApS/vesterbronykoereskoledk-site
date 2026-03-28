@@ -40,6 +40,8 @@ class BookingController extends Controller
                 'notes' => $booking->notes,
                 'attended' => $booking->attended,
                 'attendance_recorded_at' => $booking->attendance_recorded_at?->toIso8601String(),
+                'instructor_note' => $booking->instructor_note,
+                'driving_skills' => $booking->driving_skills,
             ]);
 
         return Inertia::render('bookings/index', [

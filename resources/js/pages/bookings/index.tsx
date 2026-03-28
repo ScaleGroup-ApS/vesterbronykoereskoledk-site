@@ -7,6 +7,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/BookingNoteController';
+import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -19,6 +21,17 @@ import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Bookinger', href: index().url },
 ];
+
+const ALL_SKILLS = [
+    { key: 'parking', label: 'Parkering' },
+    { key: 'motorvej', label: 'Motorvej' },
+    { key: 'roundabouts', label: 'Rundkørsel' },
+    { key: 'city_driving', label: 'Bykørsel' },
+    { key: 'overtaking', label: 'Overhaling' },
+    { key: 'reversing', label: 'Bakring' },
+    { key: 'lane_change', label: 'Filskifte' },
+    { key: 'emergency_stop', label: 'Nødstop' },
+] as const;
 
 export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }) {
     const [selected, setSelected] = useState<BookingEvent | null>(null);
@@ -181,9 +194,70 @@ export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }
                                 </Button>
                             </div>
                         </div>
+                        {/* Instructor note */}
+                        <div className="mt-3 space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">Note til elev</p>
+                            <NoteForm bookingId={selected.id} initialNote={selected.instructor_note} />
+                        </div>
+
+                        {/* Driving skills — only for driving_lesson */}
+                        {selected.type === 'driving_lesson' && (
+                            <div className="mt-3 space-y-1.5">
+                                <p className="text-xs font-medium text-muted-foreground">Færdigheder øvet</p>
+                                <SkillPicker bookingId={selected.id} initialSkills={selected.driving_skills ?? []} />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </AppLayout>
+    );
+}
+
+function NoteForm({ bookingId, initialNote }: { bookingId: number; initialNote: string | null }) {
+    const [note, setNote] = useState(initialNote ?? '');
+
+    function save() {
+        router.patch(BookingNoteController({ id: bookingId }).url, { instructor_note: note }, { preserveScroll: true });
+    }
+
+    return (
+        <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            onBlur={save}
+            rows={3}
+            placeholder="Skriv note til elev..."
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+    );
+}
+
+function SkillPicker({ bookingId, initialSkills }: { bookingId: number; initialSkills: string[] }) {
+    const [skills, setSkills] = useState(initialSkills);
+
+    function toggleSkill(key: string) {
+        const next = skills.includes(key) ? skills.filter((s) => s !== key) : [...skills, key];
+        setSkills(next);
+        router.patch(BookingSkillsController({ id: bookingId }).url, { driving_skills: next }, { preserveScroll: true });
+    }
+
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {ALL_SKILLS.map((skill) => (
+                <button
+                    key={skill.key}
+                    type="button"
+                    onClick={() => toggleSkill(skill.key)}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                        skills.includes(skill.key)
+                            ? 'border-primary bg-primary/10 font-medium text-primary'
+                            : 'border-input text-muted-foreground hover:border-primary/40'
+                    }`}
+                >
+                    {skill.label}
+                </button>
+            ))}
+        </div>
     );
 }
