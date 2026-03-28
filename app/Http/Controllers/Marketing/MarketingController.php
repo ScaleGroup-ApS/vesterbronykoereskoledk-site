@@ -17,13 +17,19 @@ class MarketingController extends Controller
 {
     public function home(): Response
     {
-        $nextCourse = Course::query()
+        $heroCourse = Course::query()
             ->with('offer')
             ->upcoming()
+            ->where('featured_on_home', true)
             ->orderBy('start_at')
-            ->first();
+            ->first()
+            ?? Course::query()
+                ->with('offer')
+                ->upcoming()
+                ->orderBy('start_at')
+                ->first();
 
-        $nextOffer = $nextCourse?->offer;
+        $nextOffer = $heroCourse?->offer;
         $offerForEnrollment = ($nextOffer && $nextOffer->type === OfferType::Primary)
             ? $nextOffer
             : Offer::query()->primary()->orderBy('name')->first();
@@ -40,7 +46,8 @@ class MarketingController extends Controller
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),
-            'nextHoldStartAt' => $nextCourse?->start_at?->toIso8601String(),
+            'nextHoldStartAt' => $heroCourse?->start_at?->toIso8601String(),
+            'heroHoldSpotsRemaining' => $heroCourse?->public_spots_remaining,
             'tilmeldHoldstartOfferSlug' => $offerForEnrollment?->slug,
         ]);
     }

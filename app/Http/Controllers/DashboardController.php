@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Dashboard\CalculateKpis;
 use App\Enums\EnrollmentStatus;
+use App\Enums\OfferType;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Offer;
@@ -57,7 +58,11 @@ class DashboardController extends Controller
             ])
             ->all();
 
-        $offers = Offer::query()->orderBy('type')->orderBy('name')->get(['id', 'name'])->all();
+        $offers = Offer::query()
+            ->where('type', OfferType::Primary)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->all();
 
         return Inertia::render('dashboard', [
             'kpis' => $kpis->handle($user),

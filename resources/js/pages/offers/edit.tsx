@@ -1,6 +1,4 @@
-import { Head, useForm, Form } from '@inertiajs/react';
-import { Trash2, Plus } from 'lucide-react';
-import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -26,21 +24,12 @@ type Offer = {
 
 type OfferType = { value: string; label: string };
 
-type Course = {
-    id: number;
-    start_at: string;
-    end_at: string;
-    max_students: number | null;
-};
-
 export default function OfferEdit({
     offer,
     offerTypes,
-    courses,
 }: {
     offer: Offer;
     offerTypes: OfferType[];
-    courses: Course[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tilbud', href: index().url },
@@ -91,7 +80,9 @@ export default function OfferEdit({
                             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                         >
                             {offerTypes.map((t) => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
+                                <option key={t.value} value={t.value}>
+                                    {t.label}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -154,63 +145,6 @@ export default function OfferEdit({
 
                     <Button disabled={form.processing}>Gem ændringer</Button>
                 </form>
-
-                <div className="max-w-lg mt-8">
-                    <h2 className="text-lg font-semibold mb-4">Kursusdatoer</h2>
-
-                    {courses.length === 0 ? (
-                        <p className="text-sm text-muted-foreground mb-4">Ingen kursusdatoer endnu.</p>
-                    ) : (
-                        <ul className="mb-4 divide-y divide-border rounded-md border">
-                            {courses.map((course) => (
-                                <li key={course.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                                    <span>
-                                        {new Date(course.start_at).toLocaleString('da-DK', { dateStyle: 'long', timeStyle: 'short' })}
-                                        {' – '}
-                                        {new Date(course.end_at).toLocaleTimeString('da-DK', { timeStyle: 'short' })}
-                                    </span>
-                                    <Form {...destroyCourse({ offer, course })} method="delete">
-                                        {({ processing }) => (
-                                            <button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="text-muted-foreground hover:text-destructive transition-colors"
-                                                aria-label="Slet kursusdato"
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </button>
-                                        )}
-                                    </Form>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-
-                    <Form {...storeCourse(offer)} className="flex gap-2" resetOnSuccess>
-                        {({ processing }) => (
-                            <>
-                                <input
-                                    type="datetime-local"
-                                    name="start_at"
-                                    required
-                                    min={new Date().toISOString().slice(0, 16)}
-                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                                />
-                                <input
-                                    type="datetime-local"
-                                    name="end_at"
-                                    required
-                                    min={new Date().toISOString().slice(0, 16)}
-                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                                />
-                                <Button type="submit" variant="outline" size="sm" disabled={processing}>
-                                    <Plus className="size-4 mr-1" />
-                                    Tilføj dato
-                                </Button>
-                            </>
-                        )}
-                    </Form>
-                </div>
             </div>
         </AppLayout>
     );

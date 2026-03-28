@@ -2,13 +2,18 @@
 
 namespace App\Http\Requests\Courses;
 
+use App\Enums\OfferType;
+use App\Models\Offer;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UpdateCourseRequest extends FormRequest
+class StoreCourseRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('course')->offer);
+        $offer = Offer::query()->findOrFail($this->integer('offer_id'));
+
+        return $this->user()->can('update', $offer);
     }
 
     protected function prepareForValidation(): void
@@ -28,6 +33,11 @@ class UpdateCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'offer_id' => [
+                'required',
+                'integer',
+                Rule::exists('offers', 'id')->where('type', OfferType::Primary->value),
+            ],
             'start_at' => ['required', 'date', 'after:now'],
             'max_students' => ['nullable', 'integer', 'min:1'],
             'featured_on_home' => ['sometimes', 'boolean'],

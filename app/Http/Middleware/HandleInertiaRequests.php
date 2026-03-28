@@ -61,6 +61,7 @@ class HandleInertiaRequests extends Middleware
                     'id' => $offer->id,
                     'name' => $offer->name,
                     'slug' => $offer->slug,
+                    'description' => $offer->description,
                     'price' => (string) $offer->price,
                     'type' => $offer->type->value,
                     'theory_lessons' => $offer->theory_lessons,

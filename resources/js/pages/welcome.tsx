@@ -11,11 +11,13 @@ import {
     type LucideIcon,
 } from 'lucide-react';
 import { HeroHoldCountdown } from '@/components/marketing/hero-hold-countdown';
+import { PackageCarousel } from '@/components/marketing/package-carousel';
 import { TestimonialCarousel } from '@/components/marketing/testimonial-carousel';
 import MarketingLayout from '@/layouts/marketing-layout';
 import { login } from '@/routes';
 import { show as enrollShow } from '@/routes/enrollment';
 import { about, contact, features, instructors, packages } from '@/routes/marketing';
+import type { MarketingOffer } from '@/types/marketing-offer';
 import type {
     MarketingHomeCopyProps,
     MarketingTestimonialProps,
@@ -63,14 +65,25 @@ const heroCollageTiles = [
 ] as const;
 
 export default function Welcome() {
-    const { homeCopy, valueBlocks, testimonials, nextHoldStartAt, tilmeldHoldstartOfferSlug } = usePage()
-        .props as unknown as {
-            homeCopy: MarketingHomeCopyProps;
-            valueBlocks: MarketingValueBlockProps[];
-            testimonials: MarketingTestimonialProps[];
-            nextHoldStartAt: string | null;
-            tilmeldHoldstartOfferSlug: string | null;
-        };
+    const {
+        homeCopy,
+        valueBlocks,
+        testimonials,
+        nextHoldStartAt,
+        heroHoldSpotsRemaining,
+        tilmeldHoldstartOfferSlug,
+        marketingOffers,
+    } = usePage().props as unknown as {
+        homeCopy: MarketingHomeCopyProps;
+        valueBlocks: MarketingValueBlockProps[];
+        testimonials: MarketingTestimonialProps[];
+        nextHoldStartAt: string | null;
+        heroHoldSpotsRemaining: number | null;
+        tilmeldHoldstartOfferSlug: string | null;
+        marketingOffers?: MarketingOffer[];
+    };
+
+    const primaryPackages = marketingOffers ?? [];
 
     const tilmeldHoldstartHref =
         tilmeldHoldstartOfferSlug !== null && tilmeldHoldstartOfferSlug !== ''
@@ -142,7 +155,11 @@ export default function Welcome() {
                                         Tilmeld holdstart
                                     </Link>
                                 </div>
-                                <HeroHoldCountdown targetIso={nextHoldStartAt} />
+                                <HeroHoldCountdown
+                                    key={nextHoldStartAt ?? 'none'}
+                                    targetIso={nextHoldStartAt}
+                                    spotsRemaining={heroHoldSpotsRemaining}
+                                />
                             </motion.div>
 
                             <motion.div
@@ -208,6 +225,29 @@ export default function Welcome() {
                         </div>
                     </div>
                 </section>
+
+                {primaryPackages.length > 0 ? (
+                    <section
+                        className="relative border-y border-slate-200/80 bg-slate-50/40 py-20"
+                        aria-labelledby="home-packages-heading"
+                    >
+                        <div className="container mx-auto px-4 lg:px-8">
+                            <div className="mx-auto mb-10 max-w-2xl text-center">
+                                <h2
+                                    id="home-packages-heading"
+                                    className="marketing-headline-on-light text-2xl font-bold tracking-tight sm:text-3xl"
+                                >
+                                    Vores pakker
+                                </h2>
+                                <p className="marketing-lead mt-3 leading-relaxed">
+                                    Gennemskuelige priser uden skjulte gebyrer. På stor skærm vises tre pakker ad
+                                    gangen — brug pilene eller prikkerne, hvis der er flere lovpakker.
+                                </p>
+                            </div>
+                            <PackageCarousel items={primaryPackages} />
+                        </div>
+                    </section>
+                ) : null}
 
                 <section className="relative bg-white py-20">
                     <div className="container mx-auto px-4 lg:px-8">

@@ -18,8 +18,26 @@ test('guests can view the public home page', function () {
             ->has('valueBlocks')
             ->has('testimonials')
             ->has('nextHoldStartAt')
+            ->has('heroHoldSpotsRemaining')
             ->has('tilmeldHoldstartOfferSlug')
         );
+});
+
+test('home page passes public spots from featured course when set', function () {
+    $offer = Offer::factory()->create();
+    $start = now()->addDays(10)->startOfHour();
+    Course::factory()->for($offer)->create([
+        'start_at' => $start,
+        'end_at' => $start->copy()->addHours(8),
+        'featured_on_home' => true,
+        'public_spots_remaining' => 4,
+    ]);
+
+    get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('heroHoldSpotsRemaining', 4)
+            ->where('nextHoldStartAt', $start->toIso8601String()));
 });
 
 test('home page exposes next hold start from earliest upcoming course', function () {

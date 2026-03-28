@@ -1,29 +1,27 @@
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
 import { useEffect, useMemo, useState } from 'react';
 
 type Props = {
     targetIso: string | null;
+    /** Vises under nedtællingen når sat i Kurser (manuel pladsangivelse). */
+    spotsRemaining?: number | null;
 };
 
-type Remaining = {
-    totalMs: number;
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-};
-
-function getRemaining(targetMs: number): Remaining {
-    const totalMs = Math.max(0, targetMs - Date.now());
-    const secondsTotal = Math.floor(totalMs / 1000);
-    const days = Math.floor(secondsTotal / 86400);
-    const hours = Math.floor((secondsTotal % 86400) / 3600);
-    const minutes = Math.floor((secondsTotal % 3600) / 60);
-    const seconds = secondsTotal % 60;
-
-    return { totalMs, days, hours, minutes, seconds };
+function getDaysRemainingMs(targetMs: number, nowMs: number): number {
+    return Math.max(0, Math.floor((targetMs - nowMs) / (1000 * 60 * 60 * 24)));
 }
 
-export function HeroHoldCountdown({ targetIso }: Props) {
+function formatHoldStartDa(iso: string): string {
+    const d = new Date(iso);
+    if (!Number.isFinite(d.getTime())) {
+        return '';
+    }
+
+    return format(d, "EEEE d. MMMM yyyy 'kl.' HH:mm", { locale: da });
+}
+
+export function HeroHoldCountdown({ targetIso, spotsRemaining = null }: Props) {
     const targetMs = useMemo(() => {
         if (!targetIso) {
             return null;
@@ -33,60 +31,85 @@ export function HeroHoldCountdown({ targetIso }: Props) {
         return Number.isFinite(t) ? t : null;
     }, [targetIso]);
 
-    const [, setTick] = useState(0);
+    const [now, setNow] = useState(() => Date.now());
 
     useEffect(() => {
         if (targetMs === null) {
             return;
         }
-        const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+        const id = window.setInterval(() => setNow(Date.now()), 60_000);
 
         return () => window.clearInterval(id);
     }, [targetMs]);
 
     if (!targetIso || targetMs === null) {
         return (
-            <p className="mt-8 max-w-[540px] text-center text-sm leading-relaxed text-slate-600 lg:text-left">
+            <p className="mt-8 w-full max-w-xl text-center text-sm leading-relaxed text-slate-600 lg:text-left">
                 Næste holdstart meldes ud her, når datoen er sat — eller skriv til os, hvis du vil på venteliste.
             </p>
         );
     }
 
-    const remaining = getRemaining(targetMs);
+    const totalMs = Math.max(0, targetMs - now);
 
-    if (remaining.totalMs <= 0) {
+    if (totalMs <= 0) {
         return (
-            <p className="mt-8 max-w-[540px] text-center text-sm font-medium text-slate-800 lg:text-left">
+            <p className="mt-8 w-full max-w-xl text-center text-sm font-medium text-slate-800 lg:text-left">
                 Holdstart er i gang — skriv til os, hvis du vil med på næste hold.
             </p>
         );
     }
 
-    const pad = (n: number) => String(n).padStart(2, '0');
+    const daysLeft = getDaysRemainingMs(targetMs, now);
+    const startSummary = formatHoldStartDa(targetIso);
+    const isToday = daysLeft === 0;
 
     return (
         <div
-            className="mt-8 max-w-[540px] rounded-xl border border-slate-200/90 bg-slate-50/90 px-4 py-4 text-center shadow-sm lg:text-left"
+            className="mt-8 w-full max-w-xl rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/95 p-5 shadow-sm ring-1 ring-slate-900/[0.04] lg:p-6"
             aria-live="polite"
         >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Næste holdstart om</p>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:justify-start">
-                <div className="min-w-[3.5rem] rounded-lg bg-white px-2 py-2 text-center shadow-sm ring-1 ring-slate-200/80">
-                    <div className="text-2xl font-bold tabular-nums text-slate-900">{remaining.days}</div>
-                    <div className="text-[0.65rem] font-medium uppercase text-slate-500">dage</div>
-                </div>
-                <div className="min-w-[3.5rem] rounded-lg bg-white px-2 py-2 text-center shadow-sm ring-1 ring-slate-200/80">
-                    <div className="text-2xl font-bold tabular-nums text-slate-900">{pad(remaining.hours)}</div>
-                    <div className="text-[0.65rem] font-medium uppercase text-slate-500">timer</div>
-                </div>
-                <div className="min-w-[3.5rem] rounded-lg bg-white px-2 py-2 text-center shadow-sm ring-1 ring-slate-200/80">
-                    <div className="text-2xl font-bold tabular-nums text-slate-900">{pad(remaining.minutes)}</div>
-                    <div className="text-[0.65rem] font-medium uppercase text-slate-500">min.</div>
-                </div>
-                <div className="min-w-[3.5rem] rounded-lg bg-white px-2 py-2 text-center shadow-sm ring-1 ring-slate-200/80">
-                    <div className="text-2xl font-bold tabular-nums text-slate-900">{pad(remaining.seconds)}</div>
-                    <div className="text-[0.65rem] font-medium uppercase text-slate-500">sek.</div>
-                </div>
+            <div className="border-b border-slate-200/80 pb-4 text-center lg:text-left">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Næste holdstart
+                </p>
+                {spotsRemaining != null && spotsRemaining >= 0 ? (
+                    <p className="mt-2 text-base font-semibold tracking-tight text-slate-900">
+                        {spotsRemaining === 0
+                            ? 'Ingen ledige pladser lige nu'
+                            : `${spotsRemaining} pladser tilbage`}
+                    </p>
+                ) : null}
+            </div>
+
+            <div className="mt-5 flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {isToday ? 'Starter' : 'Om'}
+                </p>
+                {isToday ? (
+                    <p className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">I dag</p>
+                ) : (
+                    <>
+                        <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1 lg:justify-start">
+                            <span className="text-4xl font-bold tabular-nums tracking-tight text-slate-900 sm:text-5xl">
+                                {daysLeft}
+                            </span>
+                            <span className="text-xl font-semibold text-slate-800 sm:text-2xl">
+                                {daysLeft === 1 ? 'dag' : 'dage'}
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-600">tilbage til holdstart</p>
+                    </>
+                )}
+            </div>
+
+            <div className="mt-6 rounded-xl border border-slate-200/90 bg-white/90 px-4 py-3 text-center shadow-sm lg:text-left">
+                <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-slate-500">
+                    Dato & tidspunkt
+                </p>
+                <p className="mt-1.5 text-base font-medium leading-snug text-slate-900 sm:text-lg">
+                    {startSummary || '—'}
+                </p>
             </div>
         </div>
     );
