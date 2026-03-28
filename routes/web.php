@@ -3,6 +3,8 @@
 use App\Http\Controllers\Blog\BlogPostController;
 use App\Http\Controllers\Bookings\BookingAttendanceController;
 use App\Http\Controllers\Bookings\BookingController;
+use App\Http\Controllers\Bookings\BookingNoteController;
+use App\Http\Controllers\Bookings\BookingSkillsController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\DashboardController;
@@ -79,6 +81,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('bookings/day/{date}', \App\Http\Controllers\Bookings\BookingDayController::class)->name('bookings.day');
     Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)
         ->name('bookings.attendance.store');
+    Route::patch('bookings/{booking}/note', BookingNoteController::class)
+        ->name('bookings.note');
+    Route::patch('bookings/{booking}/skills', BookingSkillsController::class)
+        ->name('bookings.skills');
     Route::resource('bookings', BookingController::class)->except(['show', 'edit']);
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
