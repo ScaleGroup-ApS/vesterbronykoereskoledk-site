@@ -1,6 +1,14 @@
 ARG COMPOSER_VERSION=2.8
+ARG NODE_VERSION=22
 
 FROM composer:${COMPOSER_VERSION} AS vendor
+
+FROM node:${NODE_VERSION}-slim AS node-build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
 
 FROM registry.scaleweb.dk/koereskole-base:latest
 
@@ -35,6 +43,7 @@ RUN composer install \
     --no-progress
 
 COPY --link . .
+COPY --link --from=node-build /app/public/build ./public/build
 
 RUN mkdir -p storage/framework/{sessions,views,cache}
 RUN mkdir -p storage/logs
