@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import MarketingLayout from '@/layouts/marketing-layout';
+import { accentLineVariants, cardContainerVariants, cardVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
 
 type Section = { title: string; body: string };
 
@@ -17,21 +19,49 @@ export default function TilEleverSide({
     return (
         <MarketingLayout>
             <Head title={`${metaTitle} | Køreskole Pro`} />
-            <main className="bg-white py-16 md:py-24">
-                <article className="container mx-auto max-w-3xl px-4 lg:px-8">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{heading}</h1>
-                    <p className="mt-4 text-lg leading-relaxed text-slate-600">{lead}</p>
-                    <div className="mt-12 space-y-10">
+            <main className="bg-mk-base py-24 md:py-32">
+                <div className="container mx-auto max-w-3xl px-6 lg:px-8">
+                    <motion.div
+                        variants={sectionHeadVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <motion.p className="mk-eyebrow" variants={sectionLineVariants}>Til elever</motion.p>
+                        <motion.div variants={accentLineVariants} className="mt-1 mb-3 h-px w-10 origin-left bg-mk-accent" />
+                        <motion.h1
+                            className="text-4xl font-bold text-mk-text sm:text-5xl leading-tight"
+                            variants={sectionLineVariants}
+                        >
+                            {heading}
+                        </motion.h1>
+                        <motion.p
+                            className="mt-4 max-w-2xl text-lg leading-relaxed text-mk-muted"
+                            variants={sectionLineVariants}
+                        >
+                            {lead}
+                        </motion.p>
+                    </motion.div>
+
+                    <motion.div
+                        className="mt-12 space-y-6"
+                        variants={cardContainerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
                         {sections.map((section, i) => (
-                            <section key={i}>
-                                <h2 className="text-xl font-semibold tracking-tight text-slate-900">{section.title}</h2>
-                                <p className="mt-3 leading-relaxed text-slate-600">
-                                    {section.body}
-                                </p>
-                            </section>
+                            <motion.section
+                                key={i}
+                                variants={cardVariants}
+                                whileInView="visible"
+                                viewport={{ once: true, margin: '-40px' }}
+                                className="rounded-2xl border border-mk-border bg-mk-surface p-6 md:p-8"
+                            >
+                                <h2 className="font-heading text-xl font-semibold text-mk-text">{section.title}</h2>
+                                <p className="mt-3 leading-relaxed text-mk-muted">{section.body}</p>
+                            </motion.section>
                         ))}
-                    </div>
-                </article>
+                    </motion.div>
+                </div>
             </main>
         </MarketingLayout>
     );

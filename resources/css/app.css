@@ -12,6 +12,7 @@
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-heading: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -59,49 +60,59 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* ── Marketing design system ── */
+    --color-mk-accent: #E8001D;
+    --color-mk-accent-soft: #FF1F3A;
+    --color-mk-base: #0A0A0A;
+    --color-mk-surface: #141414;
+    --color-mk-surface-2: #1C1C1C;
+    --color-mk-border: #2A2A2A;
+    --color-mk-text: #F5F5F0;
+    --color-mk-muted: #888888;
 }
 
 :root {
     /* Base */
     --background: oklch(0.99 0 0);
     --foreground: oklch(0.15 0 0);
-    
+
     /* Layout */
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.15 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.15 0 0);
-    
+
     /* Brand: Trustworthy Deep Blue */
     --primary: oklch(0.4 0.15 260);
     --primary-foreground: oklch(0.98 0 0);
-    
+
     /* Accent Elements: Energetic Orange */
     --accent: oklch(0.65 0.22 45);
     --accent-foreground: oklch(0.98 0 0);
-    
+
     /* Supporting */
     --secondary: oklch(0.95 0.02 260);
     --secondary-foreground: oklch(0.3 0.1 260);
     --muted: oklch(0.96 0.01 260);
     --muted-foreground: oklch(0.55 0.03 260);
-    
+
     /* Feedback */
     --destructive: oklch(0.57 0.2 25);
     --destructive-foreground: oklch(0.98 0 0);
-    
+
     /* Borders & Inputs */
     --border: oklch(0.9 0.02 260);
     --input: oklch(0.9 0.02 260);
     --ring: oklch(0.4 0.15 260);
-    
+
     /* Charts */
     --chart-1: oklch(0.6 0.15 260);
     --chart-2: oklch(0.65 0.22 45);
     --chart-3: oklch(0.4 0.15 260);
     --chart-4: oklch(0.8 0.15 85);
     --chart-5: oklch(0.7 0.15 160);
-    
+
     /* Shape */
     --radius: 0.75rem;
 
@@ -120,43 +131,43 @@
     /* Base */
     --background: oklch(0.15 0.02 260);
     --foreground: oklch(0.95 0.01 260);
-    
+
     /* Layout */
     --card: oklch(0.2 0.02 260);
     --card-foreground: oklch(0.95 0.01 260);
     --popover: oklch(0.18 0.02 260);
     --popover-foreground: oklch(0.95 0.01 260);
-    
+
     /* Brand: Lighter Trustworthy Blue for Dark Mode */
     --primary: oklch(0.7 0.15 260);
     --primary-foreground: oklch(0.15 0.02 260);
-    
+
     /* Accent Elements: Vibrant Orange */
     --accent: oklch(0.75 0.2 45);
     --accent-foreground: oklch(0.15 0.02 260);
-    
+
     /* Supporting */
     --secondary: oklch(0.25 0.03 260);
     --secondary-foreground: oklch(0.95 0.01 260);
     --muted: oklch(0.25 0.03 260);
     --muted-foreground: oklch(0.7 0.03 260);
-    
+
     /* Feedback */
     --destructive: oklch(0.6 0.2 25);
     --destructive-foreground: oklch(0.95 0.01 260);
-    
+
     /* Borders & Inputs */
     --border: oklch(0.28 0.03 260);
     --input: oklch(0.28 0.03 260);
     --ring: oklch(0.7 0.15 260);
-    
+
     /* Charts */
     --chart-1: oklch(0.7 0.15 260);
     --chart-2: oklch(0.75 0.2 45);
     --chart-3: oklch(0.6 0.15 260);
     --chart-4: oklch(0.8 0.15 300);
     --chart-5: oklch(0.65 0.15 160);
-    
+
     /* Sidebar Base */
     --sidebar: oklch(0.18 0.02 260);
     --sidebar-foreground: oklch(0.95 0.01 260);
@@ -169,43 +180,32 @@
 }
 
 /*
- | Public marketing pages: force light theme tokens when OS/user prefers dark.
- | (Dashboard/auth keep following global .dark.)
+ | Marketing public site: always deep-dark with red accent.
+ | Overrides both light and dark OS preference — marketing
+ | uses its own design system regardless of system theme.
  */
+.marketing-public-site,
 .dark .marketing-public-site {
-    color-scheme: light;
-    --background: oklch(0.99 0 0);
-    --foreground: oklch(0.15 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.15 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.15 0 0);
-    --primary: oklch(0.4 0.15 260);
-    --primary-foreground: oklch(0.98 0 0);
-    --accent: oklch(0.65 0.22 45);
-    --accent-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.95 0.02 260);
-    --secondary-foreground: oklch(0.3 0.1 260);
-    --muted: oklch(0.96 0.01 260);
-    --muted-foreground: oklch(0.55 0.03 260);
-    --destructive: oklch(0.57 0.2 25);
-    --destructive-foreground: oklch(0.98 0 0);
-    --border: oklch(0.9 0.02 260);
-    --input: oklch(0.9 0.02 260);
-    --ring: oklch(0.4 0.15 260);
-    --chart-1: oklch(0.6 0.15 260);
-    --chart-2: oklch(0.65 0.22 45);
-    --chart-3: oklch(0.4 0.15 260);
-    --chart-4: oklch(0.8 0.15 85);
-    --chart-5: oklch(0.7 0.15 160);
-    --sidebar: oklch(0.98 0.01 260);
-    --sidebar-foreground: oklch(0.15 0 0);
-    --sidebar-primary: oklch(0.4 0.15 260);
-    --sidebar-primary-foreground: oklch(0.98 0 0);
-    --sidebar-accent: oklch(0.94 0.02 260);
-    --sidebar-accent-foreground: oklch(0.2 0.05 260);
-    --sidebar-border: oklch(0.9 0.02 260);
-    --sidebar-ring: oklch(0.4 0.15 260);
+    color-scheme: dark;
+    --background: #0A0A0A;
+    --foreground: #F5F5F0;
+    --card: #141414;
+    --card-foreground: #F5F5F0;
+    --popover: #141414;
+    --popover-foreground: #F5F5F0;
+    --primary: #E8001D;
+    --primary-foreground: #ffffff;
+    --secondary: #1C1C1C;
+    --secondary-foreground: #F5F5F0;
+    --muted: #1C1C1C;
+    --muted-foreground: #888888;
+    --border: #2A2A2A;
+    --input: #1C1C1C;
+    --ring: #E8001D;
+    --accent: #E8001D;
+    --accent-foreground: #ffffff;
+    --destructive: #E8001D;
+    --destructive-foreground: #ffffff;
 }
 
 @layer base {
@@ -216,16 +216,59 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::selection {
+        background: #E8001D;
+        color: #fff;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0A0A0A;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #2A2A2A;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #E8001D;
+    }
 }
 
-/* Public marketing + auth: mesh backdrop, glass surfaces */
+/* Public marketing + auth: surfaces and layout */
 @layer components {
     .marketing-atmosphere {
         position: relative;
         isolation: isolate;
     }
 
-    .marketing-atmosphere::before {
+    /* Dark marketing atmosphere — red glow at base */
+    .marketing-public-site.marketing-atmosphere::before,
+    .dark .marketing-public-site.marketing-atmosphere::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 80% 45% at 50% 100%, rgba(232, 0, 29, 0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 30% at 100% 0%, rgba(255, 255, 255, 0.012) 0%, transparent 50%),
+            radial-gradient(ellipse 40% 25% at 0% 30%, rgba(255, 255, 255, 0.008) 0%, transparent 50%),
+            linear-gradient(180deg, #0A0A0A 0%, #0A0A0A 100%);
+    }
+
+    /* Dashboard/auth atmosphere (non-marketing) */
+    .marketing-atmosphere:not(.marketing-public-site)::before {
         content: '';
         position: fixed;
         inset: 0;
@@ -238,7 +281,7 @@
             linear-gradient(180deg, oklch(1 0 0), oklch(0.995 0.004 260));
     }
 
-    .dark .marketing-atmosphere::before {
+    .dark .marketing-atmosphere:not(.marketing-public-site)::before {
         background:
             radial-gradient(ellipse 120% 70% at 50% -20%, oklch(0.5 0.22 260 / 0.35), transparent 55%),
             radial-gradient(ellipse 55% 45% at 100% 10%, oklch(0.55 0.18 45 / 0.12), transparent 50%),
@@ -246,76 +289,115 @@
             linear-gradient(180deg, oklch(0.14 0.03 260), oklch(0.12 0.04 265));
     }
 
-    .dark .marketing-public-site.marketing-atmosphere::before {
-        background:
-            radial-gradient(ellipse 120% 70% at 50% -25%, oklch(0.55 0.18 260 / 0.08), transparent 55%),
-            radial-gradient(ellipse 55% 45% at 100% 15%, oklch(0.68 0.2 45 / 0.05), transparent 50%),
-            radial-gradient(ellipse 50% 40% at 0% 90%, oklch(0.55 0.14 280 / 0.04), transparent 45%),
-            linear-gradient(180deg, oklch(1 0 0), oklch(0.995 0.004 260));
-    }
-
     .marketing-glass-header {
-        @apply border-b border-white/15 bg-background/55 shadow-[0_4px_40px_-12px_rgba(30,64,175,0.25)] backdrop-blur-xl dark:border-white/10 dark:bg-background/40 dark:shadow-[0_4px_50px_-12px_rgba(59,130,246,0.2)];
+        @apply border-b border-white/[0.06] bg-[rgba(10,10,10,0.88)] shadow-[0_4px_40px_-12px_rgba(232,0,29,0.1)] backdrop-blur-xl;
     }
 
-    /**
-     * Public marketing header — dark bar for contrast + brand;
-     * body/content below stays on forced light tokens in .marketing-public-site.
-     */
     .marketing-header-bar {
-        @apply border-b border-white/10 bg-slate-950 text-white shadow-md backdrop-blur-md;
+        @apply border-b border-white/[0.06] bg-[#0A0A0A] text-white;
     }
 
-    /*
-     * Light-surface copy (cards, hero on white) — do not use for dark sections (footer, slate panels).
-     */
-    .marketing-public-site .marketing-hero-line {
-        color: oklch(0.12 0.02 260);
+    /* DM Sans for all marketing headings */
+    .marketing-public-site h1,
+    .marketing-public-site h2,
+    .marketing-public-site h3 {
+        font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: -0.025em;
     }
 
-    .marketing-public-site .marketing-lead {
-        color: oklch(0.38 0.04 260);
+    /* Eyebrow labels above section headings */
+    .mk-eyebrow {
+        @apply mb-3 text-sm font-semibold uppercase tracking-widest text-mk-accent;
     }
 
-    .marketing-public-site .marketing-headline-on-light {
-        color: oklch(0.12 0.02 260);
+    /* Standard dark card with top accent bar */
+    .mk-card {
+        @apply relative overflow-hidden rounded-2xl border border-mk-border bg-mk-surface;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
     }
 
+    .mk-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #E8001D;
+    }
+
+    .mk-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 24px 60px rgba(232, 0, 29, 0.12);
+    }
+
+    /* CTA button styles */
+    .mk-btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-full bg-mk-accent px-7 py-3.5 text-base font-semibold text-white transition-all duration-200 hover:bg-mk-accent-soft hover:scale-[1.04] active:scale-[0.97];
+    }
+
+    .mk-btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/30 px-7 py-3.5 text-base font-semibold text-white transition-all duration-200 hover:border-mk-accent hover:text-mk-accent;
+    }
+
+    /* Section divider */
+    .mk-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, #2A2A2A, transparent);
+        border: none;
+    }
+
+    /* Glass card — dark themed for marketing */
     .marketing-public-site .marketing-glass-card {
-        @apply rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-sm backdrop-blur-sm transition-all duration-300;
+        @apply rounded-2xl border border-mk-border bg-mk-surface text-mk-text shadow-sm backdrop-blur-sm;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease, border-color 0.3s ease;
     }
 
     .marketing-public-site .marketing-glass-card:hover {
-        @apply border-slate-300/90 shadow-md;
+        border-color: #3A3A3A;
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(232, 0, 29, 0.08);
     }
 
     .marketing-public-site .marketing-glass-panel {
-        @apply rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-sm backdrop-blur-md;
+        @apply rounded-2xl border border-mk-border bg-mk-surface text-mk-text shadow-sm backdrop-blur-md;
     }
 
     .marketing-public-site .marketing-card-elevated {
-        @apply rounded-2xl border border-slate-200/90 bg-white p-6 text-slate-900 shadow-sm transition-shadow hover:shadow-md;
+        @apply rounded-2xl border border-mk-border bg-mk-surface p-6 text-mk-text shadow-sm;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
+    }
+
+    .marketing-public-site .marketing-card-elevated:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(232, 0, 29, 0.08);
     }
 
     .marketing-footer-dark {
-        @apply border-t border-white/10 bg-slate-950 text-white;
+        @apply border-t border-white/[0.06] bg-[#050505] text-white;
     }
 
     .marketing-footer-dark .marketing-footer-muted {
-        @apply text-slate-300;
+        @apply text-mk-muted;
     }
 
-    /* Undo dark-mode glass tweaks inside forced-light marketing scope */
-    .dark .marketing-public-site .marketing-glass-card {
-        @apply border-slate-200/90 bg-white text-slate-900;
-    }
-
-    .dark .marketing-public-site .marketing-glass-panel {
-        @apply border-slate-200/90 bg-white text-slate-900;
-    }
-
+    /* Auth glass panel — dark marketing style */
     .auth-glass-panel {
-        @apply w-full max-w-sm rounded-2xl border border-white/20 bg-card/65 p-8 shadow-[0_0_50px_-20px_rgba(37,99,235,0.35)] backdrop-blur-md sm:p-10 dark:border-white/10 dark:bg-card/50 dark:shadow-[0_0_60px_-25px_rgba(59,130,246,0.25)];
+        @apply w-full max-w-sm rounded-2xl border border-mk-border bg-mk-surface/80 p-8 shadow-[0_0_60px_-20px_rgba(232,0,29,0.18)] backdrop-blur-md sm:p-10;
     }
 
+    /* Scroll indicator bounce */
+    @keyframes mk-bounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    .mk-scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: mk-bounce 2s ease-in-out infinite;
+        color: rgba(245, 245, 240, 0.3);
+    }
 }

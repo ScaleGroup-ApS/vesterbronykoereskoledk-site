@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import MarketingLayout from '@/layouts/marketing-layout';
 import { cn } from '@/lib/utils';
+import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
 import { packages } from '@/routes/marketing';
 import type { MarketingContact } from '@/types/marketing-contact';
 import type { ContactPageOffer, HoldStartOption } from '@/types/marketing-contact-page';
@@ -50,16 +51,24 @@ export default function Kontakt() {
     return (
         <MarketingLayout>
             <Head title="Kontakt | Køreskole Pro" />
-            <main className="bg-white py-12 md:py-20">
-                <div className="container mx-auto max-w-6xl px-4 lg:px-8">
-                    <div className="mx-auto max-w-2xl text-center md:mx-0 md:max-w-none md:text-left">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Kontakt</h1>
-                        <p className="mt-3 text-lg text-slate-600">
+            <main className="bg-mk-base py-24 md:py-32">
+                <div className="container mx-auto max-w-6xl px-6 lg:px-8">
+                    <motion.div
+                        className="mb-12"
+                        variants={sectionHeadVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <motion.p className="mk-eyebrow" variants={sectionLineVariants}>Kontakt</motion.p>
+                        <motion.div variants={accentLineVariants} className="mt-1 mb-3 h-px w-10 origin-left bg-mk-accent" />
+                        <motion.h1 className="text-4xl font-bold text-mk-text sm:text-5xl leading-tight" variants={sectionLineVariants}>Kontakt os</motion.h1>
+                        <motion.p className="mt-3 text-lg text-mk-muted" variants={sectionLineVariants}>
                             Skriv til os — vælg gerne pakke og hvornår du ønsker at starte. Vi svarer på hverdage.
-                        </p>
-                    </div>
+                        </motion.p>
+                    </motion.div>
 
-                    <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:gap-16">
+                    <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+                        {/* Left: contact info */}
                         <motion.div
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -67,39 +76,45 @@ export default function Kontakt() {
                             className="space-y-8"
                         >
                             {flash?.success ? (
-                                <Alert className="border-emerald-200 bg-emerald-50 text-emerald-950">
-                                    <CheckCircle2 className="text-emerald-600" />
-                                    <AlertTitle>Beskeden er sendt</AlertTitle>
-                                    <AlertDescription>{flash.success}</AlertDescription>
+                                <Alert className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                                    <CheckCircle2 className="text-emerald-400" />
+                                    <AlertTitle className="text-emerald-300">Beskeden er sendt</AlertTitle>
+                                    <AlertDescription className="text-emerald-400/80">{flash.success}</AlertDescription>
                                 </Alert>
                             ) : null}
 
                             <div>
-                                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                                <h2 className="text-xs font-semibold uppercase tracking-widest text-mk-muted">
                                     Direkte kontakt
                                 </h2>
-                                <ul className="mt-6 space-y-5 text-base">
+                                <ul className="mt-6 space-y-6">
                                     <li className="flex items-start gap-4">
-                                        <MapPin className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden />
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mk-accent/10">
+                                            <MapPin className="h-5 w-5 text-mk-accent" aria-hidden />
+                                        </div>
                                         <div>
-                                            <p className="font-medium text-slate-900">Adresse</p>
-                                            <p className="text-slate-600">Køregade 123, København</p>
+                                            <p className="font-semibold text-mk-text">Adresse</p>
+                                            <p className="mt-0.5 text-mk-muted">Køregade 123, København</p>
                                         </div>
                                     </li>
                                     <li className="flex items-start gap-4">
-                                        <Phone className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden />
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mk-accent/10">
+                                            <Phone className="h-5 w-5 text-mk-accent" aria-hidden />
+                                        </div>
                                         <div>
-                                            <p className="font-medium text-slate-900">Telefon</p>
-                                            <a href={`tel:${tel}`} className="text-slate-600 hover:text-primary">
+                                            <p className="font-semibold text-mk-text">Telefon</p>
+                                            <a href={`tel:${tel}`} className="mt-0.5 text-mk-muted hover:text-mk-accent transition-colors">
                                                 {phoneLabel}
                                             </a>
                                         </div>
                                     </li>
                                     <li className="flex items-start gap-4">
-                                        <Mail className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden />
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mk-accent/10">
+                                            <Mail className="h-5 w-5 text-mk-accent" aria-hidden />
+                                        </div>
                                         <div>
-                                            <p className="font-medium text-slate-900">E-mail</p>
-                                            <a href={`mailto:${emailAddr}`} className="text-slate-600 hover:text-primary">
+                                            <p className="font-semibold text-mk-text">E-mail</p>
+                                            <a href={`mailto:${emailAddr}`} className="mt-0.5 text-mk-muted hover:text-mk-accent transition-colors">
                                                 {emailAddr}
                                             </a>
                                         </div>
@@ -107,30 +122,31 @@ export default function Kontakt() {
                                 </ul>
                             </div>
 
-                            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/80 p-6">
-                                <h2 className="font-semibold text-slate-900">Åbningstider (kontor)</h2>
-                                <p className="mt-2 text-sm text-slate-600">
+                            <div className="rounded-2xl border border-mk-border bg-mk-surface p-6">
+                                <h2 className="font-semibold text-mk-text">Åbningstider (kontor)</h2>
+                                <p className="mt-2 text-sm leading-relaxed text-mk-muted">
                                     Mandag–fredag 9–17 · Lørdag 9–13 · Søndag lukket. Køretimer kan bookes uden for
                                     kontortid via portalen.
                                 </p>
                             </div>
                         </motion.div>
 
+                        {/* Right: contact form */}
                         <motion.div
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.45, delay: 0.05 }}
-                            className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm md:p-8"
+                            className="rounded-2xl border border-mk-border bg-mk-surface p-6 md:p-8"
                         >
-                            <h2 className="text-lg font-semibold text-slate-900">Send en besked</h2>
-                            <p className="mt-1 text-sm text-slate-600">
+                            <h2 className="font-heading text-lg font-semibold text-mk-text">Send en besked</h2>
+                            <p className="mt-1 text-sm text-mk-muted">
                                 Udfyld formularen — vælg den pakke du kigger på, og hvornår du helst vil starte på hold.
                             </p>
 
                             <form onSubmit={submit} className="mt-8 space-y-6">
                                 <div className="grid gap-5 sm:grid-cols-2">
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="name" className="text-slate-900">
+                                        <Label htmlFor="name" className="text-mk-text/80 text-sm">
                                             Navn *
                                         </Label>
                                         <Input
@@ -139,11 +155,12 @@ export default function Kontakt() {
                                             onChange={(e) => form.setData('name', e.target.value)}
                                             required
                                             autoComplete="name"
+                                            className="border-mk-border bg-mk-surface-2 text-mk-text placeholder:text-mk-muted/50 focus-visible:border-mk-accent/40 focus-visible:ring-mk-accent/20"
                                         />
                                         <InputError message={form.errors.name} />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <Label htmlFor="email" className="text-slate-900">
+                                        <Label htmlFor="email" className="text-mk-text/80 text-sm">
                                             E-mail *
                                         </Label>
                                         <Input
@@ -153,13 +170,14 @@ export default function Kontakt() {
                                             onChange={(e) => form.setData('email', e.target.value)}
                                             required
                                             autoComplete="email"
+                                            className="border-mk-border bg-mk-surface-2 text-mk-text placeholder:text-mk-muted/50 focus-visible:border-mk-accent/40 focus-visible:ring-mk-accent/20"
                                         />
                                         <InputError message={form.errors.email} />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="phone" className="text-slate-900">
+                                    <Label htmlFor="phone" className="text-mk-text/80 text-sm">
                                         Telefon
                                     </Label>
                                     <Input
@@ -168,50 +186,50 @@ export default function Kontakt() {
                                         value={form.data.phone}
                                         onChange={(e) => form.setData('phone', e.target.value)}
                                         autoComplete="tel"
+                                        className="border-mk-border bg-mk-surface-2 text-mk-text placeholder:text-mk-muted/50 focus-visible:border-mk-accent/40 focus-visible:ring-mk-accent/20"
                                     />
                                     <InputError message={form.errors.phone} />
                                 </div>
 
-                                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 sm:p-5">
+                                <div className="rounded-xl border border-mk-border bg-mk-surface-2/50 p-4 sm:p-5">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                                         <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-slate-900">Pakke og holdstart</p>
-                                            <p className="mt-1 text-sm leading-relaxed text-slate-700">
-                                                Vi hjælper dig gerne uden at du vælger — men hvis du allerede ved, hvad du
-                                                kigger på, kan vi svare mere konkret.
+                                            <p className="text-sm font-semibold text-mk-text">Pakke og holdstart</p>
+                                            <p className="mt-1 text-sm leading-relaxed text-mk-muted">
+                                                Vi hjælper dig gerne uden at du vælger — men hvis du allerede ved, hvad du kigger på, kan vi svare mere konkret.
                                             </p>
                                         </div>
                                         <Link
                                             href={packages.url()}
-                                            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm transition-colors hover:border-primary/35 hover:bg-slate-50 sm:py-1.5"
+                                            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-mk-border bg-mk-surface px-3 py-2 text-sm font-medium text-mk-text/80 shadow-sm transition-colors hover:border-mk-accent/30 hover:text-mk-text sm:py-1.5"
                                         >
                                             Sammenlign pakker
                                         </Link>
                                     </div>
 
                                     <fieldset className="mt-6 space-y-3">
-                                        <legend className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                                            <Package className="h-4 w-4 text-primary" aria-hidden />
+                                        <legend className="flex items-center gap-2 text-sm font-semibold text-mk-text">
+                                            <Package className="h-4 w-4 text-mk-accent" aria-hidden />
                                             Pakke
                                         </legend>
-                                        <p className="text-sm text-slate-600">Hvilken pakke er du mest interesseret i?</p>
+                                        <p className="text-sm text-mk-muted">Hvilken pakke er du mest interesseret i?</p>
                                         <div className="space-y-2">
                                             <label
                                                 className={cn(
                                                     'flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors',
                                                     form.data.offer_id === ''
-                                                        ? 'border-primary bg-primary/[0.06] ring-1 ring-primary/15'
-                                                        : 'border-slate-200 bg-white hover:border-slate-300',
+                                                        ? 'border-mk-accent bg-mk-accent/[0.06] ring-1 ring-mk-accent/20'
+                                                        : 'border-mk-border bg-mk-surface hover:border-mk-border/80',
                                                 )}
                                             >
                                                 <input
                                                     type="radio"
                                                     name="offer_choice"
-                                                    className="mt-1 size-4 shrink-0 accent-primary"
+                                                    className="mt-1 size-4 shrink-0 accent-[#E8001D]"
                                                     checked={form.data.offer_id === ''}
                                                     onChange={() => form.setData('offer_id', '')}
                                                 />
-                                                <span className="text-sm font-medium leading-snug text-slate-900">
+                                                <span className="text-sm font-medium leading-snug text-mk-text">
                                                     Ikke valgt endnu — vil gerne have anbefaling
                                                 </span>
                                             </label>
@@ -224,20 +242,20 @@ export default function Kontakt() {
                                                         className={cn(
                                                             'flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors',
                                                             selected
-                                                                ? 'border-primary bg-primary/[0.06] ring-1 ring-primary/15'
-                                                                : 'border-slate-200 bg-white hover:border-slate-300',
+                                                                ? 'border-mk-accent bg-mk-accent/[0.06] ring-1 ring-mk-accent/20'
+                                                                : 'border-mk-border bg-mk-surface hover:border-mk-border/80',
                                                         )}
                                                     >
                                                         <input
                                                             type="radio"
                                                             name="offer_choice"
-                                                            className="mt-1 size-4 shrink-0 accent-primary"
+                                                            className="mt-1 size-4 shrink-0 accent-[#E8001D]"
                                                             checked={selected}
                                                             onChange={() => form.setData('offer_id', id)}
                                                         />
                                                         <span className="min-w-0 flex-1 text-sm leading-snug">
-                                                            <span className="font-medium text-slate-900">{offer.name}</span>
-                                                            <span className="mt-0.5 block text-slate-700">
+                                                            <span className="font-medium text-mk-text">{offer.name}</span>
+                                                            <span className="mt-0.5 block text-mk-muted">
                                                                 {Number(offer.price).toLocaleString('da-DK')} kr.
                                                             </span>
                                                         </span>
@@ -249,28 +267,28 @@ export default function Kontakt() {
                                     </fieldset>
 
                                     <fieldset className="mt-8 space-y-3">
-                                        <legend className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                                            <CalendarClock className="h-4 w-4 text-primary" aria-hidden />
+                                        <legend className="flex items-center gap-2 text-sm font-semibold text-mk-text">
+                                            <CalendarClock className="h-4 w-4 text-mk-accent" aria-hidden />
                                             Ønsket holdstart
                                         </legend>
-                                        <p className="text-sm text-slate-600">Hvornår vil du helst starte?</p>
+                                        <p className="text-sm text-mk-muted">Hvornår vil du helst starte?</p>
                                         <div className="grid gap-2 sm:grid-cols-2">
                                             <label
                                                 className={cn(
                                                     'flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors sm:col-span-2',
                                                     form.data.preferred_hold_start === ''
-                                                        ? 'border-primary bg-primary/[0.06] ring-1 ring-primary/15'
-                                                        : 'border-slate-200 bg-white hover:border-slate-300',
+                                                        ? 'border-mk-accent bg-mk-accent/[0.06] ring-1 ring-mk-accent/20'
+                                                        : 'border-mk-border bg-mk-surface hover:border-mk-border/80',
                                                 )}
                                             >
                                                 <input
                                                     type="radio"
                                                     name="hold_start_choice"
-                                                    className="mt-1 size-4 shrink-0 accent-primary"
+                                                    className="mt-1 size-4 shrink-0 accent-[#E8001D]"
                                                     checked={form.data.preferred_hold_start === ''}
                                                     onChange={() => form.setData('preferred_hold_start', '')}
                                                 />
-                                                <span className="text-sm font-medium leading-snug text-slate-900">
+                                                <span className="text-sm font-medium leading-snug text-mk-text">
                                                     Ikke valgt endnu
                                                 </span>
                                             </label>
@@ -282,18 +300,18 @@ export default function Kontakt() {
                                                         className={cn(
                                                             'flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors',
                                                             selected
-                                                                ? 'border-primary bg-primary/[0.06] ring-1 ring-primary/15'
-                                                                : 'border-slate-200 bg-white hover:border-slate-300',
+                                                                ? 'border-mk-accent bg-mk-accent/[0.06] ring-1 ring-mk-accent/20'
+                                                                : 'border-mk-border bg-mk-surface hover:border-mk-border/80',
                                                         )}
                                                     >
                                                         <input
                                                             type="radio"
                                                             name="hold_start_choice"
-                                                            className="mt-1 size-4 shrink-0 accent-primary"
+                                                            className="mt-1 size-4 shrink-0 accent-[#E8001D]"
                                                             checked={selected}
                                                             onChange={() => form.setData('preferred_hold_start', opt.value)}
                                                         />
-                                                        <span className="text-sm font-medium leading-snug text-slate-900">
+                                                        <span className="text-sm font-medium leading-snug text-mk-text">
                                                             {opt.label}
                                                         </span>
                                                     </label>
@@ -305,13 +323,13 @@ export default function Kontakt() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="message" className="text-slate-900">
+                                    <Label htmlFor="message" className="text-mk-text/80 text-sm">
                                         Besked
                                     </Label>
                                     <textarea
                                         id="message"
                                         rows={5}
-                                        className="border-input placeholder:text-slate-500 flex min-h-[120px] w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-primary/40 focus-visible:ring-[3px] focus-visible:ring-primary/20 focus-visible:shadow-[0_0_28px_-10px_rgba(59,130,246,0.25)] md:text-sm"
+                                        className="flex min-h-[120px] w-full rounded-md border border-mk-border bg-mk-surface-2 px-3 py-2 text-sm text-mk-text shadow-xs placeholder:text-mk-muted/50 transition-[color,box-shadow] outline-none focus-visible:border-mk-accent/40 focus-visible:ring-[3px] focus-visible:ring-mk-accent/20 md:text-sm"
                                         value={form.data.message}
                                         onChange={(e) => form.setData('message', e.target.value)}
                                         placeholder="Fx spørgsmål om hold, tilmelding eller om du vil bookes til intro …"
@@ -319,7 +337,11 @@ export default function Kontakt() {
                                     <InputError message={form.errors.message} />
                                 </div>
 
-                                <Button type="submit" className="w-full sm:w-auto" disabled={form.processing}>
+                                <Button
+                                    type="submit"
+                                    className="w-full rounded-full bg-mk-accent text-white hover:bg-mk-accent-soft hover:scale-[1.02] transition-all duration-200 sm:w-auto"
+                                    disabled={form.processing}
+                                >
                                     {form.processing ? 'Sender …' : 'Send besked'}
                                 </Button>
                             </form>
