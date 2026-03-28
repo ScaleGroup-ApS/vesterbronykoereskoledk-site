@@ -14,7 +14,7 @@ class CurriculumTopicFactory extends Factory
     {
         return [
             'offer_id' => Offer::factory(),
-            'lesson_number' => $this->faker->unique()->numberBetween(1, 29),
+            'lesson_number' => $this->faker->numberBetween(1, 50),
             'title' => $this->faker->sentence(4),
             'description' => $this->faker->optional()->paragraph(),
         ];
