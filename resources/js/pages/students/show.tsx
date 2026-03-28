@@ -1,14 +1,16 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FileText, Pencil, Trash2, Upload } from 'lucide-react';
 import Heading from '@/components/heading';
-import { useLoginLink } from '@/hooks/use-login-link';
 import InputError from '@/components/input-error';
+import { StudentJourneyRoadmap, type JourneyStep, type UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoginLink } from '@/hooks/use-login-link';
 import AppLayout from '@/layouts/app-layout';
 import { index, show, edit, destroy } from '@/routes/students';
+import { show as progressionShow } from '@/routes/students/progression';
 import type { BreadcrumbItem, Student } from '@/types';
 
 type MediaItem = {
@@ -48,13 +50,29 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
     dropped_out: 'destructive',
 };
 
+type Readiness = {
+    is_ready: boolean;
+    completed: Record<string, number>;
+    required: Record<string, number>;
+    missing: Record<string, number>;
+};
+
+type JourneyPayload = {
+    steps: JourneyStep[];
+    upcoming_bookings: UpcomingBookingRow[];
+};
+
 export default function StudentShow({
     student,
     canEdit,
+    readiness,
+    journey,
     eventTimeline = [],
 }: {
     student: Student & { media: MediaItem[] };
     canEdit: boolean;
+    readiness: Readiness;
+    journey: JourneyPayload;
     eventTimeline: EventTimelineEntry[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -120,6 +138,21 @@ export default function StudentShow({
                             </Button>
                         </div>
                     )}
+                </div>
+
+                <div className="max-w-2xl space-y-3 rounded-xl border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Heading variant="small" title="Forløb & krav" />
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={progressionShow(student).url}>Detaljeret fremgang</Link>
+                        </Button>
+                    </div>
+                    <StudentJourneyRoadmap steps={journey.steps} upcomingBookings={journey.upcoming_bookings} />
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span>
+                            Fremgang: {readiness.is_ready ? 'Alle krav opfyldt' : 'Mangler stadig timer/prøver'}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="grid max-w-lg gap-4">

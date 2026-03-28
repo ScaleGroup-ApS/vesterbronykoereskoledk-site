@@ -11,6 +11,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { index, create, update, destroy } from '@/routes/bookings';
+import { store as storeAttendance } from '@/routes/bookings/attendance';
 import type { BreadcrumbItem } from '@/types';
 import type { BookingEvent } from '@/types/booking';
 import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
@@ -127,19 +128,44 @@ export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }
                                 {selected.notes && (
                                     <p className="text-sm text-muted-foreground">{selected.notes}</p>
                                 )}
+                                {selected.attendance_recorded_at && (
+                                    <p className="text-xs text-muted-foreground">
+                                        Fremmøde registreret{' '}
+                                        {new Date(selected.attendance_recorded_at).toLocaleString('da-DK', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short',
+                                        })}
+                                        {selected.attended === true && ' · Mødt'}
+                                        {selected.attended === false && ' · Ikke mødt'}
+                                    </p>
+                                )}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 {selected.status === 'scheduled' && (
                                     <>
                                         <Button
-                                            variant="outline"
+                                            variant="default"
                                             size="sm"
                                             onClick={() => {
-                                                router.patch(update(selected).url, { status: 'completed' });
-                                                setSelected(null);
+                                                router.post(storeAttendance({ booking: selected.id }).url, { attended: true }, {
+                                                    preserveScroll: true,
+                                                    onSuccess: () => setSelected(null),
+                                                });
                                             }}
                                         >
-                                            Gennemført
+                                            Mødt
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => {
+                                                router.post(storeAttendance({ booking: selected.id }).url, { attended: false }, {
+                                                    preserveScroll: true,
+                                                    onSuccess: () => setSelected(null),
+                                                });
+                                            }}
+                                        >
+                                            Mødt ikke
                                         </Button>
                                         <Button
                                             variant="destructive"

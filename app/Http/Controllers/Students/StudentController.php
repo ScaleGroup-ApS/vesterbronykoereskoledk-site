@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Students;
 
+use App\Actions\Progression\BuildStudentJourney;
+use App\Actions\Progression\CheckExamReadiness;
 use App\Actions\Students\CreateStudent;
 use App\Actions\Students\DeleteStudent;
 use App\Actions\Students\UpdateStudent;
@@ -46,17 +48,23 @@ class StudentController extends Controller
             ->with('success', 'Elev oprettet.');
     }
 
-    public function show(Request $request, Student $student): Response
-    {
+    public function show(
+        Request $request,
+        Student $student,
+        CheckExamReadiness $readiness,
+        BuildStudentJourney $buildStudentJourney,
+    ): Response {
         $this->authorize('view', $student);
 
-        $student->load('user', 'media');
+        $student->load(['user', 'media', 'offers']);
 
         $canEdit = $request->user()->isAdmin();
 
         return Inertia::render('students/show', [
             'student' => $student,
             'canEdit' => $canEdit,
+            'readiness' => $readiness->handle($student),
+            'journey' => $buildStudentJourney->handle($student),
             'eventTimeline' => $canEdit
                 ? VerbEvent::query()
                     ->where('data->student_id', $student->id)

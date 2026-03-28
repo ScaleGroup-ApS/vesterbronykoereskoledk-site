@@ -8,6 +8,8 @@ export type BookingEvent = {
     instructor: string;
     vehicle: string | null;
     notes: string | null;
+    attended: boolean | null;
+    attendance_recorded_at: string | null;
 };
 
 export type BookingType =
@@ -15,7 +17,8 @@ export type BookingType =
     | 'theory_lesson'
     | 'track_driving'
     | 'slippery_driving'
-    | 'exam';
+    | 'theory_exam'
+    | 'practical_exam';
 
 export type BookingStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
 
@@ -24,7 +27,8 @@ export const bookingTypeColors: Record<BookingType, string> = {
     theory_lesson: '#22c55e',
     track_driving: '#f97316',
     slippery_driving: '#a855f7',
-    exam: '#ef4444',
+    theory_exam: '#ef4444',
+    practical_exam: '#b91c1c',
 };
 
 export const bookingTypeLabels: Record<BookingType, string> = {
@@ -32,5 +36,6 @@ export const bookingTypeLabels: Record<BookingType, string> = {
     theory_lesson: 'Teorilektion',
     track_driving: 'Banekørsel',
     slippery_driving: 'Glat bane',
-    exam: 'Eksamen',
+    theory_exam: 'Teoriprøve',
+    practical_exam: 'Køreprøve',
 };

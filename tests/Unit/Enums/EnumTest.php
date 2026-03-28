@@ -24,8 +24,10 @@ test('OfferType has expected cases', function () {
 });
 
 test('BookingType has expected cases', function () {
-    expect(BookingType::cases())->toHaveCount(5);
+    expect(BookingType::cases())->toHaveCount(6);
     expect(BookingType::DrivingLesson->value)->toBe('driving_lesson');
+    expect(BookingType::TheoryExam->value)->toBe('theory_exam');
+    expect(BookingType::PracticalExam->value)->toBe('practical_exam');
 });
 
 test('BookingStatus has expected cases', function () {

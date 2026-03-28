@@ -13,6 +13,16 @@ class UpdateOfferRequest extends FormRequest
         return $this->user()->isAdmin();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'track_required' => $this->boolean('track_required'),
+            'slippery_required' => $this->boolean('slippery_required'),
+            'requires_theory_exam' => $this->boolean('requires_theory_exam'),
+            'requires_practical_exam' => $this->boolean('requires_practical_exam'),
+        ]);
+    }
+
     /**
      * @return array<string, array<mixed>>
      */
@@ -27,6 +37,8 @@ class UpdateOfferRequest extends FormRequest
             'driving_lessons' => ['nullable', 'integer', 'min:0'],
             'track_required' => ['nullable', 'boolean'],
             'slippery_required' => ['nullable', 'boolean'],
+            'requires_theory_exam' => ['nullable', 'boolean'],
+            'requires_practical_exam' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -8,10 +8,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class StudentDashboardController extends Controller
+class StudentForloebController extends Controller
 {
     public function __invoke(Request $request, ComposeStudentPortal $composeStudentPortal): Response
     {
-        return Inertia::render('student/index', $composeStudentPortal->build($request->user()));
+        return Inertia::render('student/forloeb', $composeStudentPortal->build($request->user(), includePastBookings: true));
     }
 }

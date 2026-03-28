@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Bookings;
 
 use App\Actions\Bookings\CancelBooking;
 use App\Actions\Bookings\CheckBookingConflicts;
-use App\Actions\Bookings\CompleteBooking;
 use App\Actions\Bookings\CreateBooking;
 use App\Actions\Bookings\UpdateBooking;
 use App\Enums\BookingStatus;
@@ -39,6 +38,8 @@ class BookingController extends Controller
                 'instructor' => $booking->instructor?->name,
                 'vehicle' => $booking->vehicle?->name,
                 'notes' => $booking->notes,
+                'attended' => $booking->attended,
+                'attendance_recorded_at' => $booking->attendance_recorded_at?->toIso8601String(),
             ]);
 
         return Inertia::render('bookings/index', [
@@ -54,9 +55,9 @@ class BookingController extends Controller
             'students' => Student::with('user')->get(),
             'instructors' => User::query()->where('role', 'instructor')->orWhere('role', 'admin')->get(),
             'vehicles' => Vehicle::query()->where('active', true)->get(),
-            'bookingTypes' => collect(BookingType::cases())->map(fn ($t) => [
+            'bookingTypes' => collect(BookingType::cases())->map(fn (BookingType $t) => [
                 'value' => $t->value,
-                'label' => $t->name,
+                'label' => $t->label(),
             ]),
         ]);
     }
@@ -95,7 +96,6 @@ class BookingController extends Controller
         Booking $booking,
         CheckBookingConflicts $conflictChecker,
         UpdateBooking $updateAction,
-        CompleteBooking $completeAction,
         CancelBooking $cancelAction,
     ): RedirectResponse {
         $this->authorize('update', $booking);
@@ -106,7 +106,9 @@ class BookingController extends Controller
             $newStatus = BookingStatus::from($data['status']);
 
             if ($newStatus === BookingStatus::Completed) {
-                $completeAction->handle($booking);
+                return back()->withErrors([
+                    'status' => 'Brug «Registrer fremmøde» for at gennemføre lektionen og tælle den med i elevens forløb.',
+                ]);
             } elseif ($newStatus === BookingStatus::Cancelled) {
                 $cancelAction->handle($booking);
             }

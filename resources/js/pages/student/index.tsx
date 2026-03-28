@@ -1,25 +1,18 @@
-import { Head, router, usePoll } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { CheckCircle, Clock, CreditCard, Download, FileText, Loader2, XCircle } from 'lucide-react';
+import { Head, Link, router, usePoll } from '@inertiajs/react';
+import { ArrowRight, Clock, CreditCard, Loader2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
 import StudentLayout from '@/layouts/student-layout';
-import { dashboard } from '@/routes/student';
+import { dashboard, forloeb } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
-type Booking = {
+type NextHighlight = {
     type: string;
+    title: string;
     starts_at: string;
     ends_at: string;
+    range_label: string;
 } | null;
-
-type Readiness = {
-    is_ready: boolean;
-    completed: Record<string, number>;
-    required: Record<string, number>;
-    missing: Record<string, number>;
-};
 
 type Balance = {
     total_owed: number;
@@ -33,45 +26,16 @@ type PendingEnrollment = {
     offer_price: number;
 } | null;
 
-type Material = {
-    id: number;
-    name: string;
-    file_name: string;
-    mime_type: string;
-    size: string;
-    url: string;
-    offer_name: string;
-};
-
-const bookingTypeLabels: Record<string, string> = {
-    driving_lesson: 'Køretest',
-    theory_lesson: 'Teoritime',
-    track_driving: 'Banekørsel',
-    slippery_driving: 'Glat bane',
-    exam: 'Eksamen',
-};
-
-const readinessTypeLabels: Record<string, string> = {
-    driving_lesson: 'Køretimer',
-    theory_lesson: 'Teorilektioner',
-    track_driving: 'Banekørsel',
-    slippery_driving: 'Glat bane',
-};
-
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Oversigt', href: dashboard().url }];
 
 export default function StudentDashboard({
     pendingEnrollment,
     booking,
-    readiness,
     balance,
-    materials,
 }: {
     pendingEnrollment: PendingEnrollment;
-    booking: Booking;
-    readiness: Readiness;
+    booking: NextHighlight;
     balance: Balance;
-    materials: Material[];
 }) {
     const wasPending = useRef(!!pendingEnrollment);
     const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
@@ -126,97 +90,48 @@ export default function StudentDashboard({
 
     return (
         <StudentLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title="Oversigt" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+                <div className="space-y-1">
+                    <Heading title="Oversigt" />
+                    <p className="text-sm text-muted-foreground">
+                        Din hurtige status — progression, materiale og historik finder du under Mit forløb.
+                    </p>
+                </div>
 
-                {/* Upcoming booking */}
                 <div className="space-y-3">
-                    <Heading variant="small" title="Næste lektion" />
+                    <Heading variant="small" title="Næste aktivitet" />
                     {booking ? (
-                        <div className="rounded-xl border p-5">
-                            <p className="font-medium">
-                                {bookingTypeLabels[booking.type] ?? booking.type}
-                            </p>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {format(new Date(booking.starts_at), 'd-M-yyyy HH:mm')}
-                                {' – '}
-                                {format(new Date(booking.ends_at), 'HH:mm')}
-                            </p>
+                        <div className="rounded-xl border bg-card p-5 shadow-sm">
+                            <p className="font-medium">{booking.title}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{booking.range_label}</p>
                         </div>
                     ) : (
-                        <p className="text-sm text-muted-foreground">Ingen kommende lektioner.</p>
+                        <p className="text-sm text-muted-foreground">Ingen kommende aktivitet registreret endnu.</p>
                     )}
                 </div>
 
-                {/* Progression */}
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <Heading variant="small" title="Fremgang" />
-                        <Badge variant={readiness.is_ready ? 'default' : 'secondary'}>
-                            {readiness.is_ready ? '✓ Klar til eksamen' : 'Ikke eksemensklar endnu'}
-                        </Badge>
-                    </div>
-
-                    <div className="rounded-xl border divide-y">
-                        {Object.entries(readiness.required).map(([type, needed]) => {
-                            const done = readiness.completed[type] ?? 0;
-                            const met = done >= needed;
-                            return (
-                                <div key={type} className="flex items-center justify-between px-4 py-3">
-                                    <div className="flex items-center gap-2">
-                                        {met
-                                            ? <CheckCircle className="size-4 text-green-600" />
-                                            : <XCircle className="size-4 text-muted-foreground" />
-                                        }
-                                        <span className="text-sm">
-                                            {readinessTypeLabels[type] ?? type}
-                                        </span>
-                                    </div>
-                                    <span className="text-sm text-muted-foreground">
-                                        {done} / {needed}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {balance.outstanding > 0 && (
-                        <div className="rounded-xl border px-4 py-3 flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Udestående saldo</span>
-                            <span className="text-sm font-medium">
-                                {Number(balance.outstanding).toLocaleString('da-DK')} kr.
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Course materials */}
-                {materials.length > 0 && (
-                    <div className="space-y-3">
-                        <Heading variant="small" title="Kursusmateriale" />
-                        <div className="rounded-xl border divide-y">
-                            {materials.map((material) => (
-                                <a
-                                    key={material.id}
-                                    href={material.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="size-4 shrink-0 text-muted-foreground" />
-                                        <span className="text-sm">{material.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-muted-foreground">{material.size}</span>
-                                        <Download className="size-4 text-muted-foreground" />
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
+                {balance.outstanding > 0 && (
+                    <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+                        <span className="text-sm text-muted-foreground">Udestående saldo</span>
+                        <span className="text-sm font-semibold tabular-nums">
+                            {Number(balance.outstanding).toLocaleString('da-DK')} kr.
+                        </span>
                     </div>
                 )}
 
+                <Link
+                    href={forloeb().url}
+                    className="group flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-transparent to-transparent p-5 shadow-sm transition hover:border-primary/40"
+                >
+                    <div className="space-y-1">
+                        <p className="font-medium">Mit forløb</p>
+                        <p className="text-sm text-muted-foreground">
+                            Se kørekortsforløb, krav til eksamen, materiale og bookinghistorik.
+                        </p>
+                    </div>
+                    <ArrowRight className="size-5 shrink-0 text-primary transition group-hover:translate-x-0.5" />
+                </Link>
             </div>
         </StudentLayout>
     );

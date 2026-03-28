@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Blog\BlogPostController;
+use App\Http\Controllers\Bookings\BookingAttendanceController;
 use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\MessageController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\StudentForloebController;
 use App\Http\Controllers\Student\StudentOfferMaterialController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
@@ -56,6 +58,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:student')
         ->name('student.dashboard');
 
+    Route::get('student/forloeb', StudentForloebController::class)
+        ->middleware('role:student')
+        ->name('student.forloeb');
+
     Route::get('student/offers/{offer}/materials/{media}', StudentOfferMaterialController::class)
         ->middleware('role:student')
         ->name('student.offers.materials.show');
@@ -71,6 +77,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'update'])->name('courses.update');
     Route::delete('courses/{course}', [\App\Http\Controllers\Courses\CourseController::class, 'destroy'])->name('courses.destroy');
     Route::get('bookings/day/{date}', \App\Http\Controllers\Bookings\BookingDayController::class)->name('bookings.day');
+    Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)
+        ->name('bookings.attendance.store');
     Route::resource('bookings', BookingController::class)->except(['show', 'edit']);
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');

@@ -27,6 +27,8 @@ class Offer extends Model implements HasMedia
         'driving_lessons',
         'track_required',
         'slippery_required',
+        'requires_theory_exam',
+        'requires_practical_exam',
     ];
 
     protected function casts(): array
@@ -38,6 +40,8 @@ class Offer extends Model implements HasMedia
             'driving_lessons' => 'integer',
             'track_required' => 'boolean',
             'slippery_required' => 'boolean',
+            'requires_theory_exam' => 'boolean',
+            'requires_practical_exam' => 'boolean',
         ];
     }
 

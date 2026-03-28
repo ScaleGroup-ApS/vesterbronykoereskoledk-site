@@ -20,6 +20,8 @@ type Offer = {
     driving_lessons: number;
     track_required: boolean;
     slippery_required: boolean;
+    requires_theory_exam: boolean;
+    requires_practical_exam: boolean;
 };
 
 type OfferType = { value: string; label: string };
@@ -45,6 +47,8 @@ export default function OfferEdit({
         driving_lessons: String(offer.driving_lessons),
         track_required: offer.track_required,
         slippery_required: offer.slippery_required,
+        requires_theory_exam: offer.requires_theory_exam,
+        requires_practical_exam: offer.requires_practical_exam,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -140,6 +144,22 @@ export default function OfferEdit({
                                 onCheckedChange={(v) => form.setData('slippery_required', v === true)}
                             />
                             <Label htmlFor="slippery_required">Glat bane krævet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_theory_exam"
+                                checked={form.data.requires_theory_exam}
+                                onCheckedChange={(v) => form.setData('requires_theory_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_theory_exam">Teoriprøve i forløbet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_practical_exam"
+                                checked={form.data.requires_practical_exam}
+                                onCheckedChange={(v) => form.setData('requires_practical_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_practical_exam">Køreprøve i forløbet</Label>
                         </div>
                     </div>
 
