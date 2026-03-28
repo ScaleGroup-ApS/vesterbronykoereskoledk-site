@@ -95,23 +95,39 @@ export default function MarketingLayout({ children }: MarketingLayoutProps) {
                 </div>
 
                 {mobileOpen ? (
-                    <div className="border-t border-border bg-background px-4 py-4 lg:hidden max-h-[min(70vh,calc(100vh-8rem))] overflow-y-auto">
-                        <div className="mb-4 flex flex-col gap-1 rounded-xl border border-border bg-muted/20 p-4">
-                            <a
-                                href={`tel:${tel}`}
-                                className="text-xl font-semibold tabular-nums text-foreground hover:text-primary"
-                            >
-                                {phoneLabel}
-                            </a>
-                            <a
-                                href={`mailto:${email}`}
-                                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-                            >
-                                <Mail className="size-4 shrink-0" aria-hidden />
-                                {email}
-                            </a>
+                    <div className="flex max-h-[min(70vh,calc(100vh-8rem))] flex-col border-t border-border bg-background lg:hidden">
+                        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+                            <MarketingNavMobile onNavigate={() => setMobileOpen(false)} />
                         </div>
-                        <MarketingNavMobile onNavigate={() => setMobileOpen(false)} />
+                        <div className="shrink-0 border-t border-border bg-muted/25 px-4 py-4">
+                            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Kontakt
+                            </p>
+                            <ul className="space-y-3 text-sm">
+                                <li className="flex items-start gap-2.5 text-foreground">
+                                    <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                                    <span>Køregade 123, København</span>
+                                </li>
+                                <li>
+                                    <a
+                                        href={`tel:${tel}`}
+                                        className="inline-flex items-center gap-2 font-semibold tabular-nums text-foreground hover:text-primary"
+                                    >
+                                        <Phone className="size-4 shrink-0 text-primary" aria-hidden />
+                                        {phoneLabel}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href={`mailto:${email}`}
+                                        className="inline-flex items-center gap-2 break-all text-muted-foreground hover:text-foreground"
+                                    >
+                                        <Mail className="size-4 shrink-0 text-primary" aria-hidden />
+                                        {email}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 ) : null}
             </header>

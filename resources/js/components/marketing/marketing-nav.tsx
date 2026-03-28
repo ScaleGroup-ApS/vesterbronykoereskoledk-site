@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
     DropdownMenu,
@@ -152,51 +153,115 @@ export function MarketingNavMobile({
     };
     const offers = marketingOffers ?? [];
 
+    const isPackagesRoute = url === packages.url() || url.startsWith('/pakker/');
+    const isTilEleverRoute = url.startsWith('/til-elever/');
+
+    const [pakkerOpen, setPakkerOpen] = useState(() => isPackagesRoute);
+    const [tilEleverOpen, setTilEleverOpen] = useState(() => isTilEleverRoute);
+
+    useEffect(() => {
+        setPakkerOpen(isPackagesRoute);
+    }, [isPackagesRoute]);
+
+    useEffect(() => {
+        setTilEleverOpen(isTilEleverRoute);
+    }, [isTilEleverRoute]);
+
     const linkClass = (active: boolean) =>
         cn(
             'block rounded-md px-2 py-2 transition-colors',
             active ? 'bg-primary/10 font-medium text-primary' : 'text-foreground hover:bg-muted/70',
         );
 
+    const submenuButtonClass =
+        'flex w-full items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/50';
+
     return (
-        <div className="flex flex-col gap-2 text-sm font-medium">
-            <div className="rounded-md border border-border bg-muted/30 px-2 py-2">
-                <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Pakker
-                </p>
-                {offers.map((offer) => (
-                    <Link
-                        key={offer.id}
-                        href={marketingPackageShow.url(offer.slug)}
-                        className={linkClass(url === marketingPackageShow.url(offer.slug))}
-                        onClick={onNavigate}
-                    >
-                        {offer.name}
-                    </Link>
-                ))}
-                <Link
-                    href={packages.url()}
-                    className={linkClass(url === packages.url())}
-                    onClick={onNavigate}
+        <nav className="flex flex-col gap-1 text-sm font-medium" aria-label="Mobil navigation">
+            <div className="rounded-lg border border-border bg-muted/20">
+                <button
+                    type="button"
+                    className={submenuButtonClass}
+                    aria-expanded={pakkerOpen}
+                    aria-controls="mobile-nav-pakker"
+                    id="mobile-nav-pakker-trigger"
+                    onClick={() => setPakkerOpen((o) => !o)}
                 >
-                    Se alle pakker
-                </Link>
+                    <span>Pakker</span>
+                    <ChevronDown
+                        className={cn('size-4 shrink-0 text-muted-foreground transition-transform duration-200', pakkerOpen && 'rotate-180')}
+                        aria-hidden
+                    />
+                </button>
+                <div
+                    id="mobile-nav-pakker"
+                    role="region"
+                    aria-labelledby="mobile-nav-pakker-trigger"
+                    hidden={!pakkerOpen}
+                >
+                    <div className="space-y-0 border-t border-border/80 px-2 pb-2 pt-1">
+                        {offers.length > 0 ? (
+                            offers.map((offer) => (
+                                <Link
+                                    key={offer.id}
+                                    href={marketingPackageShow.url(offer.slug)}
+                                    className={linkClass(url === marketingPackageShow.url(offer.slug))}
+                                    onClick={onNavigate}
+                                >
+                                    {offer.name}
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="px-2 py-2 text-sm text-muted-foreground">Ingen pakker endnu</p>
+                        )}
+                        <Link
+                            href={packages.url()}
+                            className={linkClass(url === packages.url())}
+                            onClick={onNavigate}
+                        >
+                            Se alle pakker
+                        </Link>
+                    </div>
+                </div>
             </div>
 
-            <div className="rounded-md border border-border bg-muted/30 px-2 py-2">
-                <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Til elever
-                </p>
-                {tilEleverLinks.map((item) => (
-                    <Link
-                        key={item.slug}
-                        href={tilEleverShow.url(item.slug)}
-                        className={linkClass(url === tilEleverShow.url(item.slug))}
-                        onClick={onNavigate}
-                    >
-                        {item.label}
-                    </Link>
-                ))}
+            <div className="rounded-lg border border-border bg-muted/20">
+                <button
+                    type="button"
+                    className={submenuButtonClass}
+                    aria-expanded={tilEleverOpen}
+                    aria-controls="mobile-nav-til-elever"
+                    id="mobile-nav-til-elever-trigger"
+                    onClick={() => setTilEleverOpen((o) => !o)}
+                >
+                    <span>Til elever</span>
+                    <ChevronDown
+                        className={cn(
+                            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                            tilEleverOpen && 'rotate-180',
+                        )}
+                        aria-hidden
+                    />
+                </button>
+                <div
+                    id="mobile-nav-til-elever"
+                    role="region"
+                    aria-labelledby="mobile-nav-til-elever-trigger"
+                    hidden={!tilEleverOpen}
+                >
+                    <div className="space-y-0 border-t border-border/80 px-2 pb-2 pt-1">
+                        {tilEleverLinks.map((item) => (
+                            <Link
+                                key={item.slug}
+                                href={tilEleverShow.url(item.slug)}
+                                className={linkClass(url === tilEleverShow.url(item.slug))}
+                                onClick={onNavigate}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <Link href={faq.url()} className={linkClass(url === faq.url())} onClick={onNavigate}>
@@ -211,6 +276,6 @@ export function MarketingNavMobile({
             <Link href={contact.url()} className={linkClass(url === contact.url())} onClick={onNavigate}>
                 Kontakt
             </Link>
-        </div>
+        </nav>
     );
 }
