@@ -21,7 +21,10 @@ use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Student\StudentDashboardController;
+use App\Http\Controllers\Student\StudentFaerdighederController;
 use App\Http\Controllers\Student\StudentForloebController;
+use App\Http\Controllers\Student\StudentHistorikController;
+use App\Http\Controllers\Student\StudentMaterialeController;
 use App\Http\Controllers\Student\StudentOfferMaterialController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\StudentLoginLinkController;
@@ -65,6 +68,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('student/forloeb', StudentForloebController::class)
         ->middleware('role:student')
         ->name('student.forloeb');
+
+    Route::get('student/historik', StudentHistorikController::class)
+        ->middleware('role:student')
+        ->name('student.historik');
+
+    Route::get('student/materiale', StudentMaterialeController::class)
+        ->middleware('role:student')
+        ->name('student.materiale');
+
+    Route::get('student/faerdigheder', StudentFaerdighederController::class)
+        ->middleware('role:student')
+        ->name('student.faerdigheder');
 
     Route::get('student/offers/{offer}/materials/{media}', StudentOfferMaterialController::class)
         ->middleware('role:student')
