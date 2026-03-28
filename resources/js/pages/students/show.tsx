@@ -2,13 +2,16 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FileText, Pencil, Trash2, Upload } from 'lucide-react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { StudentJourneyRoadmap, type JourneyStep, type UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoginLink } from '@/hooks/use-login-link';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Student } from '@/types';
 import { index, show, edit, destroy } from '@/routes/students';
+import { show as progressionShow } from '@/routes/students/progression';
+import type { BreadcrumbItem, Student } from '@/types';
 
 type MediaItem = {
     id: number;
@@ -16,6 +19,21 @@ type MediaItem = {
     collection_name: string;
     size: number;
     created_at: string;
+};
+
+type EventTimelineEntry = {
+    id: string;
+    summary: string;
+    category: 'booking' | 'enrollment' | 'student' | 'payment' | 'other';
+    created_at: string;
+};
+
+const categoryDotColors: Record<string, string> = {
+    booking: 'bg-blue-500',
+    enrollment: 'bg-purple-500',
+    student: 'bg-green-500',
+    payment: 'bg-amber-500',
+    other: 'bg-muted-foreground',
 };
 
 const statusLabels: Record<string, string> = {
@@ -32,11 +50,37 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
     dropped_out: 'destructive',
 };
 
-export default function StudentShow({ student, canEdit }: { student: Student & { media: MediaItem[] }; canEdit: boolean }) {
+type Readiness = {
+    is_ready: boolean;
+    completed: Record<string, number>;
+    required: Record<string, number>;
+    missing: Record<string, number>;
+};
+
+type JourneyPayload = {
+    steps: JourneyStep[];
+    upcoming_bookings: UpcomingBookingRow[];
+};
+
+export default function StudentShow({
+    student,
+    canEdit,
+    readiness,
+    journey,
+    eventTimeline = [],
+}: {
+    student: Student & { media: MediaItem[] };
+    canEdit: boolean;
+    readiness: Readiness;
+    journey: JourneyPayload;
+    eventTimeline: EventTimelineEntry[];
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Elever', href: index().url },
         { title: student.user.name, href: show(student).url },
     ];
+
+    const { sendLoginLink, processing: loginLinkProcessing } = useLoginLink(student);
 
     const uploadForm = useForm<{ file: File | null; collection: string }>({
         file: null,
@@ -79,6 +123,9 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
                     <Heading title={student.user.name} />
                     {canEdit && (
                         <div className="flex gap-2">
+                            <Button variant="outline" type="button" onClick={sendLoginLink} disabled={loginLinkProcessing}>
+                                Send login link
+                            </Button>
                             <Button variant="outline" asChild>
                                 <Link href={edit(student).url}>
                                     <Pencil className="mr-2 size-4" />
@@ -91,6 +138,21 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
                             </Button>
                         </div>
                     )}
+                </div>
+
+                <div className="max-w-2xl space-y-3 rounded-xl border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Heading variant="small" title="Forløb & krav" />
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={progressionShow(student).url}>Detaljeret fremgang</Link>
+                        </Button>
+                    </div>
+                    <StudentJourneyRoadmap steps={journey.steps} upcomingBookings={journey.upcoming_bookings} />
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        <span>
+                            Fremgang: {readiness.is_ready ? 'Alle krav opfyldt' : 'Mangler stadig timer/prøver'}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="grid max-w-lg gap-4">
@@ -180,6 +242,29 @@ export default function StudentShow({ student, canEdit }: { student: Student & {
                         </form>
                     )}
                 </div>
+
+                {canEdit && (
+                    <div className="max-w-lg space-y-4">
+                        <Heading variant="small" title="Hændelseslog" />
+                        {eventTimeline.length > 0 ? (
+                            <ol className="relative border-l pl-6">
+                                {eventTimeline.map((entry) => (
+                                    <li key={entry.id} className="relative mb-4 last:mb-0">
+                                        <span
+                                            className={`absolute -left-6 top-1 size-3 -translate-x-1/2 rounded-full ${categoryDotColors[entry.category] ?? 'bg-muted-foreground'}`}
+                                        />
+                                        <p className="text-sm">{entry.summary}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(entry.created_at).toLocaleString('da-DK')}
+                                        </p>
+                                    </li>
+                                ))}
+                            </ol>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Ingen hændelser registreret.</p>
+                        )}
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

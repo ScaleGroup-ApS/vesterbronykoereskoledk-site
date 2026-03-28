@@ -16,6 +16,7 @@ test('admin can view upcoming courses', function () {
         ->assertInertia(fn ($page) => $page
             ->component('courses/index')
             ->has('courses', 1)
+            ->has('offers')
         );
 });
 
@@ -40,7 +41,6 @@ test('admin can update a course', function () {
     $this->actingAs($admin)
         ->patch(route('courses.update', $course), [
             'start_at' => $startAt->format('Y-m-d H:i:s'),
-            'end_at' => $startAt->copy()->addHours(8)->format('Y-m-d H:i:s'),
             'max_students' => 15,
         ])
         ->assertRedirect(route('courses.show', $course));
@@ -56,7 +56,6 @@ test('instructor cannot update a course', function () {
     $this->actingAs($instructor)
         ->patch(route('courses.update', $course), [
             'start_at' => $startAt->format('Y-m-d H:i:s'),
-            'end_at' => $startAt->copy()->addHours(8)->format('Y-m-d H:i:s'),
         ])
         ->assertForbidden();
 });

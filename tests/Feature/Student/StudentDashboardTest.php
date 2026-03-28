@@ -23,9 +23,36 @@ test('student can visit their dashboard', function () {
         ->assertInertia(fn ($page) => $page
             ->component('student/index')
             ->has('booking')
+            ->has('journey')
             ->has('readiness')
             ->has('balance')
+            ->has('materials')
         );
+});
+
+test('student can visit mit forloeb page', function () {
+    $user = User::factory()->student()->create();
+    Student::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('student.forloeb'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('student/forloeb')
+            ->has('past_bookings')
+            ->has('journey')
+            ->has('readiness')
+            ->has('balance')
+            ->has('materials')
+        );
+});
+
+test('admin cannot visit student forloeb page', function () {
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('student.forloeb'))
+        ->assertForbidden();
 });
 
 test('admin cannot visit student dashboard', function () {

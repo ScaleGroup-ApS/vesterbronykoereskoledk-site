@@ -26,6 +26,8 @@ test('student is not ready when driving lessons are incomplete', function () {
         'theory_lessons' => 0,
         'track_required' => false,
         'slippery_required' => false,
+        'requires_theory_exam' => false,
+        'requires_practical_exam' => false,
     ]);
 
     (new AssignOffer)->handle($student, $offer);
@@ -54,6 +56,8 @@ test('student is ready when all requirements are met', function () {
         'theory_lessons' => 1,
         'track_required' => false,
         'slippery_required' => false,
+        'requires_theory_exam' => false,
+        'requires_practical_exam' => false,
     ]);
 
     (new AssignOffer)->handle($student, $offer);
@@ -81,6 +85,8 @@ test('track and slippery required flags are included in requirements', function 
         'theory_lessons' => 0,
         'track_required' => true,
         'slippery_required' => true,
+        'requires_theory_exam' => false,
+        'requires_practical_exam' => false,
     ]);
 
     (new AssignOffer)->handle($student, $offer);
@@ -95,8 +101,8 @@ test('track and slippery required flags are included in requirements', function 
 
 test('multiple offers accumulate driving and theory requirements', function () {
     $student = Student::factory()->create();
-    $primary = Offer::factory()->create(['driving_lessons' => 20, 'theory_lessons' => 10, 'track_required' => false, 'slippery_required' => false]);
-    $addon = Offer::factory()->create(['driving_lessons' => 5, 'theory_lessons' => 0, 'track_required' => false, 'slippery_required' => false]);
+    $primary = Offer::factory()->create(['driving_lessons' => 20, 'theory_lessons' => 10, 'track_required' => false, 'slippery_required' => false, 'requires_theory_exam' => false, 'requires_practical_exam' => false]);
+    $addon = Offer::factory()->create(['driving_lessons' => 5, 'theory_lessons' => 0, 'track_required' => false, 'slippery_required' => false, 'requires_theory_exam' => false, 'requires_practical_exam' => false]);
 
     (new AssignOffer)->handle($student, $primary);
     (new AssignOffer)->handle($student, $addon);

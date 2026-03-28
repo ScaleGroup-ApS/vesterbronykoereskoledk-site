@@ -1,4 +1,13 @@
+import type { EventClickArg } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import type { DateClickArg } from '@fullcalendar/interaction';
+import interactionPlugin from '@fullcalendar/interaction';
+import FullCalendar from '@fullcalendar/react';
+import { Form, Head, Link, router, useForm } from '@inertiajs/react';
+import { CalendarDays, CheckCircle2, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { CourseHoldCapacityChart } from '@/components/dashboard/course-hold-capacity-chart';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,21 +19,21 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import { create, day } from '@/routes/bookings';
-import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
+import { show as showCourse, store as storeCourse } from '@/routes/courses';
 import { index as enrollmentsIndex } from '@/routes/enrollments';
 import type { BreadcrumbItem } from '@/types';
-import { EventClickArg } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import FullCalendar from '@fullcalendar/react';
-import { Form, Head, Link, router } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, Plus, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
-import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
 
@@ -78,31 +87,68 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ElementType; label:
     );
 }
 
+type Offer = { id: number; name: string };
+type CourseEvent = {
+    id: number;
+    title: string;
+    start: string;
+    end: string;
+    max_students: number | null;
+    public_spots_remaining: number | null;
+    enrollments_completed_count: number;
+    enrollments_pending_count: number;
+};
+
 export default function Dashboard({
     kpis,
-    dayCounts = [],
+    courses = [],
     enrollments = [],
+    offers = [],
 }: {
     kpis: Kpis;
-    dayCounts?: { date: string; count: number }[];
+    courses?: CourseEvent[];
     enrollments: Enrollment[];
+    offers?: Offer[];
 }) {
     const isAdmin = 'total_students' in kpis;
     const isInstructor = 'upcoming_bookings' in kpis && !isAdmin;
 
     const [enrollmentDialogOpen, setEnrollmentDialogOpen] = useState(false);
     const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
+    const [courseDialogDate, setCourseDialogDate] = useState<string | null>(null);
 
-    const events = dayCounts.map(({ date, count }) => ({
-        title: `${count} bookinger`,
-        start: date,
-        allDay: true,
-        display: 'block',
+    const courseForm = useForm({ offer_id: '', start_at: '', max_students: '' });
+
+    const events = courses.map((course) => ({
+        id: String(course.id),
+        title: course.title,
+        start: course.start,
+        end: course.end,
+        color: 'var(--color-primary)',
     }));
 
     function handleEventClick(info: EventClickArg) {
-        const dateStr = info.event.startStr.slice(0, 10);
-        router.visit(day({ date: dateStr }).url);
+        const id = info.event.id ? Number(info.event.id) : null;
+        if (id) { router.visit(showCourse(id).url); }
+    }
+
+    function handleDateClick(info: DateClickArg) {
+        courseForm.setData({
+            offer_id: '',
+            start_at: `${info.dateStr}T09:00`,
+            max_students: '',
+        });
+        setCourseDialogDate(info.dateStr);
+    }
+
+    function handleCourseSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!courseForm.data.offer_id) {
+            return;
+        }
+        courseForm.post(storeCourse.url(), {
+            onSuccess: () => setCourseDialogDate(null),
+        });
     }
 
     return (
@@ -155,35 +201,27 @@ export default function Dashboard({
                     )}
                 </div>
 
+                {isAdmin && (
+                    <div className="rounded-xl border p-5">
+                        <Heading
+                            title="Hold & kapacitet"
+                            description="Kommende hold med godkendte tilmeldinger, afventende og ledige pladser."
+                        />
+                        <div className="mt-5">
+                            <CourseHoldCapacityChart courses={courses} />
+                        </div>
+                    </div>
+                )}
+
                 {(isAdmin || isInstructor) && (
                     <>
                         <div className="flex items-center justify-between">
-                            <Heading title="Bookinger" description="Administrer køretimer og lektioner" />
-                            <div className="flex gap-2">
-                                <Button variant="outline" asChild>
-                                    <Link href={enrollmentsIndex()}>
-                                        Afventende tilmeldinger ({enrollments.length})
-                                    </Link>
-                                </Button>
-                                <Button asChild>
-                                    <Link href={create().url}>
-                                        <Plus className="mr-2 size-4" />
-                                        Opret booking
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3 text-sm">
-                            {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
-                                <span key={type} className="flex items-center gap-1.5">
-                                    <span
-                                        className="inline-block size-3 rounded-sm"
-                                        style={{ backgroundColor: bookingTypeColors[type] }}
-                                    />
-                                    {label}
-                                </span>
-                            ))}
+                            <Heading title="Kurser" description="Klik på en dag for at oprette et kursus" />
+                            <Button variant="outline" asChild>
+                                <Link href={enrollmentsIndex().url}>
+                                    Afventende tilmeldinger ({enrollments.length})
+                                </Link>
+                            </Button>
                         </div>
 
                         <div className="rounded-xl border p-4">
@@ -200,11 +238,83 @@ export default function Dashboard({
                                 height="auto"
                                 events={events}
                                 eventClick={handleEventClick}
+                                dateClick={handleDateClick}
                             />
                         </div>
                     </>
                 )}
             </div>
+
+            <Dialog open={courseDialogDate !== null} onOpenChange={(open) => !open && setCourseDialogDate(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Opret kursusdato</DialogTitle>
+                            <DialogDescription>
+                                Tilføj et nyt kursus til et tilbud, så elever kan tilmelde sig.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleCourseSubmit} className="grid gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="course_offer">Lovpakke (tilbud)</Label>
+                                <Select
+                                    value={courseForm.data.offer_id || undefined}
+                                    onValueChange={(v) => courseForm.setData('offer_id', v)}
+                                >
+                                    <SelectTrigger id="course_offer" className="bg-background">
+                                        <SelectValue placeholder="Vælg lovpakke…" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper" className="z-[200]">
+                                        {offers.map((offer) => (
+                                            <SelectItem key={offer.id} value={String(offer.id)}>
+                                                {offer.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="course_start_at">Start (dato og tid)</Label>
+                                <Input
+                                    id="course_start_at"
+                                    type="datetime-local"
+                                    value={courseForm.data.start_at}
+                                    onChange={(e) => courseForm.setData('start_at', e.target.value)}
+                                    required
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Sluttid sættes automatisk efter standard kursuslængde.
+                                </p>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="course_max_students">
+                                    Maks. elever{' '}
+                                    <span className="font-normal text-muted-foreground">(valgfrit)</span>
+                                </Label>
+                                <Input
+                                    id="course_max_students"
+                                    type="number"
+                                    min={1}
+                                    value={courseForm.data.max_students}
+                                    onChange={(e) => courseForm.setData('max_students', e.target.value)}
+                                    placeholder="Ubegrænset"
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setCourseDialogDate(null)}>
+                                    Annuller
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={courseForm.processing || !courseForm.data.offer_id}
+                                    className="gap-1.5"
+                                >
+                                    {courseForm.processing && <Spinner />}
+                                    Opret kursus
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+            </Dialog>
 
             {isAdmin && (
                 <>

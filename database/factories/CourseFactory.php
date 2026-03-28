@@ -19,6 +19,8 @@ class CourseFactory extends Factory
             'start_at' => $startAt->format('Y-m-d H:i:s'),
             'end_at' => (clone $startAt)->modify('+8 hours')->format('Y-m-d H:i:s'),
             'max_students' => null,
+            'featured_on_home' => false,
+            'public_spots_remaining' => null,
         ];
     }
 

@@ -24,6 +24,9 @@ class Booking extends Model
         'starts_at',
         'ends_at',
         'notes',
+        'attended',
+        'attendance_recorded_at',
+        'attendance_recorded_by',
     ];
 
     protected function casts(): array
@@ -33,6 +36,8 @@ class Booking extends Model
             'status' => BookingStatus::class,
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'attended' => 'boolean',
+            'attendance_recorded_at' => 'datetime',
         ];
     }
 
@@ -49,6 +54,11 @@ class Booking extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
+    }
+
+    public function attendanceRecordedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'attendance_recorded_by');
     }
 
     public function team(): BelongsTo

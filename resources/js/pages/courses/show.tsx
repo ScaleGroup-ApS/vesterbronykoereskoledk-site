@@ -1,16 +1,16 @@
 import { Head, Link, useForm, Form } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { destroy, update } from '@/routes/courses';
+import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/courses';
-import { update } from '@/actions/App/Http/Controllers/Courses/CourseController';
-import { destroy } from '@/actions/App/Http/Controllers/Offers/CourseController';
-import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import type { BreadcrumbItem } from '@/types';
 
 type Enrollment = {
     id: number;
@@ -24,6 +24,8 @@ type CourseDetail = {
     start_at: string;
     end_at: string;
     max_students: number | null;
+    featured_on_home: boolean;
+    public_spots_remaining: number | null;
     offer: { id: number; name: string };
     enrollments: Enrollment[];
 };
@@ -36,8 +38,10 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
 
     const form = useForm({
         start_at: new Date(course.start_at).toISOString().slice(0, 16),
-        end_at: new Date(course.end_at).toISOString().slice(0, 16),
         max_students: course.max_students ? String(course.max_students) : '',
+        public_spots_remaining:
+            course.public_spots_remaining != null ? String(course.public_spots_remaining) : '',
+        featured_on_home: course.featured_on_home,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -57,33 +61,22 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                     <Heading title={course.offer.name} />
                 </div>
 
-                {/* Edit form */}
                 <div className="max-w-lg">
                     <h2 className="mb-4 text-base font-semibold">Kursusdato</h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="start_at">Start</Label>
-                                <Input
-                                    id="start_at"
-                                    type="datetime-local"
-                                    value={form.data.start_at}
-                                    onChange={(e) => form.setData('start_at', e.target.value)}
-                                    required
-                                />
-                                <InputError message={form.errors.start_at} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="end_at">Slut</Label>
-                                <Input
-                                    id="end_at"
-                                    type="datetime-local"
-                                    value={form.data.end_at}
-                                    onChange={(e) => form.setData('end_at', e.target.value)}
-                                    required
-                                />
-                                <InputError message={form.errors.end_at} />
-                            </div>
+                        <div className="grid max-w-md gap-2">
+                            <Label htmlFor="start_at">Start (dato og tid)</Label>
+                            <Input
+                                id="start_at"
+                                type="datetime-local"
+                                value={form.data.start_at}
+                                onChange={(e) => form.setData('start_at', e.target.value)}
+                                required
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Sluttid beregnes automatisk ud fra standard kursuslængde (konfiguration).
+                            </p>
+                            <InputError message={form.errors.start_at} />
                         </div>
                         <div className="grid max-w-[160px] gap-2">
                             <Label htmlFor="max_students">Maks. elever</Label>
@@ -97,14 +90,41 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                             />
                             <InputError message={form.errors.max_students} />
                         </div>
+                        <div className="grid max-w-[200px] gap-2">
+                            <Label htmlFor="public_spots_remaining">Pladser tilbage på websitet</Label>
+                            <Input
+                                id="public_spots_remaining"
+                                type="number"
+                                min="0"
+                                value={form.data.public_spots_remaining}
+                                onChange={(e) => form.setData('public_spots_remaining', e.target.value)}
+                                placeholder="Tom = vis ikke"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Vises ved nedtælling på forsiden sammen med holdstart.
+                            </p>
+                            <InputError message={form.errors.public_spots_remaining} />
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <Checkbox
+                                id="featured_on_home"
+                                checked={form.data.featured_on_home}
+                                onCheckedChange={(v) => form.setData('featured_on_home', v === true)}
+                                className="mt-0.5"
+                            />
+                            <Label htmlFor="featured_on_home" className="text-sm font-normal leading-snug">
+                                Brug denne dato til nedtælling på forsiden (kun ét kursus ad gangen)
+                            </Label>
+                        </div>
                         <Button type="submit" disabled={form.processing}>
                             Gem ændringer
                         </Button>
                     </form>
                     <Form
-                        {...destroy({ offer: course.offer, course })}
-                        method="delete"
+                        {...destroy.form({ course })}
+                        method="post"
                         onBefore={() => confirm('Er du sikker på, at du vil slette dette kursus?')}
+                        className="mt-4"
                     >
                         {({ processing }) => (
                             <Button type="submit" variant="destructive" disabled={processing}>
@@ -114,7 +134,6 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                     </Form>
                 </div>
 
-                {/* Enrollments table */}
                 <div className="max-w-2xl">
                     <h2 className="mb-4 text-base font-semibold">
                         Tilmeldte ({course.enrollments.length}
@@ -140,7 +159,9 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                         <tr key={enrollment.id} className="border-b last:border-0">
                                             <td className="px-4 py-2">{enrollment.student.name}</td>
                                             <td className="px-4 py-2 text-muted-foreground">{enrollment.student.email}</td>
-                                            <td className="px-4 py-2">{enrollment.payment_method === 'stripe' ? 'Kortbetaling' : 'Kontant'}</td>
+                                            <td className="px-4 py-2">
+                                                {enrollment.payment_method === 'stripe' ? 'Kortbetaling' : 'Kontant'}
+                                            </td>
                                             <td className="px-4 py-2">
                                                 {enrollment.status === 'pending_approval' && 'Afventer godkendelse'}
                                                 {enrollment.status === 'pending_payment' && 'Afventer betaling'}

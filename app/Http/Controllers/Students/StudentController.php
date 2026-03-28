@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Students;
 
+use App\Actions\Progression\BuildStudentJourney;
+use App\Actions\Progression\CheckExamReadiness;
 use App\Actions\Students\CreateStudent;
 use App\Actions\Students\DeleteStudent;
 use App\Actions\Students\UpdateStudent;
@@ -14,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Thunk\Verbs\Models\VerbEvent;
 
 class StudentController extends Controller
 {
@@ -45,15 +48,35 @@ class StudentController extends Controller
             ->with('success', 'Elev oprettet.');
     }
 
-    public function show(Request $request, Student $student): Response
-    {
+    public function show(
+        Request $request,
+        Student $student,
+        CheckExamReadiness $readiness,
+        BuildStudentJourney $buildStudentJourney,
+    ): Response {
         $this->authorize('view', $student);
 
-        $student->load('user', 'media');
+        $student->load(['user', 'media', 'offers']);
+
+        $canEdit = $request->user()->isAdmin();
 
         return Inertia::render('students/show', [
             'student' => $student,
-            'canEdit' => $request->user()->isAdmin(),
+            'canEdit' => $canEdit,
+            'readiness' => $readiness->handle($student),
+            'journey' => $buildStudentJourney->handle($student),
+            'eventTimeline' => $canEdit
+                ? VerbEvent::query()
+                    ->where('data->student_id', $student->id)
+                    ->latest()
+                    ->get()
+                    ->map(fn (VerbEvent $event) => [
+                        'id' => (string) $event->id,
+                        'summary' => $this->eventSummary($event),
+                        'category' => $this->eventCategory($event),
+                        'created_at' => $event->created_at->toISOString(),
+                    ])
+                : [],
         ]);
     }
 
@@ -84,5 +107,35 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')
             ->with('success', 'Elev slettet.');
+    }
+
+    private function eventSummary(VerbEvent $event): string
+    {
+        return match (class_basename($event->type)) {
+            'BookingCreated' => 'Booking oprettet',
+            'BookingCompleted' => 'Booking gennemført',
+            'BookingCancelled' => 'Booking annulleret',
+            'BookingNoShow' => 'Elev mødte ikke op',
+            'EnrollmentRequested' => 'Tilmelding anmodet',
+            'EnrollmentApproved' => 'Tilmelding godkendt',
+            'EnrollmentRejected' => 'Tilmelding afvist',
+            'StudentEnrolled' => 'Elev tilmeldt',
+            'StudentStatusChanged' => 'Status ændret → '.($event->data['new_status'] ?? ''),
+            'OfferAssigned' => 'Tilbud tildelt: '.($event->data['offer_name'] ?? ''),
+            'PaymentRecorded' => 'Betaling registreret: '.number_format((float) ($event->data['amount'] ?? 0), 2, ',', '.').' kr.',
+            'StripePaymentCompleted' => 'Stripe-betaling gennemført',
+            default => class_basename($event->type),
+        };
+    }
+
+    private function eventCategory(VerbEvent $event): string
+    {
+        return match (class_basename($event->type)) {
+            'BookingCreated', 'BookingCompleted', 'BookingCancelled', 'BookingNoShow' => 'booking',
+            'EnrollmentRequested', 'EnrollmentApproved', 'EnrollmentRejected' => 'enrollment',
+            'StudentEnrolled', 'StudentStatusChanged' => 'student',
+            'OfferAssigned', 'PaymentRecorded', 'StripePaymentCompleted' => 'payment',
+            default => 'other',
+        };
     }
 }

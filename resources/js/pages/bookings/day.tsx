@@ -1,3 +1,4 @@
+import { Head, Link, router } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -5,7 +6,6 @@ import { dashboard } from '@/routes';
 import { update } from '@/routes/bookings';
 import type { BreadcrumbItem } from '@/types';
 import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
-import { Head, Link, router } from '@inertiajs/react';
 
 type DayEvent = {
     id: string;

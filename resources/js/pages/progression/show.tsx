@@ -1,10 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Heading from '@/components/heading';
+import { StudentJourneyRoadmap, type JourneyStep, type UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index as studentsIndex, show as studentShow } from '@/routes/students';
+import type { BreadcrumbItem } from '@/types';
 
 const typeLabels: Record<string, string> = {
     driving_lesson: 'Køretimer',
@@ -31,14 +32,21 @@ type Student = {
     user: { name: string };
 };
 
+type JourneyPayload = {
+    steps: JourneyStep[];
+    upcoming_bookings: UpcomingBookingRow[];
+};
+
 export default function ProgressionShow({
     student,
     readiness,
     balance,
+    journey,
 }: {
     student: Student;
     readiness: Readiness;
     balance: Balance;
+    journey: JourneyPayload;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Elever', href: studentsIndex().url },
@@ -57,8 +65,13 @@ export default function ProgressionShow({
                         description="Oversigt over gennemførte lektioner og eksamensparathed"
                     />
                     <Badge variant={readiness.is_ready ? 'default' : 'secondary'}>
-                        {readiness.is_ready ? '✓ Klar til eksamen' : 'Ikke klar endnu'}
+                        {readiness.is_ready ? '✓ Krav opfyldt' : 'Ikke klar endnu'}
                     </Badge>
+                </div>
+
+                <div className="rounded-xl border p-4">
+                    <p className="mb-3 text-sm font-medium">Forløb & kommende</p>
+                    <StudentJourneyRoadmap steps={journey.steps} upcomingBookings={journey.upcoming_bookings} />
                 </div>
 
                 {/* Lesson progress */}

@@ -1,3 +1,17 @@
+import { Link, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    Car,
+    CreditCard,
+    FileText,
+    GraduationCap,
+    LayoutGrid,
+    ListChecks,
+    MessageSquare,
+    MessageSquareQuote,
+    ScrollText,
+    Tag,
+} from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -11,18 +25,17 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
+import { edit as editHomeCopy } from '@/routes/marketing/home-copy';
+import { index as testimonialsIndex } from '@/routes/marketing/testimonials';
+import { index as valueBlocksIndex } from '@/routes/marketing/value-blocks';
 import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
-import { index as teamsIndex } from '@/routes/teams';
+import { index as timelineIndex } from '@/routes/timeline';
 import { index as vehiclesIndex } from '@/routes/vehicles';
-import { index as enrollmentsIndex } from '@/routes/enrollments';
 import type { NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { CalendarDays, Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, Tag, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -51,11 +64,11 @@ const mainNavItems: NavItem[] = [
         href: offersIndex(),
         icon: Tag,
     },
-    // {
-    //     title: 'Kurser',
-    //     href: coursesIndex(),
-    //     icon: CalendarDays,
-    // },
+    {
+        title: 'Kurser',
+        href: coursesIndex(),
+        icon: BookOpen,
+    },
     // {
     //     title: 'Tilmeldinger',
     //     href: enrollmentsIndex(),
@@ -76,11 +89,37 @@ const mainNavItems: NavItem[] = [
         href: chatIndex(),
         icon: MessageSquare,
     },
+    {
+        title: 'Hændelseslog',
+        href: timelineIndex(),
+        icon: ScrollText,
+    },
 ];
 
 const footerNavItems: NavItem[] = [];
 
+const marketingNavItems: NavItem[] = [
+    {
+        title: 'Forsidetekster',
+        href: editHomeCopy.url(),
+        icon: FileText,
+    },
+    {
+        title: 'USP-blokke',
+        href: valueBlocksIndex.url(),
+        icon: ListChecks,
+    },
+    {
+        title: 'Udtalelser',
+        href: testimonialsIndex.url(),
+        icon: MessageSquareQuote,
+    },
+];
+
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const showMarketing = auth.user?.role === 'admin';
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -97,6 +136,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {showMarketing ? <NavMain items={marketingNavItems} groupLabel="Hjemmeside" /> : null}
             </SidebarContent>
 
             <SidebarFooter>

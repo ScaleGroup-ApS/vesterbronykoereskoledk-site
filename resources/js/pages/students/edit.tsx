@@ -1,13 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
+import { update } from '@/actions/App/Http/Controllers/Students/StudentController';
 import Heading from '@/components/heading';
+import { useLoginLink } from '@/hooks/use-login-link';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Student } from '@/types';
 import { index, show } from '@/routes/students';
-import { update } from '@/actions/App/Http/Controllers/Students/StudentController';
+import type { BreadcrumbItem, Student } from '@/types';
 
 export default function StudentEdit({ student }: { student: Student }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -15,6 +16,8 @@ export default function StudentEdit({ student }: { student: Student }) {
         { title: student.user.name, href: show(student).url },
         { title: 'Rediger', href: '#' },
     ];
+
+    const { sendLoginLink, processing: loginLinkProcessing } = useLoginLink(student);
 
     const form = useForm({
         name: student.user.name,
@@ -36,6 +39,17 @@ export default function StudentEdit({ student }: { student: Student }) {
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Heading title={`Rediger ${student.user.name}`} />
+
+                <div className="max-w-lg">
+                    <Button
+                        variant="outline"
+                        type="button"
+                        onClick={sendLoginLink}
+                        disabled={loginLinkProcessing}
+                    >
+                        Send login link
+                    </Button>
+                </div>
 
                 <form onSubmit={handleSubmit} className="max-w-lg space-y-6">
                     <div className="grid gap-2">

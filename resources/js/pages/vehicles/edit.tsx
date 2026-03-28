@@ -1,4 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
+import { update } from '@/actions/App/Http/Controllers/Vehicles/VehicleController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,9 +7,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/vehicles';
-import { update } from '@/actions/App/Http/Controllers/Vehicles/VehicleController';
+import type { BreadcrumbItem } from '@/types';
 
 type Vehicle = {
     id: number;

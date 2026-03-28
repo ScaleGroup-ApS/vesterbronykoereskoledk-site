@@ -20,13 +20,15 @@ class CheckExamReadiness
         $student->loadMissing('offers');
 
         $state = StudentProgressionState::load($student->id);
-        $completed = $state->lesson_counts;
+        $completed = $this->normalizeCompletedLessonCounts($state->lesson_counts ?? []);
 
         $required = [
             'driving_lesson' => 0,
             'theory_lesson' => 0,
             'track_driving' => 0,
             'slippery_driving' => 0,
+            'theory_exam' => 0,
+            'practical_exam' => 0,
         ];
 
         foreach ($student->offers as $offer) {
@@ -40,11 +42,23 @@ class CheckExamReadiness
             if ($offer->slippery_required) {
                 $required['slippery_driving'] = max(1, $required['slippery_driving']);
             }
+
+            if ($offer->requires_theory_exam) {
+                $required['theory_exam'] = 1;
+            }
+
+            if ($offer->requires_practical_exam) {
+                $required['practical_exam'] = 1;
+            }
         }
 
         $missing = [];
 
         foreach ($required as $type => $needed) {
+            if ($needed <= 0) {
+                continue;
+            }
+
             $done = $completed[$type] ?? 0;
 
             if ($done < $needed) {
@@ -58,5 +72,21 @@ class CheckExamReadiness
             'required' => $required,
             'missing' => $missing,
         ];
+    }
+
+    /**
+     * @param  array<string, int>  $counts
+     * @return array<string, int>
+     */
+    private function normalizeCompletedLessonCounts(array $counts): array
+    {
+        $legacyExam = (int) ($counts['exam'] ?? 0);
+        unset($counts['exam']);
+
+        if ($legacyExam > 0) {
+            $counts['theory_exam'] = ($counts['theory_exam'] ?? 0) + $legacyExam;
+        }
+
+        return $counts;
     }
 }

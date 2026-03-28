@@ -1,5 +1,5 @@
-import { Head, useForm, Form } from '@inertiajs/react';
-import { Trash2, Plus } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { index } from '@/routes/offers';
-import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
-import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import type { BreadcrumbItem } from '@/types';
 
 type Offer = {
     id: number;
@@ -22,25 +20,18 @@ type Offer = {
     driving_lessons: number;
     track_required: boolean;
     slippery_required: boolean;
+    requires_theory_exam: boolean;
+    requires_practical_exam: boolean;
 };
 
 type OfferType = { value: string; label: string };
 
-type Course = {
-    id: number;
-    start_at: string;
-    end_at: string;
-    max_students: number | null;
-};
-
 export default function OfferEdit({
     offer,
     offerTypes,
-    courses,
 }: {
     offer: Offer;
     offerTypes: OfferType[];
-    courses: Course[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tilbud', href: index().url },
@@ -56,6 +47,8 @@ export default function OfferEdit({
         driving_lessons: String(offer.driving_lessons),
         track_required: offer.track_required,
         slippery_required: offer.slippery_required,
+        requires_theory_exam: offer.requires_theory_exam,
+        requires_practical_exam: offer.requires_practical_exam,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -91,7 +84,9 @@ export default function OfferEdit({
                             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                         >
                             {offerTypes.map((t) => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
+                                <option key={t.value} value={t.value}>
+                                    {t.label}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -150,67 +145,26 @@ export default function OfferEdit({
                             />
                             <Label htmlFor="slippery_required">Glat bane krævet</Label>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_theory_exam"
+                                checked={form.data.requires_theory_exam}
+                                onCheckedChange={(v) => form.setData('requires_theory_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_theory_exam">Teoriprøve i forløbet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_practical_exam"
+                                checked={form.data.requires_practical_exam}
+                                onCheckedChange={(v) => form.setData('requires_practical_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_practical_exam">Køreprøve i forløbet</Label>
+                        </div>
                     </div>
 
                     <Button disabled={form.processing}>Gem ændringer</Button>
                 </form>
-
-                <div className="max-w-lg mt-8">
-                    <h2 className="text-lg font-semibold mb-4">Kursusdatoer</h2>
-
-                    {courses.length === 0 ? (
-                        <p className="text-sm text-muted-foreground mb-4">Ingen kursusdatoer endnu.</p>
-                    ) : (
-                        <ul className="mb-4 divide-y divide-border rounded-md border">
-                            {courses.map((course) => (
-                                <li key={course.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                                    <span>
-                                        {new Date(course.start_at).toLocaleString('da-DK', { dateStyle: 'long', timeStyle: 'short' })}
-                                        {' – '}
-                                        {new Date(course.end_at).toLocaleTimeString('da-DK', { timeStyle: 'short' })}
-                                    </span>
-                                    <Form {...destroyCourse({ offer, course })} method="delete">
-                                        {({ processing }) => (
-                                            <button
-                                                type="submit"
-                                                disabled={processing}
-                                                className="text-muted-foreground hover:text-destructive transition-colors"
-                                                aria-label="Slet kursusdato"
-                                            >
-                                                <Trash2 className="size-4" />
-                                            </button>
-                                        )}
-                                    </Form>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-
-                    <Form {...storeCourse(offer)} className="flex gap-2" resetOnSuccess>
-                        {({ processing }) => (
-                            <>
-                                <input
-                                    type="datetime-local"
-                                    name="start_at"
-                                    required
-                                    min={new Date().toISOString().slice(0, 16)}
-                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                                />
-                                <input
-                                    type="datetime-local"
-                                    name="end_at"
-                                    required
-                                    min={new Date().toISOString().slice(0, 16)}
-                                    className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                                />
-                                <Button type="submit" variant="outline" size="sm" disabled={processing}>
-                                    <Plus className="size-4 mr-1" />
-                                    Tilføj dato
-                                </Button>
-                            </>
-                        )}
-                    </Form>
-                </div>
             </div>
         </AppLayout>
     );

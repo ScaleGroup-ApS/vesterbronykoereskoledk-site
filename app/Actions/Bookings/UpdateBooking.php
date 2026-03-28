@@ -2,6 +2,7 @@
 
 namespace App\Actions\Bookings;
 
+use App\Events\BookingUpdated;
 use App\Models\Booking;
 
 class UpdateBooking
@@ -23,6 +24,13 @@ class UpdateBooking
         $booking->ends_at = $data['ends_at'] ?? $booking->ends_at;
         $booking->notes = $data['notes'] ?? $booking->notes;
         $booking->save();
+
+        BookingUpdated::fire(
+            student_id: $booking->student_id,
+            booking_id: $booking->id,
+            starts_at: $booking->starts_at->toDateTimeString(),
+            ends_at: $booking->ends_at->toDateTimeString(),
+        );
 
         return $booking->refresh();
     }

@@ -8,7 +8,7 @@ use function Pest\Laravel\seed;
 
 describe('Smoke tests', function () {
     test('guest pages', function () {
-        visit(['/', '/login'])->assertNoSmoke();
+        visit(['/', '/login', '/fordele', '/pakker', '/om-os', '/kontakt'])->assertNoSmoke();
     });
 
     test('authenticated pages', function () {
@@ -26,7 +26,7 @@ describe('Smoke tests', function () {
             '/offers',
             '/bookings',
             '/payments',
-            '/chat'
+            '/chat',
         ])->assertNoSmoke();
     });
 })->skipOnCi();

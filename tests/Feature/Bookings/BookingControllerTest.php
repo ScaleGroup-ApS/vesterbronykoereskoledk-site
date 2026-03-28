@@ -31,6 +31,8 @@ test('admin can create a booking', function () {
     $student = Student::factory()->create();
     $instructor = User::factory()->instructor()->create();
     $vehicle = Vehicle::factory()->create();
+    $starts = now()->addDays(5)->startOfHour();
+    $ends = (clone $starts)->addMinutes(45);
 
     actingAs($admin)
         ->post(route('bookings.store'), [
@@ -38,8 +40,8 @@ test('admin can create a booking', function () {
             'instructor_id' => $instructor->id,
             'vehicle_id' => $vehicle->id,
             'type' => 'driving_lesson',
-            'starts_at' => '2026-03-10 10:00:00',
-            'ends_at' => '2026-03-10 10:45:00',
+            'starts_at' => $starts->toDateTimeString(),
+            'ends_at' => $ends->toDateTimeString(),
         ])
         ->assertRedirect(route('bookings.index'));
 
@@ -50,12 +52,14 @@ test('booking store rejects conflict', function () {
     $admin = User::factory()->create();
     $student = Student::factory()->create();
     $instructor = User::factory()->instructor()->create();
+    $slotStart = now()->addDays(5)->startOfHour();
+    $slotEnd = (clone $slotStart)->addMinutes(45);
 
     Booking::factory()->create([
         'student_id' => $student->id,
         'instructor_id' => $instructor->id,
-        'starts_at' => '2026-03-10 10:00:00',
-        'ends_at' => '2026-03-10 10:45:00',
+        'starts_at' => $slotStart,
+        'ends_at' => $slotEnd,
     ]);
 
     actingAs($admin)
@@ -63,8 +67,8 @@ test('booking store rejects conflict', function () {
             'student_id' => $student->id,
             'instructor_id' => $instructor->id,
             'type' => 'driving_lesson',
-            'starts_at' => '2026-03-10 10:15:00',
-            'ends_at' => '2026-03-10 11:00:00',
+            'starts_at' => $slotStart->copy()->addMinutes(15)->toDateTimeString(),
+            'ends_at' => $slotStart->copy()->addMinutes(75)->toDateTimeString(),
         ])
         ->assertSessionHasErrors('conflicts');
 });
@@ -80,18 +84,38 @@ test('admin can cancel a booking', function () {
     expect($booking->fresh()->status)->toBe(BookingStatus::Cancelled);
 });
 
-test('admin can mark a booking as completed', function () {
+test('admin can record attendance as present and complete booking', function () {
     $admin = User::factory()->create();
     $booking = Booking::factory()->create();
 
     actingAs($admin)
         ->from(route('bookings.index'))
-        ->patch(route('bookings.update', $booking), [
-            'status' => 'completed',
+        ->post(route('bookings.attendance.store', $booking), [
+            'attended' => true,
         ])
-        ->assertRedirect(route('bookings.index'));
+        ->assertRedirect();
 
-    expect($booking->fresh()->status)->toBe(BookingStatus::Completed);
+    $booking->refresh();
+
+    expect($booking->status)->toBe(BookingStatus::Completed);
+    expect($booking->attended)->toBeTrue();
+    expect($booking->attendance_recorded_by)->toBe($admin->id);
+});
+
+test('admin can record attendance as absent as no-show', function () {
+    $admin = User::factory()->create();
+    $booking = Booking::factory()->create();
+
+    actingAs($admin)
+        ->post(route('bookings.attendance.store', $booking), [
+            'attended' => false,
+        ])
+        ->assertRedirect();
+
+    $booking->refresh();
+
+    expect($booking->status)->toBe(BookingStatus::NoShow);
+    expect($booking->attended)->toBeFalse();
 });
 
 test('instructor can only update own bookings', function () {
