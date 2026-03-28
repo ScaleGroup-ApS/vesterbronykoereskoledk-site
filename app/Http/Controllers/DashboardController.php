@@ -48,6 +48,13 @@ class DashboardController extends Controller
 
         $courses = Course::query()
             ->with('offer:id,name')
+            ->withCount([
+                'enrollments as enrollments_completed_count' => fn ($query) => $query->where('status', EnrollmentStatus::Completed),
+                'enrollments as enrollments_pending_count' => fn ($query) => $query->whereIn('status', [
+                    EnrollmentStatus::PendingApproval,
+                    EnrollmentStatus::PendingPayment,
+                ]),
+            ])
             ->orderBy('start_at')
             ->get()
             ->map(fn (Course $course) => [
@@ -55,6 +62,10 @@ class DashboardController extends Controller
                 'title' => $course->offer->name,
                 'start' => $course->start_at->toIso8601String(),
                 'end' => $course->end_at->toIso8601String(),
+                'max_students' => $course->max_students,
+                'public_spots_remaining' => $course->public_spots_remaining,
+                'enrollments_completed_count' => $course->enrollments_completed_count,
+                'enrollments_pending_count' => $course->enrollments_pending_count,
             ])
             ->all();
 

@@ -1,11 +1,13 @@
+import type { EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import type { DateClickArg } from '@fullcalendar/interaction';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, Plus, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { CalendarDays, CheckCircle2, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { CourseHoldCapacityChart } from '@/components/dashboard/course-hold-capacity-chart';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,9 +31,8 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import { show as showCourse } from '@/routes/courses';
+import { show as showCourse, store as storeCourse } from '@/routes/courses';
 import { index as enrollmentsIndex } from '@/routes/enrollments';
-import { store as storeCourse } from '@/routes/courses';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
@@ -87,7 +88,16 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ElementType; label:
 }
 
 type Offer = { id: number; name: string };
-type CourseEvent = { id: number; title: string; start: string; end: string };
+type CourseEvent = {
+    id: number;
+    title: string;
+    start: string;
+    end: string;
+    max_students: number | null;
+    public_spots_remaining: number | null;
+    enrollments_completed_count: number;
+    enrollments_pending_count: number;
+};
 
 export default function Dashboard({
     kpis,
@@ -117,7 +127,7 @@ export default function Dashboard({
         color: 'var(--color-primary)',
     }));
 
-    function handleEventClick(info: import('@fullcalendar/core').EventClickArg) {
+    function handleEventClick(info: EventClickArg) {
         const id = info.event.id ? Number(info.event.id) : null;
         if (id) { router.visit(showCourse(id).url); }
     }
@@ -190,6 +200,18 @@ export default function Dashboard({
                         </div>
                     )}
                 </div>
+
+                {isAdmin && (
+                    <div className="rounded-xl border p-5">
+                        <Heading
+                            title="Hold & kapacitet"
+                            description="Kommende hold med godkendte tilmeldinger, afventende og ledige pladser."
+                        />
+                        <div className="mt-5">
+                            <CourseHoldCapacityChart courses={courses} />
+                        </div>
+                    </div>
+                )}
 
                 {(isAdmin || isInstructor) && (
                     <>

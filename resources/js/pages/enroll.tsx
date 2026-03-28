@@ -1,21 +1,27 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { ArrowLeft, Banknote, Car, CheckCircle2, ChevronRight, CreditCard, Info } from 'lucide-react';
 import { useState } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { store } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { home } from '@/routes';
 
 interface Offer {
     id: number;
+    slug: string;
     name: string;
     description: string | null;
     price: string;
@@ -36,10 +42,23 @@ type CourseEvent = {
 type PaymentMethod = 'stripe' | 'cash';
 
 const STEPS = [
-    { n: 1 as const, label: 'Dato' },
+    { n: 1 as const, label: 'Hold' },
     { n: 2 as const, label: 'Info' },
     { n: 3 as const, label: 'Betaling' },
 ];
+
+function formatCourseOption(course: CourseEvent): string {
+    const start = new Date(course.start);
+    const end = new Date(course.end);
+    if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime())) {
+        return course.title;
+    }
+
+    const datePart = format(start, "EEEE d. MMMM yyyy 'kl.' HH:mm", { locale: da });
+    const endPart = format(end, 'HH:mm', { locale: da });
+
+    return `${datePart} – ${endPart}`;
+}
 
 export default function Enroll({
     offer,
@@ -60,23 +79,7 @@ export default function Enroll({
         password_confirmation: '',
         course_id: null as number | null,
         payment_method: 'stripe' as PaymentMethod,
-    }).withPrecognition(store(offer.id));
-
-    const localizer = dateFnsLocalizer({
-        format,
-        parse,
-        startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-        getDay,
-        locales: { da },
-    });
-
-    const calendarEvents = courseEvents.map((c) => ({
-        id: c.id,
-        title: c.title,
-        start: new Date(c.start),
-        end: new Date(c.end),
-        resource: c,
-    }));
+    }).withPrecognition(store(offer.slug));
 
     function formatCpr(value: string): string {
         const digits = value.replace(/\D/g, '').slice(0, 10);
@@ -85,7 +88,7 @@ export default function Enroll({
 
     function handleSubmit() {
         if (!form.data.course_id) { return; }
-        form.post(store(offer.id).url, {
+        form.post(store(offer.slug).url, {
             onError: (errs) => {
                 if (errs.course_id) { setStep(1); }
             },
@@ -145,30 +148,46 @@ export default function Enroll({
                             ))}
                         </div>
 
-                        {/* Step 1: Calendar */}
+                        {/* Step 1: Vælg hold */}
                         {step === 1 && (
                             <div className="space-y-4">
-                                <div className="h-[600px]">
-                                    <Calendar
-                                        localizer={localizer}
-                                        events={calendarEvents}
-                                        defaultView="month"
-                                        views={['month']}
-                                        culture="da"
-                                        onSelectEvent={(event) => {
-                                            const course = event.resource as CourseEvent;
-                                            setSelectedCourse(course);
-                                            form.setData('course_id', course.id);
-                                        }}
-                                        style={{ height: '100%' }}
-                                        messages={{
-                                            next: '›',
-                                            previous: '‹',
-                                            today: 'I dag',
-                                            month: 'Måned',
-                                            noEventsInRange: 'Ingen hold i denne periode.',
-                                        }}
-                                    />
+                                <div className="grid gap-2">
+                                    <Label htmlFor="course_id">Vælg hold</Label>
+                                    {courseEvents.length === 0 ? (
+                                        <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                                            Der er ingen kommende hold endnu. Kontakt køreskolen for at komme på venteliste.
+                                        </p>
+                                    ) : (
+                                        <Select
+                                            value={
+                                                form.data.course_id != null
+                                                    ? String(form.data.course_id)
+                                                    : undefined
+                                            }
+                                            onValueChange={(value) => {
+                                                const course = courseEvents.find((c) => c.id === Number(value));
+                                                if (course) {
+                                                    setSelectedCourse(course);
+                                                    form.setData('course_id', course.id);
+                                                    form.clearErrors('course_id');
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger
+                                                id="course_id"
+                                                className="h-11 w-full bg-background text-left"
+                                            >
+                                                <SelectValue placeholder="Vælg et hold…" />
+                                            </SelectTrigger>
+                                            <SelectContent position="popper" className="z-[100] max-h-72">
+                                                {courseEvents.map((c) => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>
+                                                        {formatCourseOption(c)}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
                                 </div>
                                 {selectedCourse ? (
                                     <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
@@ -176,19 +195,14 @@ export default function Enroll({
                                         <span>
                                             <strong>{selectedCourse.title}</strong>
                                             {' — '}
-                                            {new Date(selectedCourse.start).toLocaleString('da-DK', {
-                                                dateStyle: 'long',
-                                                timeStyle: 'short',
-                                            })}
-                                            {' – '}
-                                            {new Date(selectedCourse.end).toLocaleTimeString('da-DK', {
-                                                timeStyle: 'short',
-                                            })}
+                                            {formatCourseOption(selectedCourse)}
                                         </span>
                                     </div>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">Klik på en dato i kalenderen for at vælge.</p>
-                                )}
+                                ) : courseEvents.length > 0 ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        Vælg det hold du vil tilmelde dig.
+                                    </p>
+                                ) : null}
                                 {form.errors.course_id && <InputError message={form.errors.course_id} />}
                                 <Button onClick={() => setStep(2)} disabled={!selectedCourse} className="w-full">
                                     Videre →
@@ -304,15 +318,8 @@ export default function Enroll({
                                 {selectedCourse && (
                                     <div className="rounded-lg border bg-muted/30 p-4 text-sm">
                                         <p className="font-medium">{selectedCourse.title}</p>
-                                        <p className="text-muted-foreground mt-0.5">
-                                            {new Date(selectedCourse.start).toLocaleString('da-DK', {
-                                                dateStyle: 'long',
-                                                timeStyle: 'short',
-                                            })}
-                                            {' – '}
-                                            {new Date(selectedCourse.end).toLocaleTimeString('da-DK', {
-                                                timeStyle: 'short',
-                                            })}
+                                        <p className="mt-0.5 text-muted-foreground">
+                                            {formatCourseOption(selectedCourse)}
                                         </p>
                                     </div>
                                 )}
