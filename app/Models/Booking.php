@@ -27,6 +27,8 @@ class Booking extends Model
         'attended',
         'attendance_recorded_at',
         'attendance_recorded_by',
+        'instructor_note',
+        'driving_skills',
     ];
 
     protected function casts(): array
@@ -38,6 +40,7 @@ class Booking extends Model
             'ends_at' => 'datetime',
             'attended' => 'boolean',
             'attendance_recorded_at' => 'datetime',
+            'driving_skills' => 'array',
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OfferType;
+use App\Models\CurriculumTopic;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -94,6 +95,11 @@ class Offer extends Model implements HasMedia
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
+    }
+
+    public function curriculumTopics(): HasMany
+    {
+        return $this->hasMany(CurriculumTopic::class)->orderBy('lesson_number');
     }
 
     /** @param Builder<Offer> $query */
