@@ -37,6 +37,9 @@ class BookingDayController extends Controller
                 'vehicle_id' => $booking->vehicle_id,
                 'vehicle' => $booking->vehicle?->name,
                 'notes' => $booking->notes,
+                'attended' => $booking->attended,
+                'instructor_note' => $booking->instructor_note,
+                'driving_skills' => $booking->driving_skills ?? [],
             ]);
 
         $teamEvents = $bookings
@@ -57,6 +60,9 @@ class BookingDayController extends Controller
                 'vehicle_id' => $booking->vehicle_id,
                 'vehicle' => $booking->vehicle?->name,
                 'notes' => $booking->notes,
+                'attended' => null,
+                'instructor_note' => null,
+                'driving_skills' => null,
             ]);
 
         $instructors = User::query()
