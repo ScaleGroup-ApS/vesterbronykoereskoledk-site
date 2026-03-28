@@ -2,6 +2,23 @@ ARG COMPOSER_VERSION=2.8
 
 FROM composer:${COMPOSER_VERSION} AS vendor
 
+FROM registry.scaleweb.dk/koereskole-base:latest AS node-build
+WORKDIR /var/www/html
+
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --no-ansi --no-scripts --no-progress
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
 FROM registry.scaleweb.dk/koereskole-base:latest
 
 ARG USER_ID=1000
@@ -35,6 +52,7 @@ RUN composer install \
     --no-progress
 
 COPY --link . .
+COPY --link --from=node-build /var/www/html/public/build ./public/build
 
 RUN mkdir -p storage/framework/{sessions,views,cache}
 RUN mkdir -p storage/logs
