@@ -1,5 +1,16 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, Car, CreditCard, GraduationCap, LayoutGrid, MessageSquare, ScrollText, Tag } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    Car,
+    CreditCard,
+    FileText,
+    GraduationCap,
+    LayoutGrid,
+    ListChecks,
+    MessageSquareQuote,
+    ScrollText,
+    Tag,
+} from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -83,7 +94,28 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [];
 
+const marketingNavItems: NavItem[] = [
+    {
+        title: 'Forsidetekster',
+        href: editHomeCopy.url(),
+        icon: FileText,
+    },
+    {
+        title: 'USP-blokke',
+        href: valueBlocksIndex.url(),
+        icon: ListChecks,
+    },
+    {
+        title: 'Udtalelser',
+        href: testimonialsIndex.url(),
+        icon: MessageSquareQuote,
+    },
+];
+
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const showMarketing = auth.user?.role === 'admin';
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -100,6 +132,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {showMarketing ? <NavMain items={marketingNavItems} groupLabel="Hjemmeside" /> : null}
             </SidebarContent>
 
             <SidebarFooter>

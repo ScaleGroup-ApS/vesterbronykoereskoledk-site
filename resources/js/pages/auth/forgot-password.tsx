@@ -13,10 +13,10 @@ import { email } from '@/routes/password';
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <AuthLayout
-            title="Forgot password"
-            description="Enter your email to receive a password reset link"
+            title="Glemt adgangskode"
+            description="Indtast din e-mail, så sender vi et link til at nulstille adgangskoden"
         >
-            <Head title="Forgot password" />
+            <Head title="Glemt adgangskode" />
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
@@ -29,14 +29,14 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">E-mailadresse</Label>
                                 <Input
                                     id="email"
                                     type="email"
                                     name="email"
                                     autoComplete="off"
                                     autoFocus
-                                    placeholder="email@example.com"
+                                    placeholder="din@email.dk"
                                 />
 
                                 <InputError message={errors.email} />
@@ -44,14 +44,14 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
                             <div className="my-6 flex items-center justify-start">
                                 <Button
-                                    className="w-full"
+                                    className="w-full shadow-[0_8px_28px_-8px_rgba(37,99,235,0.45)]"
                                     disabled={processing}
                                     data-test="email-password-reset-link-button"
                                 >
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Email password reset link
+                                    Send nulstillingslink
                                 </Button>
                             </div>
                         </>
@@ -59,8 +59,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Or, return to</span>
-                    <TextLink href={login()}>log in</TextLink>
+                    <span>Eller gå tilbage til</span>
+                    <TextLink href={login()}>log ind</TextLink>
                 </div>
             </div>
         </AuthLayout>

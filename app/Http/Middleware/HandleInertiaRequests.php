@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -51,6 +52,31 @@ class HandleInertiaRequests extends Middleware
                 'colors' => array_filter(config('branding.colors')),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'marketingOffers' => fn (): array => Offer::query()
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Offer $offer) => [
+                    'id' => $offer->id,
+                    'name' => $offer->name,
+                    'slug' => $offer->slug,
+                    'price' => (string) $offer->price,
+                    'type' => $offer->type->value,
+                    'theory_lessons' => $offer->theory_lessons,
+                    'driving_lessons' => $offer->driving_lessons,
+                    'track_required' => $offer->track_required,
+                    'slippery_required' => $offer->slippery_required,
+                ])
+                ->values()
+                ->all(),
+            'marketingContact' => fn (): array => [
+                'phone' => config('marketing.contact.phone'),
+                'phone_href' => config('marketing.contact.phone_href'),
+                'email' => config('marketing.contact.email'),
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

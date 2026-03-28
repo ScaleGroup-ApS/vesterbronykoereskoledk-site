@@ -21,10 +21,10 @@ export default function Login({
 }: Props) {
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Log ind på din konto"
+            description="Indtast din e-mail og adgangskode nedenfor for at logge ind"
         >
-            <Head title="Log in" />
+            <Head title="Log ind" />
 
             <Form
                 {...store.form()}
@@ -35,7 +35,7 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">E-mailadresse</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -44,21 +44,21 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="din@email.dk"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">Adgangskode</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            Glemt adgangskode?
                                         </TextLink>
                                     )}
                                 </div>
@@ -69,7 +69,7 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="Adgangskode"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -80,18 +80,18 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">Husk mig</Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 w-full shadow-[0_8px_28px_-8px_rgba(37,99,235,0.45)]"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Log ind
                             </Button>
                         </div>
 
