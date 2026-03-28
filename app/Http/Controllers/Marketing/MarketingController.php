@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Marketing;
 
+use App\Enums\OfferType;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\MarketingHomeCopy;
@@ -22,8 +23,10 @@ class MarketingController extends Controller
             ->orderBy('start_at')
             ->first();
 
-        $offerForEnrollment = $nextCourse?->offer
-            ?? Offer::query()->orderBy('name')->first();
+        $nextOffer = $nextCourse?->offer;
+        $offerForEnrollment = ($nextOffer && $nextOffer->type === OfferType::Primary)
+            ? $nextOffer
+            : Offer::query()->primary()->orderBy('name')->first();
 
         return Inertia::render('welcome', [
             'homeCopy' => MarketingHomeCopy::forHome(),
@@ -50,12 +53,17 @@ class MarketingController extends Controller
     public function packages(): Response
     {
         return Inertia::render('marketing/pakker', [
-            'offers' => Offer::all(),
+            'offers' => Offer::query()->primary()->orderBy('name')->get(),
+            'addons' => Offer::query()->addon()->orderBy('name')->get(),
         ]);
     }
 
     public function packageShow(Offer $offer): Response
     {
+        if ($offer->type !== OfferType::Primary) {
+            abort(404);
+        }
+
         return Inertia::render('marketing/pakke-show', [
             'offer' => $offer,
         ]);
@@ -102,6 +110,7 @@ class MarketingController extends Controller
     {
         return Inertia::render('marketing/kontakt', [
             'offers' => Offer::query()
+                ->primary()
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug', 'price']),
             'holdStartOptions' => config('marketing.hold_start_options', []),

@@ -7,6 +7,7 @@ import {
     GraduationCap,
     LayoutGrid,
     ListChecks,
+    MessageSquare,
     MessageSquareQuote,
     ScrollText,
     Tag,
@@ -25,6 +26,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as chatIndex } from '@/routes/chat';
+import { edit as editHomeCopy } from '@/routes/marketing/home-copy';
+import { index as testimonialsIndex } from '@/routes/marketing/testimonials';
+import { index as valueBlocksIndex } from '@/routes/marketing/value-blocks';
 import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';

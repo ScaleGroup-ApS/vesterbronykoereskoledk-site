@@ -7,7 +7,12 @@ import { show as bookOffer } from '@/routes/enrollment';
 import { contact } from '@/routes/marketing';
 import { show as packageShow } from '@/routes/marketing/packages';
 
-export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
+type PakkerProps = {
+    offers?: MarketingOffer[];
+    addons?: MarketingOffer[];
+};
+
+export default function Pakker({ offers = [], addons = [] }: PakkerProps) {
     return (
         <MarketingLayout>
             <Head title="Pakker | Køreskole Pro" />
@@ -17,12 +22,13 @@ export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="text-center mb-16 max-w-2xl mx-auto"
+                        className="mx-auto mb-16 max-w-2xl text-center"
                     >
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Vores pakker</h1>
                         <p className="mt-4 text-lg text-slate-600">Gennemskuelige priser uden skjulte gebyrer.</p>
                     </motion.div>
-                    <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+
+                    <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
                         {offers.length > 0 ? (
                             offers.map((offer, index) => (
                                 <motion.div
@@ -33,8 +39,8 @@ export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                     className="marketing-glass-panel relative flex flex-col p-8"
                                 >
-                                    {offer.type === 'primary' && (
-                                        <div className="absolute top-0 right-8 -translate-y-1/2 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-primary-foreground inline-flex items-center gap-1">
+                                    {index === 0 && (
+                                        <div className="absolute right-8 top-0 inline-flex -translate-y-1/2 items-center gap-1 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-primary-foreground">
                                             Mest populære
                                         </div>
                                     )}
@@ -42,12 +48,12 @@ export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
                                         <h2 className="text-2xl font-bold text-slate-900">
                                             <Link
                                                 href={packageShow.url(offer.slug)}
-                                                className="hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-2 rounded-sm"
+                                                className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-2"
                                             >
                                                 {offer.name}
                                             </Link>
                                         </h2>
-                                        <p className="text-muted-foreground mt-2">{offer.description}</p>
+                                        <p className="mt-2 text-muted-foreground">{offer.description}</p>
                                         <p className="mt-3">
                                             <Link
                                                 href={packageShow.url(offer.slug)}
@@ -56,55 +62,43 @@ export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
                                                 Læs mere om pakken
                                             </Link>
                                         </p>
-                                        <div className="mt-6 flex items-baseline text-5xl font-extrabold pb-2">
+                                        <div className="mt-6 flex items-baseline pb-2 text-5xl font-extrabold">
                                             {Number(offer.price).toLocaleString('da-DK')}
                                             <span className="ml-1 text-xl font-medium text-slate-500">DKK</span>
                                         </div>
-                                        {offer.type === 'addon' && (
-                                            <p className="mt-2 text-sm text-slate-500">Ekstra tillægspakke</p>
-                                        )}
                                     </div>
                                     <ul className="mb-8 flex-1 space-y-4 text-slate-800">
                                         {offer.theory_lessons > 0 && (
                                             <li className="flex items-center gap-3">
-                                                <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
+                                                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                                                 <span>{offer.theory_lessons} Teoritimer</span>
                                             </li>
                                         )}
                                         {offer.driving_lessons > 0 && (
                                             <li className="flex items-center gap-3">
-                                                <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
+                                                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                                                 <span>{offer.driving_lessons} Kørelektioner (45 min)</span>
                                             </li>
                                         )}
                                         {offer.track_required && (
                                             <li className="flex items-center gap-3">
-                                                <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
+                                                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                                                 <span>Manøvrebane</span>
                                             </li>
                                         )}
                                         {offer.slippery_required && (
                                             <li className="flex items-center gap-3">
-                                                <CheckCircle2 className="text-primary h-5 w-5 shrink-0" />
+                                                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                                                 <span>Køreteknisk anlæg (Glatbane)</span>
                                             </li>
                                         )}
                                     </ul>
-                                    {offer.type === 'primary' ? (
-                                        <Link
-                                            href={bookOffer.url(offer.slug)}
-                                            className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
-                                        >
-                                            Tilmeld dig nu <ArrowRight className="ml-2 h-5 w-5" />
-                                        </Link>
-                                    ) : (
-                                        <Link
-                                            href={contact.url()}
-                                            className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-accent"
-                                        >
-                                            Kontakt os
-                                        </Link>
-                                    )}
+                                    <Link
+                                        href={bookOffer.url(offer.slug)}
+                                        className="mt-auto inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                                    >
+                                        Tilmeld dig nu <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Link>
                                 </motion.div>
                             ))
                         ) : (
@@ -113,6 +107,51 @@ export default function Pakker({ offers = [] }: { offers?: MarketingOffer[] }) {
                             </div>
                         )}
                     </div>
+
+                    {addons.length > 0 ? (
+                        <motion.section
+                            initial={{ opacity: 0, y: 16 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: '-40px' }}
+                            transition={{ duration: 0.45 }}
+                            className="mx-auto mt-20 max-w-3xl"
+                        >
+                            <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900">
+                                Tilvalg og ekstra priser
+                            </h2>
+                            <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">
+                                Tillæg ud over din hovedpakke — bookes typisk sammen med eller efter tilmelding. Kontakt os
+                                gerne, hvis du er i tvivl om, hvad du skal bruge.
+                            </p>
+                            <ul className="mt-10 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50 shadow-sm">
+                                {addons.map((addon) => (
+                                    <li
+                                        key={addon.id}
+                                        className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="font-semibold text-slate-900">{addon.name}</p>
+                                            {addon.description ? (
+                                                <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                                                    {addon.description}
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                        <p className="shrink-0 text-lg font-semibold tabular-nums text-slate-900">
+                                            {Number(addon.price).toLocaleString('da-DK')}{' '}
+                                            <span className="text-base font-medium text-slate-500">kr.</span>
+                                        </p>
+                                    </li>
+                                ))}
+                            </ul>
+                            <p className="mt-8 text-center text-sm text-slate-600">
+                                Spørgsmål om tilvalg?{' '}
+                                <Link href={contact.url()} className="font-medium text-primary hover:underline">
+                                    Skriv til os
+                                </Link>
+                            </p>
+                        </motion.section>
+                    ) : null}
                 </div>
             </main>
         </MarketingLayout>

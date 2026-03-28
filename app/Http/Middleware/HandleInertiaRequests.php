@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\OfferType;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -53,6 +54,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'marketingOffers' => fn (): array => Offer::query()
+                ->where('type', OfferType::Primary)
                 ->orderBy('name')
                 ->get()
                 ->map(fn (Offer $offer) => [

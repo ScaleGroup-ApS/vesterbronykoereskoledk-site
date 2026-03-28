@@ -62,7 +62,28 @@ test('guests can view the packages page with offers', function () {
             ->component('marketing/pakker')
             ->has('offers', 1)
             ->where('offers.0.name', 'Basis')
+            ->has('addons', 0)
         );
+});
+
+test('packages page lists primary offers and addons separately', function () {
+    Offer::factory()->create(['name' => 'Lovpakke A']);
+    Offer::factory()->addon()->create(['name' => 'Ekstra time']);
+
+    get(route('marketing.packages'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('marketing/pakker')
+            ->has('offers', 1)
+            ->where('offers.0.name', 'Lovpakke A')
+            ->has('addons', 1)
+            ->where('addons.0.name', 'Ekstra time'));
+});
+
+test('marketing package detail returns 404 for addon offers', function () {
+    $addon = Offer::factory()->addon()->create();
+
+    get(route('marketing.packages.show', $addon))->assertNotFound();
 });
 
 test('guests can view a single package page by slug', function () {
@@ -75,6 +96,33 @@ test('guests can view a single package page by slug', function () {
             ->where('offer.name', 'Basis Pakke')
             ->where('offer.slug', $offer->slug)
         );
+});
+
+test('shared marketing offers only include primary packages', function () {
+    Offer::factory()->create(['name' => 'Primær']);
+    Offer::factory()->addon()->create(['name' => 'Tilvalg']);
+
+    get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('marketingOffers', 1)
+            ->where('marketingOffers.0.name', 'Primær'));
+});
+
+test('home page uses first primary offer when next course is an addon offer', function () {
+    $primary = Offer::factory()->create(['slug' => 'primær-hold', 'name' => 'Primær']);
+    $addon = Offer::factory()->addon()->create(['slug' => 'addon-kursus']);
+    $start = now()->addDays(10)->startOfHour();
+    Course::factory()->for($addon)->create([
+        'start_at' => $start,
+        'end_at' => $start->copy()->addMonths(3),
+    ]);
+
+    get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('nextHoldStartAt', $start->toIso8601String())
+            ->where('tilmeldHoldstartOfferSlug', 'primær-hold'));
 });
 
 test('guests can view til elever content pages', function () {
