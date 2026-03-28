@@ -7,6 +7,8 @@ use App\Http\Controllers\Bookings\BookingNoteController;
 use App\Http\Controllers\Bookings\BookingSkillsController;
 use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\MessageController;
+use App\Http\Controllers\Curriculum\CurriculumMaterialUnlockController;
+use App\Http\Controllers\Curriculum\CurriculumTopicController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Enrollment\EnrollmentApprovalController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
@@ -105,6 +107,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('enrollments/{enrollment}/reject', [EnrollmentApprovalController::class, 'reject'])->name('enrollments.reject');
 
     Route::get('timeline', TimelineController::class)->middleware('role:admin')->name('timeline.index');
+
+    Route::get('offers/{offer}/curriculum', [CurriculumTopicController::class, 'index'])
+        ->name('curriculum.index');
+    Route::post('offers/{offer}/curriculum', [CurriculumTopicController::class, 'store'])
+        ->name('curriculum.store');
+    Route::put('curriculum/{topic}', [CurriculumTopicController::class, 'update'])
+        ->name('curriculum.update');
+    Route::delete('curriculum/{topic}', [CurriculumTopicController::class, 'destroy'])
+        ->name('curriculum.destroy');
+    Route::patch('offers/{offer}/curriculum/materials', CurriculumMaterialUnlockController::class)
+        ->name('curriculum.materials.unlock');
 
     Route::middleware('role:admin')->prefix('marketing')->name('marketing.')->group(function () {
         Route::get('home-copy', [MarketingHomeCopyController::class, 'edit'])->name('home-copy.edit');
