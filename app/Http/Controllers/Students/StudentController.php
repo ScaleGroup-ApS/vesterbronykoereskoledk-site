@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Students\StoreStudentRequest;
 use App\Http\Requests\Students\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Models\Booking;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,6 +78,22 @@ class StudentController extends Controller
                         'created_at' => $event->created_at->toISOString(),
                     ])
                 : [],
+            'pastBookings' => $student->bookings()
+                ->with('instructor:id,name')
+                ->orderByDesc('starts_at')
+                ->limit(20)
+                ->get()
+                ->map(fn (Booking $b) => [
+                    'id' => $b->id,
+                    'type_label' => $b->type->label(),
+                    'range_label' => $b->starts_at->translatedFormat('d. MMM yyyy').' · '.$b->starts_at->format('H:i'),
+                    'status' => $b->status->value,
+                    'attended' => $b->attended,
+                    'instructor_note' => $b->instructor_note,
+                    'driving_skills' => $b->driving_skills ?? [],
+                ])
+                ->values()
+                ->all(),
         ]);
     }
 
