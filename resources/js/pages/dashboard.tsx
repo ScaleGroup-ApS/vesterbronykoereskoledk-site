@@ -4,7 +4,7 @@ import type { DateClickArg } from '@fullcalendar/interaction';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { Award, CalendarDays, CheckCircle2, ClipboardCheck, GraduationCap, TrendingDown, TrendingUp, Users, Wallet, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import { CourseHoldCapacityChart } from '@/components/dashboard/course-hold-capacity-chart';
@@ -42,11 +42,16 @@ type AdminKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
     total_outstanding: number;
+    monthly_revenue: number;
+    completed_this_month: number;
+    exam_pass_rate: number;
 };
 
 type InstructorKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
+    my_students: number;
+    completed_this_month: number;
 };
 
 type Kpis = AdminKpis | InstructorKpis | Record<string, never>;
@@ -190,6 +195,21 @@ export default function Dashboard({
                                 label="Udestående saldo"
                                 value={`${Number((kpis as AdminKpis).total_outstanding).toLocaleString('da-DK')} kr.`}
                             />
+                            <KpiCard
+                                icon={TrendingUp}
+                                label="Omsætning (denne måned)"
+                                value={`${Number((kpis as AdminKpis).monthly_revenue).toLocaleString('da-DK')} kr.`}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as AdminKpis).completed_this_month}
+                            />
+                            <KpiCard
+                                icon={Award}
+                                label="Beståelsesrate (prøver)"
+                                value={`${(kpis as AdminKpis).exam_pass_rate}%`}
+                            />
                         </>
                     )}
                     {isInstructor && (
@@ -203,6 +223,16 @@ export default function Dashboard({
                                 icon={TrendingDown}
                                 label="No-show rate"
                                 value={`${(kpis as InstructorKpis).no_show_rate}%`}
+                            />
+                            <KpiCard
+                                icon={GraduationCap}
+                                label="Mine elever"
+                                value={(kpis as InstructorKpis).my_students}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as InstructorKpis).completed_this_month}
                             />
                         </>
                     )}

@@ -1,9 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, Send, X } from 'lucide-react';
 import { useState } from 'react';
+import BulkStudentLoginLinkController from '@/actions/App/Http/Controllers/Students/BulkStudentLoginLinkController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -61,6 +63,21 @@ export default function StudentsIndex({
     filters: Filters;
 }) {
     const [search, setSearch] = useState(filters.search);
+    const [selected, setSelected] = useState<number[]>([]);
+    const [bulkProcessing, setBulkProcessing] = useState(false);
+
+    const allOnPage = students.data.map((s) => s.id);
+    const allSelected = allOnPage.length > 0 && allOnPage.every((id) => selected.includes(id));
+
+    function toggleAll() {
+        setSelected(allSelected ? [] : allOnPage);
+    }
+
+    function toggleOne(id: number) {
+        setSelected((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+        );
+    }
 
     function applyFilters(overrides: Partial<Filters>) {
         const params = { ...filters, ...overrides };
@@ -83,6 +100,21 @@ export default function StudentsIndex({
     function clearSearch() {
         setSearch('');
         applyFilters({ search: '' });
+    }
+
+    function handleBulkLoginLinks() {
+        if (selected.length === 0) {
+            return;
+        }
+        setBulkProcessing(true);
+        router.post(BulkStudentLoginLinkController().url, { student_ids: selected }, {
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setBulkProcessing(false);
+                setSelected([]);
+            },
+        });
     }
 
     return (
@@ -134,12 +166,32 @@ export default function StudentsIndex({
                             <SelectItem value="dropped_out">Frafaldet</SelectItem>
                         </SelectContent>
                     </Select>
+
+                    {selected.length > 0 && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleBulkLoginLinks}
+                            disabled={bulkProcessing}
+                            className="ml-auto gap-1.5"
+                        >
+                            <Send className="size-4" />
+                            Send login link ({selected.length})
+                        </Button>
+                    )}
                 </div>
 
                 <div className="rounded-xl border">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b text-left">
+                                <th className="px-4 py-3">
+                                    <Checkbox
+                                        checked={allSelected}
+                                        onCheckedChange={toggleAll}
+                                        aria-label="Vælg alle"
+                                    />
+                                </th>
                                 <th
                                     className="cursor-pointer px-4 py-3 font-medium select-none"
                                     onClick={() => handleSort('name')}
@@ -176,22 +228,51 @@ export default function StudentsIndex({
                                 <tr
                                     key={student.id}
                                     className="cursor-pointer border-b transition-colors hover:bg-muted/50 last:border-0"
-                                    onClick={() => router.visit(show(student).url)}
                                 >
-                                    <td className="px-4 py-3 font-medium">{student.user.name}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{student.user.email}</td>
-                                    <td className="px-4 py-3 text-muted-foreground">{student.phone ?? '-'}</td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                                        <Checkbox
+                                            checked={selected.includes(student.id)}
+                                            onCheckedChange={() => toggleOne(student.id)}
+                                            aria-label={`Vælg ${student.user.name}`}
+                                        />
+                                    </td>
+                                    <td
+                                        className="px-4 py-3 font-medium"
+                                        onClick={() => router.visit(show(student).url)}
+                                    >
+                                        {student.user.name}
+                                    </td>
+                                    <td
+                                        className="px-4 py-3 text-muted-foreground"
+                                        onClick={() => router.visit(show(student).url)}
+                                    >
+                                        {student.user.email}
+                                    </td>
+                                    <td
+                                        className="px-4 py-3 text-muted-foreground"
+                                        onClick={() => router.visit(show(student).url)}
+                                    >
+                                        {student.phone ?? '-'}
+                                    </td>
+                                    <td
+                                        className="px-4 py-3"
+                                        onClick={() => router.visit(show(student).url)}
+                                    >
                                         <Badge variant={statusVariants[student.status] ?? 'secondary'}>
                                             {statusLabels[student.status] ?? student.status}
                                         </Badge>
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">{student.start_date ?? '-'}</td>
+                                    <td
+                                        className="px-4 py-3 text-muted-foreground"
+                                        onClick={() => router.visit(show(student).url)}
+                                    >
+                                        {student.start_date ?? '-'}
+                                    </td>
                                 </tr>
                             ))}
                             {students.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                                         Ingen elever fundet.
                                     </td>
                                 </tr>

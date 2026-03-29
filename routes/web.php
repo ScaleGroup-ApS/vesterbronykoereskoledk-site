@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
 
     Route::post('students/{student}/login-link', StudentLoginLinkController::class)->name('students.login-link');
+    Route::post('students/bulk-login-links', \App\Http\Controllers\Students\BulkStudentLoginLinkController::class)->name('students.bulk-login-links');
     Route::post('students/{student}/media', [StudentMediaController::class, 'store'])->name('students.media.store');
     Route::get('students/{student}/media/{media}', [StudentMediaController::class, 'show'])->name('students.media.show');
     Route::delete('students/{student}/media/{media}', [StudentMediaController::class, 'destroy'])->name('students.media.destroy');
