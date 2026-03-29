@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, Download, FileText, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import Heading from '@/components/heading';
 import { StudentJourneyRoadmap } from '@/components/student/student-journey-roadmap';
 import type { JourneyStep, UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
@@ -26,28 +26,6 @@ type Balance = {
     outstanding: number;
 };
 
-type Material = {
-    id: number;
-    name: string;
-    file_name: string;
-    mime_type: string;
-    size: string;
-    url: string;
-    offer_name: string;
-};
-
-type PastBooking = {
-    id: number;
-    type: string;
-    type_label: string;
-    status: string;
-    starts_at: string;
-    ends_at: string;
-    range_label: string;
-    attended: boolean | null;
-    attendance_recorded_at: string | null;
-};
-
 const readinessTypeLabels: Record<string, string> = {
     driving_lesson: 'Køretimer',
     theory_lesson: 'Teorilektioner',
@@ -55,13 +33,6 @@ const readinessTypeLabels: Record<string, string> = {
     slippery_driving: 'Glat bane',
     theory_exam: 'Teoriprøve',
     practical_exam: 'Køreprøve',
-};
-
-const bookingStatusLabels: Record<string, string> = {
-    scheduled: 'Planlagt',
-    completed: 'Gennemført',
-    cancelled: 'Annulleret',
-    no_show: 'Udeblevet',
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -73,14 +44,12 @@ export default function StudentForloeb({
     journey,
     readiness,
     balance,
-    materials,
-    past_bookings,
+    curriculum_by_lesson,
 }: {
     journey: JourneyPayload;
     readiness: Readiness;
     balance: Balance;
-    materials: Material[];
-    past_bookings: PastBooking[];
+    curriculum_by_lesson: Record<number, string>;
 }) {
     return (
         <StudentLayout breadcrumbs={breadcrumbs}>
@@ -90,7 +59,7 @@ export default function StudentForloeb({
                     <div className="space-y-1">
                         <Heading title="Mit forløb" />
                         <p className="text-sm text-muted-foreground">
-                            Her ser du din progression, materiale og tidligere bookinger.
+                            Se din progression, krav til eksamen og læringsplan.
                         </p>
                     </div>
                     <Link
@@ -149,69 +118,23 @@ export default function StudentForloeb({
                     )}
                 </section>
 
-                {materials.length > 0 && (
+                {Object.keys(curriculum_by_lesson).length > 0 && (
                     <section className="space-y-3">
-                        <Heading variant="small" title="Kursusmateriale" />
+                        <Heading variant="small" title="Læringsplan" />
                         <div className="divide-y rounded-xl border">
-                            {materials.map((material) => (
-                                <a
-                                    key={material.id}
-                                    href={material.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/50"
-                                >
-                                    <div className="flex min-w-0 items-center gap-2">
-                                        <FileText className="size-4 shrink-0 text-muted-foreground" />
-                                        <span className="truncate text-sm">{material.name}</span>
+                            {Object.entries(curriculum_by_lesson)
+                                .sort(([a], [b]) => Number(a) - Number(b))
+                                .map(([lessonNumber, title]) => (
+                                    <div key={lessonNumber} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                                        <span className="w-20 shrink-0 text-xs font-medium text-muted-foreground">
+                                            Lektion {lessonNumber}
+                                        </span>
+                                        <span>{title}</span>
                                     </div>
-                                    <div className="flex shrink-0 items-center gap-3">
-                                        <span className="text-xs text-muted-foreground">{material.size}</span>
-                                        <Download className="size-4 text-muted-foreground" />
-                                    </div>
-                                </a>
-                            ))}
+                                ))}
                         </div>
                     </section>
                 )}
-
-                <section className="space-y-3">
-                    <Heading variant="small" title="Historik" />
-                    {past_bookings.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Ingen tidligere bookinger endnu.</p>
-                    ) : (
-                        <div className="overflow-x-auto rounded-xl border">
-                            <table className="w-full min-w-[640px] text-left text-sm">
-                                <thead>
-                                    <tr className="border-b bg-muted/40 text-muted-foreground">
-                                        <th className="px-4 py-3 font-medium">Tidspunkt</th>
-                                        <th className="px-4 py-3 font-medium">Type</th>
-                                        <th className="px-4 py-3 font-medium">Status</th>
-                                        <th className="px-4 py-3 font-medium">Fremmøde</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y">
-                                    {past_bookings.map((row) => (
-                                        <tr key={row.id} className="hover:bg-muted/30">
-                                            <td className="px-4 py-3 whitespace-nowrap">{row.range_label}</td>
-                                            <td className="px-4 py-3">{row.type_label}</td>
-                                            <td className="px-4 py-3">
-                                                <Badge variant="outline" className="font-normal">
-                                                    {bookingStatusLabels[row.status] ?? row.status}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-4 py-3 text-muted-foreground">
-                                                {row.attended === true && 'Mødt'}
-                                                {row.attended === false && 'Ikke mødt'}
-                                                {row.attended === null && '—'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </section>
             </div>
         </StudentLayout>
     );

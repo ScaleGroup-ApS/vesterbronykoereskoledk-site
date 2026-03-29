@@ -10,6 +10,7 @@ use App\Enums\BookingType;
 use App\Enums\DrivingSkill;
 use App\Enums\EnrollmentStatus;
 use App\Models\Booking;
+use App\Models\CurriculumTopic;
 use App\Models\Enrollment;
 use App\Models\Student;
 use App\Models\User;
@@ -66,6 +67,16 @@ class ComposeStudentPortal
         ])
         )->values()->all();
 
+        $completedTheoryCount = $student->bookings()
+            ->where('type', BookingType::TheoryLesson->value)
+            ->where('status', BookingStatus::Completed->value)
+            ->count();
+
+        $offerIds = $student->offers->pluck('id');
+        $nextTheoryTopic = CurriculumTopic::whereIn('offer_id', $offerIds)
+            ->where('lesson_number', $completedTheoryCount + 1)
+            ->first(['lesson_number', 'title', 'description']);
+
         $props = [
             'pendingEnrollment' => $pendingEnrollment ? [
                 'status' => $pendingEnrollment->status->value,
@@ -79,9 +90,24 @@ class ComposeStudentPortal
             'materials' => $materials,
         ];
 
+        $props['next_theory_topic'] = $nextTheoryTopic ? [
+            'lesson_number' => $nextTheoryTopic->lesson_number,
+            'title' => $nextTheoryTopic->title,
+            'description' => $nextTheoryTopic->description,
+        ] : null;
+
         if ($includePastBookings) {
             $props['past_bookings'] = $this->pastBookings($student);
         }
+
+        $curriculumByLesson = CurriculumTopic::whereIn('offer_id', $offerIds)
+            ->orderBy('lesson_number')
+            ->get(['lesson_number', 'title'])
+            ->keyBy('lesson_number')
+            ->map(fn ($t) => $t->title)
+            ->all();
+
+        $props['curriculum_by_lesson'] = $curriculumByLesson;
 
         return $props;
     }
