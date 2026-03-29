@@ -20,6 +20,7 @@ use App\Http\Controllers\Marketing\MarketingController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
+use App\Http\Controllers\Student\StudentCalendarController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentFaerdighederController;
 use App\Http\Controllers\Student\StudentForloebController;
@@ -80,6 +81,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('student/faerdigheder', StudentFaerdighederController::class)
         ->middleware('role:student')
         ->name('student.faerdigheder');
+
+    Route::get('student/kalender', StudentCalendarController::class)
+        ->middleware('role:student')
+        ->name('student.kalender');
 
     Route::get('student/offers/{offer}/materials/{media}', StudentOfferMaterialController::class)
         ->middleware('role:student')
