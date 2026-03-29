@@ -21,6 +21,7 @@ class ComposeStudentPortal
         private CheckExamReadiness $readiness,
         private CalculateBalance $balance,
         private BuildStudentJourney $buildStudentJourney,
+        private BuildStudentLessonProgress $buildStudentLessonProgress,
     ) {}
 
     /**
@@ -86,6 +87,7 @@ class ComposeStudentPortal
             'booking' => $nextLesson,
             'journey' => $this->buildStudentJourney->handle($student),
             'readiness' => $this->readiness->handle($student),
+            'lesson_progress' => $this->buildStudentLessonProgress->handle($student),
             'balance' => $this->balance->handle($student),
             'materials' => $materials,
         ];

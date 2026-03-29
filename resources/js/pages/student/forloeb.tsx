@@ -3,6 +3,8 @@ import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import Heading from '@/components/heading';
 import { StudentJourneyRoadmap } from '@/components/student/student-journey-roadmap';
 import type { JourneyStep, UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
+import { StudentLessonProgress } from '@/components/student/student-lesson-progress';
+import type { LessonProgressRow } from '@/components/student/student-lesson-progress';
 import { Badge } from '@/components/ui/badge';
 import StudentLayout from '@/layouts/student-layout';
 import { dashboard, forloeb } from '@/routes/student';
@@ -45,11 +47,13 @@ export default function StudentForloeb({
     readiness,
     balance,
     curriculum_by_lesson,
+    lesson_progress,
 }: {
     journey: JourneyPayload;
     readiness: Readiness;
     balance: Balance;
     curriculum_by_lesson: Record<number, string>;
+    lesson_progress: LessonProgressRow[];
 }) {
     return (
         <StudentLayout breadcrumbs={breadcrumbs}>
@@ -74,6 +78,15 @@ export default function StudentForloeb({
                 <section className="space-y-3">
                     <Heading variant="small" title="Kørekortsforløb" />
                     <StudentJourneyRoadmap steps={journey.steps} upcomingBookings={journey.upcoming_bookings} />
+                </section>
+
+                <section className="space-y-3">
+                    <Heading variant="small" title="Dit pakkeforløb" />
+                    <p className="text-sm text-muted-foreground">
+                        Krav fra dit tilbud sammenholdt med, hvad der er gennemført, booket frem i tiden, og hvad der
+                        mangler.
+                    </p>
+                    <StudentLessonProgress rows={lesson_progress} variant="full" />
                 </section>
 
                 <section className="space-y-3">

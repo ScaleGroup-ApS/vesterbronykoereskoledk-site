@@ -2,6 +2,8 @@ import { Head, Link, router, usePoll } from '@inertiajs/react';
 import { ArrowRight, Clock, CreditCard, Loader2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
+import { StudentLessonProgress } from '@/components/student/student-lesson-progress';
+import type { LessonProgressRow } from '@/components/student/student-lesson-progress';
 import StudentLayout from '@/layouts/student-layout';
 import { dashboard, forloeb } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
@@ -32,10 +34,12 @@ export default function StudentDashboard({
     pendingEnrollment,
     booking,
     balance,
+    lesson_progress,
 }: {
     pendingEnrollment: PendingEnrollment;
     booking: NextHighlight;
     balance: Balance;
+    lesson_progress: LessonProgressRow[];
 }) {
     const wasPending = useRef(!!pendingEnrollment);
     const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
@@ -109,6 +113,11 @@ export default function StudentDashboard({
                     ) : (
                         <p className="text-sm text-muted-foreground">Ingen kommende aktivitet registreret endnu.</p>
                     )}
+                </div>
+
+                <div className="space-y-3">
+                    <Heading variant="small" title="Dit pakkeforløb" />
+                    <StudentLessonProgress rows={lesson_progress} variant="compact" />
                 </div>
 
                 {balance.outstanding > 0 && (

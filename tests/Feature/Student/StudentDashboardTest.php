@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Booking;
+use App\Models\Offer;
 use App\Models\Student;
 use App\Models\User;
 
@@ -25,6 +26,7 @@ test('student can visit their dashboard', function () {
             ->has('booking')
             ->has('journey')
             ->has('readiness')
+            ->has('lesson_progress')
             ->has('balance')
             ->has('materials')
         );
@@ -42,6 +44,7 @@ test('student can visit mit forloeb page', function () {
             ->has('past_bookings')
             ->has('journey')
             ->has('readiness')
+            ->has('lesson_progress')
             ->has('balance')
             ->has('materials')
         );
@@ -96,5 +99,35 @@ test('student dashboard booking is null when no upcoming bookings', function () 
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('booking', null)
+        );
+});
+
+test('student lesson progress reflects offer requirements and scheduled bookings', function () {
+    $user = User::factory()->student()->create();
+    $student = Student::factory()->for($user)->create();
+    $offer = Offer::factory()->create([
+        'theory_lessons' => 4,
+        'driving_lessons' => 2,
+        'track_required' => false,
+        'slippery_required' => false,
+        'requires_theory_exam' => false,
+        'requires_practical_exam' => false,
+    ]);
+    $student->offers()->attach($offer);
+
+    Booking::factory()->for($student)->theory()->create([
+        'starts_at' => now()->addDays(3),
+        'ends_at' => now()->addDays(3)->addHour(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('student.forloeb'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('lesson_progress.0.type', 'theory_lesson')
+            ->where('lesson_progress.0.required', 4)
+            ->where('lesson_progress.0.completed', 0)
+            ->where('lesson_progress.0.scheduled', 1)
+            ->where('lesson_progress.0.remaining', 3)
         );
 });
