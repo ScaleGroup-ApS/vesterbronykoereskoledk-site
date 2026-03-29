@@ -51,6 +51,16 @@ type InstructorKpis = {
 
 type Kpis = AdminKpis | InstructorKpis | Record<string, never>;
 
+type TodayBooking = {
+    id: number;
+    student_name: string;
+    type_label: string;
+    time: string;
+    vehicle: string | null;
+    status: string;
+    attended: boolean | null;
+};
+
 type Enrollment = {
     id: number;
     student_name: string;
@@ -104,11 +114,13 @@ export default function Dashboard({
     courses = [],
     enrollments = [],
     offers = [],
+    todayBookings = [],
 }: {
     kpis: Kpis;
     courses?: CourseEvent[];
     enrollments: Enrollment[];
     offers?: Offer[];
+    todayBookings?: TodayBooking[];
 }) {
     const isAdmin = 'total_students' in kpis;
     const isInstructor = 'upcoming_bookings' in kpis && !isAdmin;
@@ -200,6 +212,48 @@ export default function Dashboard({
                         </div>
                     )}
                 </div>
+
+                {(isAdmin || isInstructor) && todayBookings.length > 0 && (
+                    <div className="rounded-xl border p-5">
+                        <Heading title="Dagens program" description="Bookinger i dag" />
+                        <div className="mt-4 divide-y">
+                            {todayBookings.map((b) => (
+                                <div key={b.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-28 text-sm font-medium">{b.time}</span>
+                                        <div>
+                                            <p className="text-sm font-medium">{b.student_name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {b.type_label}
+                                                {b.vehicle && ` · ${b.vehicle}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {b.attended === true && (
+                                            <Badge variant="default">Mødt</Badge>
+                                        )}
+                                        {b.attended === false && (
+                                            <Badge variant="destructive">Ikke mødt</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'cancelled' && (
+                                            <Badge variant="secondary">Annulleret</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'scheduled' && (
+                                            <Badge variant="outline">Planlagt</Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {(isAdmin || isInstructor) && todayBookings.length === 0 && (
+                    <div className="rounded-xl border px-4 py-6 text-center text-sm text-muted-foreground">
+                        Ingen bookinger i dag.
+                    </div>
+                )}
 
                 {isAdmin && (
                     <div className="rounded-xl border p-5">
