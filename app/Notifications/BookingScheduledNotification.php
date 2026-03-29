@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BookingCancelledNotification extends Notification implements ShouldQueue
+class BookingScheduledNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -24,10 +24,14 @@ class BookingCancelledNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $label = $this->booking->type->label();
+        $when = $this->booking->starts_at->timezone(config('app.timezone'))->translatedFormat('l j. F Y \k\l. H:i');
+
         return (new MailMessage)
-            ->subject('Din booking er annulleret')
+            ->subject('Ny booking hos '.config('app.name'))
             ->greeting("Hej {$notifiable->name}!")
-            ->line("Din booking ({$this->booking->type->label()}) d. {$this->booking->starts_at->format('d/m/Y H:i')} er blevet annulleret.")
+            ->line("Der er booket en ny aktivitet: {$label}.")
+            ->line("Tidspunkt: {$when}")
             ->action('Se kalenderen', route('student.kalender'));
     }
 
