@@ -1,9 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Pencil, Plus, Trash2 } from 'lucide-react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { index as curriculumIndex } from '@/actions/App/Http/Controllers/Curriculum/CurriculumTopicController';
 import { index, create, edit, destroy } from '@/routes/offers';
 import type { BreadcrumbItem } from '@/types';
 
@@ -14,6 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 type Offer = {
     id: number;
     name: string;
+    slug: string;
     price: string;
     type: string;
     driving_lessons: number;
@@ -79,6 +81,11 @@ export default function OffersIndex({ offers }: { offers: PaginatedOffers }) {
                                     <td className="px-4 py-3 text-muted-foreground">{offer.theory_lessons}</td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" size="sm" asChild title="Læringsplan">
+                                                <Link href={curriculumIndex(offer).url}>
+                                                    <BookOpen className="size-4" />
+                                                </Link>
+                                            </Button>
                                             <Button variant="ghost" size="sm" asChild>
                                                 <Link href={edit(offer).url}>
                                                     <Pencil className="size-4" />
