@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
+    CalendarDays,
     Car,
     CreditCard,
     FileText,
@@ -11,6 +12,8 @@ import {
     MessageSquareQuote,
     ScrollText,
     Tag,
+    UserPlus,
+    Users,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -24,15 +27,18 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { index as enrollmentsIndex } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import { dashboard } from '@/routes';
+import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
+import { index as coursesIndex } from '@/routes/courses';
 import { edit as editHomeCopy } from '@/routes/marketing/home-copy';
 import { index as testimonialsIndex } from '@/routes/marketing/testimonials';
 import { index as valueBlocksIndex } from '@/routes/marketing/value-blocks';
-import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
+import { index as teamsIndex } from '@/routes/teams';
 import { index as timelineIndex } from '@/routes/timeline';
 import { index as vehiclesIndex } from '@/routes/vehicles';
 import type { NavItem } from '@/types';
@@ -49,11 +55,11 @@ const mainNavItems: NavItem[] = [
         href: studentsIndex(),
         icon: GraduationCap,
     },
-    // {
-    //     title: 'Hold',
-    //     href: teamsIndex(),
-    //     icon: Users,
-    // },
+    {
+        title: 'Hold',
+        href: teamsIndex(),
+        icon: Users,
+    },
     {
         title: 'Køretøjer',
         href: vehiclesIndex(),
@@ -69,16 +75,16 @@ const mainNavItems: NavItem[] = [
         href: coursesIndex(),
         icon: BookOpen,
     },
-    // {
-    //     title: 'Tilmeldinger',
-    //     href: enrollmentsIndex(),
-    //     icon: CalendarDays,
-    // },
-    // {
-    //     title: 'Bookinger',
-    //     href: bookingsIndex(),
-    //     icon: CalendarDays,
-    // },
+    {
+        title: 'Tilmeldinger',
+        href: enrollmentsIndex(),
+        icon: UserPlus,
+    },
+    {
+        title: 'Bookinger',
+        href: bookingsIndex(),
+        icon: CalendarDays,
+    },
     {
         title: 'Betalinger',
         href: paymentsIndex(),
