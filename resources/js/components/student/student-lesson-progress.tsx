@@ -12,9 +12,11 @@ export type LessonProgressRow = {
 type Props = {
     rows: LessonProgressRow[];
     variant?: 'compact' | 'full';
+    /** When false, hides the help text under the full table (e.g. staff booking form). */
+    showFooterNote?: boolean;
 };
 
-export function StudentLessonProgress({ rows, variant = 'full' }: Props) {
+export function StudentLessonProgress({ rows, variant = 'full', showFooterNote = true }: Props) {
     if (rows.length === 0) {
         return (
             <p className="text-sm text-muted-foreground">
@@ -73,10 +75,12 @@ export function StudentLessonProgress({ rows, variant = 'full' }: Props) {
                     ))}
                 </tbody>
             </table>
-            <p className="border-t bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
-                «Mangler» er hvad der endnu ikke er fuldført eller booket frem i tiden. Kontakt os for at booke flere
-                timer.
-            </p>
+            {showFooterNote ? (
+                <p className="border-t bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+                    «Mangler» er hvad der endnu ikke er fuldført eller booket frem i tiden. Kontakt os for at booke
+                    flere timer.
+                </p>
+            ) : null}
         </div>
     );
 }

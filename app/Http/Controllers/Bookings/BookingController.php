@@ -6,6 +6,7 @@ use App\Actions\Bookings\CancelBooking;
 use App\Actions\Bookings\CheckBookingConflicts;
 use App\Actions\Bookings\CreateBooking;
 use App\Actions\Bookings\UpdateBooking;
+use App\Actions\Student\BuildStudentLessonProgress;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use App\Http\Controllers\Controller;
@@ -16,6 +17,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,9 +51,22 @@ class BookingController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request, BuildStudentLessonProgress $buildStudentLessonProgress): Response
     {
         $this->authorize('create', Booking::class);
+
+        $selectedStudentId = $request->filled('student_id')
+            ? $request->integer('student_id')
+            : null;
+
+        $studentLessonProgress = null;
+
+        if ($selectedStudentId !== null) {
+            $student = Student::find($selectedStudentId);
+            if ($student !== null) {
+                $studentLessonProgress = $buildStudentLessonProgress->handle($student);
+            }
+        }
 
         return Inertia::render('bookings/create', [
             'students' => Student::with('user')->get(),
@@ -61,6 +76,8 @@ class BookingController extends Controller
                 'value' => $t->value,
                 'label' => $t->label(),
             ]),
+            'selectedStudentId' => $selectedStudentId,
+            'studentLessonProgress' => $studentLessonProgress,
         ]);
     }
 
