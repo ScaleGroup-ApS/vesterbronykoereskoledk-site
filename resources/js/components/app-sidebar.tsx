@@ -44,7 +44,7 @@ import { index as vehiclesIndex } from '@/routes/vehicles';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const sharedNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -76,11 +76,6 @@ const mainNavItems: NavItem[] = [
         icon: BookOpen,
     },
     {
-        title: 'Tilmeldinger',
-        href: enrollmentsIndex(),
-        icon: UserPlus,
-    },
-    {
         title: 'Bookinger',
         href: bookingsIndex(),
         icon: CalendarDays,
@@ -94,6 +89,14 @@ const mainNavItems: NavItem[] = [
         title: 'Chat',
         href: chatIndex(),
         icon: MessageSquare,
+    },
+];
+
+const adminOnlyNavItems: NavItem[] = [
+    {
+        title: 'Tilmeldinger',
+        href: enrollmentsIndex(),
+        icon: UserPlus,
     },
     {
         title: 'Hændelseslog',
@@ -124,7 +127,11 @@ const marketingNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const showMarketing = auth.user?.role === 'admin';
+    const isAdmin = auth.user?.role === 'admin';
+
+    const mainNavItems = isAdmin
+        ? [...sharedNavItems, ...adminOnlyNavItems]
+        : sharedNavItems;
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -142,7 +149,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                {showMarketing ? <NavMain items={marketingNavItems} groupLabel="Hjemmeside" /> : null}
+                {isAdmin ? <NavMain items={marketingNavItems} groupLabel="Hjemmeside" /> : null}
             </SidebarContent>
 
             <SidebarFooter>

@@ -11,6 +11,13 @@ import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/Booki
 import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { index, create, update, destroy } from '@/routes/bookings';
 import { store as storeAttendance } from '@/routes/bookings/attendance';
@@ -33,7 +40,20 @@ const ALL_SKILLS = [
     { key: 'emergency_stop', label: 'Nødstop' },
 ] as const;
 
-export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }) {
+type FilterOption = { id: number; name: string };
+type Filters = { instructor_id: string; vehicle_id: string };
+
+export default function BookingsIndex({
+    bookings,
+    instructors = [],
+    vehicles = [],
+    filters,
+}: {
+    bookings: BookingEvent[];
+    instructors?: FilterOption[];
+    vehicles?: FilterOption[];
+    filters?: Filters;
+}) {
     const [selected, setSelected] = useState<BookingEvent | null>(null);
 
     const events = bookings.map((b) => ({
@@ -93,17 +113,60 @@ export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }
                     </Button>
                 </div>
 
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3 text-sm">
-                    {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
-                        <span key={type} className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block size-3 rounded-sm"
-                                style={{ backgroundColor: bookingTypeColors[type] }}
-                            />
-                            {label}
-                        </span>
-                    ))}
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Legend */}
+                    <div className="flex flex-wrap gap-3 text-sm">
+                        {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
+                            <span key={type} className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block size-3 rounded-sm"
+                                    style={{ backgroundColor: bookingTypeColors[type] }}
+                                />
+                                {label}
+                            </span>
+                        ))}
+                    </div>
+
+                    <div className="ml-auto flex gap-2">
+                        <Select
+                            value={filters?.instructor_id || 'all'}
+                            onValueChange={(v) => {
+                                router.get(index().url, {
+                                    ...(filters?.vehicle_id ? { vehicle_id: filters.vehicle_id } : {}),
+                                    ...(v !== 'all' ? { instructor_id: v } : {}),
+                                }, { preserveState: true, replace: true });
+                            }}
+                        >
+                            <SelectTrigger className="w-44 bg-background">
+                                <SelectValue placeholder="Alle instruktører" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Alle instruktører</SelectItem>
+                                {instructors.map((i) => (
+                                    <SelectItem key={i.id} value={String(i.id)}>{i.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters?.vehicle_id || 'all'}
+                            onValueChange={(v) => {
+                                router.get(index().url, {
+                                    ...(filters?.instructor_id ? { instructor_id: filters.instructor_id } : {}),
+                                    ...(v !== 'all' ? { vehicle_id: v } : {}),
+                                }, { preserveState: true, replace: true });
+                            }}
+                        >
+                            <SelectTrigger className="w-44 bg-background">
+                                <SelectValue placeholder="Alle køretøjer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Alle køretøjer</SelectItem>
+                                {vehicles.map((v) => (
+                                    <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="rounded-xl border p-4">

@@ -27,8 +27,17 @@ class BookingController extends Controller
     {
         $this->authorize('viewAny', Booking::class);
 
-        $bookings = Booking::with(['student.user', 'instructor', 'vehicle'])
-            ->orderBy('starts_at')
+        $query = Booking::with(['student.user', 'instructor', 'vehicle']);
+
+        if ($instructorId = request()->input('instructor_id')) {
+            $query->where('instructor_id', $instructorId);
+        }
+
+        if ($vehicleId = request()->input('vehicle_id')) {
+            $query->where('vehicle_id', $vehicleId);
+        }
+
+        $bookings = $query->orderBy('starts_at')
             ->get()
             ->map(fn (Booking $booking) => [
                 'id' => $booking->id,
@@ -38,7 +47,9 @@ class BookingController extends Controller
                 'type' => $booking->type->value,
                 'status' => $booking->status->value,
                 'instructor' => $booking->instructor?->name,
+                'instructor_id' => $booking->instructor_id,
                 'vehicle' => $booking->vehicle?->name,
+                'vehicle_id' => $booking->vehicle_id,
                 'notes' => $booking->notes,
                 'attended' => $booking->attended,
                 'attendance_recorded_at' => $booking->attendance_recorded_at?->toIso8601String(),
@@ -46,8 +57,25 @@ class BookingController extends Controller
                 'driving_skills' => $booking->driving_skills,
             ]);
 
+        $instructors = User::query()
+            ->where('role', 'instructor')
+            ->orWhere('role', 'admin')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $vehicles = Vehicle::query()
+            ->where('active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return Inertia::render('bookings/index', [
             'bookings' => $bookings,
+            'instructors' => $instructors,
+            'vehicles' => $vehicles,
+            'filters' => [
+                'instructor_id' => request()->input('instructor_id', ''),
+                'vehicle_id' => request()->input('vehicle_id', ''),
+            ],
         ]);
     }
 

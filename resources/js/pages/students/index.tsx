@@ -1,8 +1,17 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, X } from 'lucide-react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { index, create, show } from '@/routes/students';
 import type { BreadcrumbItem, PaginatedStudents } from '@/types';
@@ -28,7 +37,54 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
     dropped_out: 'destructive',
 };
 
-export default function StudentsIndex({ students }: { students: PaginatedStudents }) {
+type Filters = {
+    search: string;
+    status: string;
+    sort: string;
+    direction: string;
+};
+
+function SortIcon({ field, filters }: { field: string; filters: Filters }) {
+    if (filters.sort !== field) {
+        return <ArrowUpDown className="ml-1 inline size-3 text-muted-foreground/50" />;
+    }
+    return filters.direction === 'asc'
+        ? <ArrowUp className="ml-1 inline size-3" />
+        : <ArrowDown className="ml-1 inline size-3" />;
+}
+
+export default function StudentsIndex({
+    students,
+    filters,
+}: {
+    students: PaginatedStudents;
+    filters: Filters;
+}) {
+    const [search, setSearch] = useState(filters.search);
+
+    function applyFilters(overrides: Partial<Filters>) {
+        const params = { ...filters, ...overrides };
+        router.get(index().url, Object.fromEntries(Object.entries(params).filter(([, v]) => v)), {
+            preserveState: true,
+            replace: true,
+        });
+    }
+
+    function handleSort(field: string) {
+        const direction = filters.sort === field && filters.direction === 'asc' ? 'desc' : 'asc';
+        applyFilters({ sort: field, direction });
+    }
+
+    function handleSearch(e: React.FormEvent) {
+        e.preventDefault();
+        applyFilters({ search });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        applyFilters({ search: '' });
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Elever" />
@@ -44,15 +100,75 @@ export default function StudentsIndex({ students }: { students: PaginatedStudent
                     </Button>
                 </div>
 
+                <div className="flex flex-wrap items-center gap-3">
+                    <form onSubmit={handleSearch} className="relative flex-1 sm:max-w-xs">
+                        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Søg navn, email eller telefon…"
+                            className="pl-9 pr-8"
+                        />
+                        {search && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        )}
+                    </form>
+                    <Select
+                        value={filters.status || 'all'}
+                        onValueChange={(v) => applyFilters({ status: v === 'all' ? '' : v })}
+                    >
+                        <SelectTrigger className="w-40 bg-background">
+                            <SelectValue placeholder="Alle statusser" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Alle statusser</SelectItem>
+                            <SelectItem value="active">Aktiv</SelectItem>
+                            <SelectItem value="inactive">Inaktiv</SelectItem>
+                            <SelectItem value="graduated">Udlært</SelectItem>
+                            <SelectItem value="dropped_out">Frafaldet</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
                 <div className="rounded-xl border">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b text-left">
-                                <th className="px-4 py-3 font-medium">Navn</th>
-                                <th className="px-4 py-3 font-medium">Email</th>
+                                <th
+                                    className="cursor-pointer px-4 py-3 font-medium select-none"
+                                    onClick={() => handleSort('name')}
+                                >
+                                    Navn
+                                    <SortIcon field="name" filters={filters} />
+                                </th>
+                                <th
+                                    className="cursor-pointer px-4 py-3 font-medium select-none"
+                                    onClick={() => handleSort('email')}
+                                >
+                                    Email
+                                    <SortIcon field="email" filters={filters} />
+                                </th>
                                 <th className="px-4 py-3 font-medium">Telefon</th>
-                                <th className="px-4 py-3 font-medium">Status</th>
-                                <th className="px-4 py-3 font-medium">Startdato</th>
+                                <th
+                                    className="cursor-pointer px-4 py-3 font-medium select-none"
+                                    onClick={() => handleSort('status')}
+                                >
+                                    Status
+                                    <SortIcon field="status" filters={filters} />
+                                </th>
+                                <th
+                                    className="cursor-pointer px-4 py-3 font-medium select-none"
+                                    onClick={() => handleSort('start_date')}
+                                >
+                                    Startdato
+                                    <SortIcon field="start_date" filters={filters} />
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
