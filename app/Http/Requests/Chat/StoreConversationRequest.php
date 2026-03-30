@@ -20,6 +20,8 @@ class StoreConversationRequest extends FormRequest
             'user_id' => ['required_without:name', 'nullable', 'exists:users,id'],
             'name' => ['required_without:user_id', 'nullable', 'string', 'max:255'],
             'type' => ['in:direct,group'],
+            'user_ids' => ['nullable', 'array'],
+            'user_ids.*' => ['exists:users,id'],
         ];
     }
 }

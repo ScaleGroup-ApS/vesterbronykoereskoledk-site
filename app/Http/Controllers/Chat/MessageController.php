@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\StreamedResponse;
 use Illuminate\Support\Facades\Auth;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MessageController extends Controller
 {
@@ -19,10 +20,12 @@ class MessageController extends Controller
         $this->authorize('view', $conversation);
 
         $messages = $conversation->messages()
-            ->with('user')
+            ->with(['user', 'media'])
             ->paginate(50);
 
         $conversation->users()->updateExistingPivot(Auth::id(), ['last_read_at' => now()]);
+
+        $messages->getCollection()->transform(fn (Message $message) => $this->formatMessage($message));
 
         return response()->json($messages);
     }
@@ -39,7 +42,13 @@ class MessageController extends Controller
             'body' => $request->validated('body'),
         ]);
 
-        $message->load('user');
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $message->addMedia($file)->toMediaCollection('attachments');
+            }
+        }
+
+        $message->load(['user', 'media']);
 
         $conversation->users()
             ->where('user_id', '!=', $sender->id)
@@ -48,12 +57,7 @@ class MessageController extends Controller
                 new NewMessageNotification($sender->name, (string) $conversation->id)
             ));
 
-        return response()->json([
-            'id' => $message->id,
-            'body' => $message->body,
-            'user' => ['id' => $message->user->id, 'name' => $message->user->name],
-            'created_at' => $message->created_at->toISOString(),
-        ], 201);
+        return response()->json($this->formatMessage($message), 201);
     }
 
     public function stream(Conversation $conversation, Request $request): StreamedResponse
@@ -67,7 +71,7 @@ class MessageController extends Controller
                 $messages = Message::query()
                     ->where('conversation_id', $conversation->id)
                     ->where('created_at', '>', $after)
-                    ->with('user')
+                    ->with(['user', 'media'])
                     ->orderBy('created_at')
                     ->get();
 
@@ -76,17 +80,36 @@ class MessageController extends Controller
 
                     yield new \Illuminate\Http\StreamedEvent(
                         event: 'message',
-                        data: json_encode([
-                            'id' => $message->id,
-                            'body' => $message->body,
-                            'user' => ['id' => $message->user->id, 'name' => $message->user->name],
-                            'created_at' => $message->created_at->toISOString(),
-                        ]),
+                        data: json_encode($this->formatMessage($message)),
                     );
                 }
 
                 sleep(1);
             }
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatMessage(Message $message): array
+    {
+        return [
+            'id' => $message->id,
+            'body' => $message->body,
+            'user' => ['id' => $message->user->id, 'name' => $message->user->name],
+            'created_at' => $message->created_at->toISOString(),
+            'attachments' => $message->getMedia('attachments')->map(fn (Media $media) => [
+                'id' => $media->id,
+                'name' => $media->file_name,
+                'mime_type' => $media->mime_type,
+                'size' => $media->size,
+                'url' => route('chat.messages.attachments.show', [
+                    'conversation' => $message->conversation_id,
+                    'message' => $message->id,
+                    'media' => $media->id,
+                ]),
+            ])->values()->all(),
+        ];
     }
 }

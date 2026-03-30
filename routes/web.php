@@ -6,6 +6,8 @@ use App\Http\Controllers\Bookings\BookingController;
 use App\Http\Controllers\Bookings\BookingNoteController;
 use App\Http\Controllers\Bookings\BookingSkillsController;
 use App\Http\Controllers\Chat\ConversationController;
+use App\Http\Controllers\Chat\ConversationMemberController;
+use App\Http\Controllers\Chat\MessageAttachmentController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\Curriculum\CurriculumMaterialUnlockController;
 use App\Http\Controllers\Curriculum\CurriculumTopicController;
@@ -122,6 +124,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('chat/{conversation}/messages', [MessageController::class, 'index'])->name('chat.messages.index');
     Route::post('chat/{conversation}/messages', [MessageController::class, 'store'])->name('chat.messages.store');
     Route::get('chat/{conversation}/stream', [MessageController::class, 'stream'])->name('chat.messages.stream');
+    Route::get('chat/{conversation}/messages/{message}/attachments/{media}', [MessageAttachmentController::class, 'show'])->name('chat.messages.attachments.show');
+    Route::post('chat/{conversation}/members', [ConversationMemberController::class, 'store'])->name('chat.members.store');
+    Route::delete('chat/{conversation}/members/{user}', [ConversationMemberController::class, 'destroy'])->name('chat.members.destroy');
 
     Route::get('enrollments', [EnrollmentApprovalController::class, 'index'])->name('enrollments.index');
     Route::post('enrollments/{enrollment}/approve', [EnrollmentApprovalController::class, 'approve'])->name('enrollments.approve');
