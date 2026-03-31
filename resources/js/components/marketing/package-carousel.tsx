@@ -1,13 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { MarketingOffer } from '@/types/marketing-offer';
 import { show as bookOffer } from '@/routes/enrollment';
-import { show as packageShow } from '@/routes/marketing/packages';
 import { packages } from '@/routes/marketing';
+import { show as packageShow } from '@/routes/marketing/packages';
+import type { MarketingOffer } from '@/types/marketing-offer';
 
 type Props = {
     items: MarketingOffer[];
@@ -98,10 +98,7 @@ export function PackageCarousel({ items }: Props) {
     const perView = usePackagesPerView();
     const maxStart = Math.max(0, items.length - perView);
     const [start, setStart] = useState(0);
-
-    useEffect(() => {
-        setStart((s) => Math.min(s, maxStart));
-    }, [maxStart]);
+    const clampedStart = Math.min(start, maxStart);
 
     const go = useCallback(
         (dir: number) => {
@@ -140,7 +137,7 @@ export function PackageCarousel({ items }: Props) {
         return null;
     }
 
-    const visible = items.slice(start, start + perView);
+    const visible = items.slice(clampedStart, clampedStart + perView);
     const showNav = maxStart > 0;
     const dotCount = maxStart + 1;
 
@@ -149,7 +146,7 @@ export function PackageCarousel({ items }: Props) {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((offer) => (
                     <motion.div
-                        key={`${start}-${offer.id}`}
+                        key={`${clampedStart}-${offer.id}`}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
@@ -196,10 +193,10 @@ export function PackageCarousel({ items }: Props) {
                                     key={i}
                                     type="button"
                                     role="tab"
-                                    aria-selected={i === start}
+                                    aria-selected={i === clampedStart}
                                     className={cn(
                                         'h-2.5 w-2.5 rounded-full transition-colors',
-                                        i === start ? 'bg-mk-accent' : 'bg-mk-muted/30 hover:bg-mk-muted/50',
+                                        i === clampedStart ? 'bg-mk-accent' : 'bg-mk-muted/30 hover:bg-mk-muted/50',
                                     )}
                                     onClick={() => setStart(i)}
                                 />

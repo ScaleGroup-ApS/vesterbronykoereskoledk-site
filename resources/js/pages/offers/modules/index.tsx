@@ -1,7 +1,7 @@
 import { Head, Form, Link, router } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from 'lucide-react';
+import { edit as editOffer, index as offersIndex } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import {
-    index as modulesIndex,
     store as storeModule,
     edit as editModule,
     destroy as destroyModule,
@@ -18,7 +18,6 @@ import {
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { edit as editOffer, index as offersIndex } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import type { BreadcrumbItem } from '@/types';
 
 type Offer = { id: number; name: string };

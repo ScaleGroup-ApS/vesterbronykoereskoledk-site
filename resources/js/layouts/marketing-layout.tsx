@@ -2,15 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 import { Car, ChevronRight, LayoutDashboard, Mail, MapPin, Menu, Phone, UserRound, X } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { MarketingNavDesktop, MarketingNavMobile } from '@/components/marketing/marketing-nav';
-import type { MarketingContact } from '@/types/marketing-contact';
 import { cn } from '@/lib/utils';
 import { dashboard, home, login } from '@/routes';
 import {
-    contact,
     cookies,
     privacy,
     terms,
 } from '@/routes/marketing';
+import type { MarketingContact } from '@/types/marketing-contact';
 
 type MarketingLayoutProps = {
     children: ReactNode;

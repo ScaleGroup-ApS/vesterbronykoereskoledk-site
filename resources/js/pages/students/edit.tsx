@@ -1,11 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
 import { update } from '@/actions/App/Http/Controllers/Students/StudentController';
 import Heading from '@/components/heading';
-import { useLoginLink } from '@/hooks/use-login-link';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoginLink } from '@/hooks/use-login-link';
 import AppLayout from '@/layouts/app-layout';
 import { index, show } from '@/routes/students';
 import type { BreadcrumbItem, Student } from '@/types';

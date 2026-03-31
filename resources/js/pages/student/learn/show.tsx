@@ -1,6 +1,6 @@
 import { Head, Form, Link } from '@inertiajs/react';
-import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Circle, ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import {
     show as showPage,
     markComplete,

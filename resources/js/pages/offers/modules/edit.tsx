@@ -1,9 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
+import { edit as editOffer, index as offersIndex } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import {
     index as modulesIndex,
     update as updateModule,
 } from '@/actions/App/Http/Controllers/Offers/OfferModuleController';
-import { edit as editOffer, index as offersIndex } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';

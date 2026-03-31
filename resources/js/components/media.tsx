@@ -1,19 +1,11 @@
-import { createContext, useContext, useRef, useState } from 'react';
 import { router, usePoll } from '@inertiajs/react';
-import { CheckCircle, FileText, Loader2, Trash2 } from 'lucide-react';
-import { FilePond, registerPlugin } from 'react-filepond';
-import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
-import 'filepond/dist/filepond.min.css';
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+import { CheckCircle, FileText, Loader2, Trash2, Upload } from 'lucide-react';
+import { createContext, useContext, useRef, useState } from 'react';
 import {
     store as storeMedia,
     show as showMedia,
     destroy as destroyMedia,
 } from '@/actions/App/Http/Controllers/MediaController';
-
-registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,12 +24,6 @@ const COLLECTION_TYPES: Record<string, string[]> = {
 
 function collectionFor(file: File, allowed: string[]): string {
     return allowed.find((c) => COLLECTION_TYPES[c]?.includes(file.type)) ?? allowed[0];
-}
-
-function maxSizeFor(collections: string[]): string {
-    if (collections.includes('video'))       return '2000MB';
-    if (collections.includes('attachments')) return '50MB';
-    return '10MB';
 }
 
 // ── Context ───────────────────────────────────────────────────────────────────
@@ -202,31 +188,34 @@ function MediaAttachments({ items }: { items: AttachmentMedia[] }) {
 
 function MediaUpload({ collections = Object.keys(COLLECTION_TYPES) }: { collections?: string[] }) {
     const { upload } = useMedia();
-    const pondRef = useRef<FilePond>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        upload(file, collectionFor(file, collections), () => {
+            if (inputRef.current) inputRef.current.value = '';
+            setUploading(false);
+        });
+    }
+
+    const accepted = collections.flatMap((c) => COLLECTION_TYPES[c] ?? []).join(',');
+
     return (
-        <FilePond
-            ref={pondRef}
-            onaddfile={(_error, fileItem) => {
-                const file = fileItem.file as File;
-                setUploading(true);
-                upload(file, collectionFor(file, collections), () => {
-                    pondRef.current?.removeFiles();
-                    setUploading(false);
-                });
-            }}
-            allowMultiple={false}
-            disabled={uploading}
-            acceptedFileTypes={collections.flatMap((c) => COLLECTION_TYPES[c] ?? [])}
-            maxFileSize={maxSizeFor(collections)}
-            labelIdle='Træk & slip eller <span class="filepond--label-action">vælg fil</span>'
-            labelFileTypeNotAllowed="Filtypen er ikke tilladt"
-            fileValidateTypeLabelExpectedTypes="Tilladt: billede, video, PDF, Word, ZIP"
-            labelMaxFileSizeExceeded="Filen er for stor"
-            labelMaxFileSize="Maks: {filesize}"
-            credits={false}
-        />
+        <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+            <Upload className="size-4 shrink-0" />
+            <span>{uploading ? 'Uploader…' : 'Vælg fil'}</span>
+            <input
+                ref={inputRef}
+                type="file"
+                accept={accepted}
+                onChange={handleChange}
+                disabled={uploading}
+                className="sr-only"
+            />
+        </label>
     );
 }
 
