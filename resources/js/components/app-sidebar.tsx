@@ -2,19 +2,14 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     CalendarDays,
-    Car,
     CreditCard,
-    FileText,
     GraduationCap,
     LayoutGrid,
-    ListChecks,
     MessageSquare,
-    MessageSquareQuote,
     ScrollText,
     Tag,
     UserCog,
     UserPlus,
-    Users,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -34,15 +29,10 @@ import { dashboard } from '@/routes';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
 import { index as coursesIndex } from '@/routes/courses';
-import { edit as editHomeCopy } from '@/routes/marketing/home-copy';
-import { index as testimonialsIndex } from '@/routes/marketing/testimonials';
-import { index as valueBlocksIndex } from '@/routes/marketing/value-blocks';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
-import { index as teamsIndex } from '@/routes/teams';
 import { index as timelineIndex } from '@/routes/timeline';
-import { index as vehiclesIndex } from '@/routes/vehicles';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -57,17 +47,7 @@ const sharedNavItems: NavItem[] = [
         href: studentsIndex(),
         icon: GraduationCap,
     },
-    {
-        title: 'Hold',
-        href: teamsIndex(),
-        icon: Users,
-    },
-    {
-        title: 'Køretøjer',
-        href: vehiclesIndex(),
-        icon: Car,
-    },
-    {
+{
         title: 'Tilbud',
         href: offersIndex(),
         icon: Tag,
@@ -114,24 +94,6 @@ const adminOnlyNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [];
 
-const marketingNavItems: NavItem[] = [
-    {
-        title: 'Forsidetekster',
-        href: editHomeCopy.url(),
-        icon: FileText,
-    },
-    {
-        title: 'USP-blokke',
-        href: valueBlocksIndex.url(),
-        icon: ListChecks,
-    },
-    {
-        title: 'Udtalelser',
-        href: testimonialsIndex.url(),
-        icon: MessageSquareQuote,
-    },
-];
-
 export function AppSidebar() {
     const { auth } = usePage().props;
     const isAdmin = auth.user?.role === 'admin';
@@ -156,7 +118,6 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
-                {isAdmin ? <NavMain items={marketingNavItems} groupLabel="Hjemmeside" /> : null}
             </SidebarContent>
 
             <SidebarFooter>
