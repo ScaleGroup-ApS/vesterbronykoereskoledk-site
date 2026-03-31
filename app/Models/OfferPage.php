@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\OfferPageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class OfferPage extends Model implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\OfferPageFactory> */
+    /** @use HasFactory<OfferPageFactory> */
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
@@ -25,8 +26,8 @@ class OfferPage extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments');
-        $this->addMediaCollection('images');
-        $this->addMediaCollection('video');
+        $this->addMediaCollection('banner')->singleFile();
+        $this->addMediaCollection('video')->singleFile();
     }
 
     public function registerMediaConversions(?Media $media = null): void

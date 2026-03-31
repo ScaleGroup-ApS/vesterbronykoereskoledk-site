@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\OfferModule;
+use App\Models\OfferPage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\OfferPage>
+ * @extends Factory<OfferPage>
  */
 class OfferPageFactory extends Factory
 {
@@ -16,7 +17,6 @@ class OfferPageFactory extends Factory
             'offer_module_id' => OfferModule::factory(),
             'title' => $this->faker->sentence(4),
             'body' => $this->faker->optional()->paragraphs(3, true),
-            'video_url' => null,
             'sort_order' => $this->faker->numberBetween(0, 100),
         ];
     }

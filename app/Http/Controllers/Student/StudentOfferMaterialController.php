@@ -18,7 +18,7 @@ class StudentOfferMaterialController extends Controller
         abort_unless(
             $media->model_type === Offer::class
                 && $media->model_id === $offer->id
-                && in_array($media->collection_name, ['images', 'video']),
+                && $media->collection_name === 'materials',
             404
         );
 

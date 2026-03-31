@@ -18,11 +18,16 @@ class OfferPageController extends Controller
     {
         $maxOrder = $module->pages()->max('sort_order') ?? -1;
 
-        $module->pages()->create([
+        $page = $module->pages()->create([
             'title' => $request->validated('title'),
             'body' => $request->validated('body'),
             'sort_order' => $maxOrder + 1,
         ]);
+
+        if ($request->hasFile('attachment')) {
+            $page->addMediaFromRequest('attachment')
+                ->toMediaCollection('attachments');
+        }
 
         return redirect()->route('offers.modules.index', $offer)
             ->with('success', 'Side oprettet.');
@@ -42,28 +47,30 @@ class OfferPageController extends Controller
             'size' => $media->human_readable_size,
         ])->values()->all();
 
-        $images = $page->getMedia('images')->map(fn ($media) => [
-            'id' => $media->id,
-            'file_name' => $media->file_name,
-            'size' => $media->human_readable_size,
-        ])->values()->all();
+        $bannerMedia = $page->getFirstMedia('banner');
+        $banner = $bannerMedia ? [
+            'id' => $bannerMedia->id,
+            'file_name' => $bannerMedia->file_name,
+            'size' => $bannerMedia->human_readable_size,
+        ] : null;
 
-        $videos = $page->getMedia('video')->map(fn ($media) => [
-            'id' => $media->id,
-            'file_name' => $media->file_name,
-            'size' => $media->human_readable_size,
-            'processing' => ! $media->hasGeneratedConversion('thumbnail'),
-            'thumbnail_url' => $media->hasGeneratedConversion('thumbnail')
-                ? $media->getUrl('thumbnail')
+        $videoMedia = $page->getFirstMedia('video');
+        $video = $videoMedia ? [
+            'id' => $videoMedia->id,
+            'file_name' => $videoMedia->file_name,
+            'size' => $videoMedia->human_readable_size,
+            'processing' => ! $videoMedia->hasGeneratedConversion('thumbnail'),
+            'thumbnail_url' => $videoMedia->hasGeneratedConversion('thumbnail')
+                ? $videoMedia->getUrl('thumbnail')
                 : null,
-        ])->values()->all();
+        ] : null;
 
         return Inertia::render('offers/pages/edit', [
             'offer' => $offer,
             'module' => $module,
             'page' => array_merge($page->toArray(), ['attachments' => $attachments]),
-            'images' => $images,
-            'videos' => $videos,
+            'banner' => $banner,
+            'video' => $video,
         ]);
     }
 

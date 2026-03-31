@@ -125,12 +125,10 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Velkommen til kurset',
                         'body' => '<p>Velkommen til dit køreuddannelsesforløb. I dette kursus gennemgår vi alt, hvad du skal vide for at bestå køreprøven og blive en sikker trafikant.</p><p>Du vil møde teori, øvelser og quizzer undervejs. Tag det i dit eget tempo.</p>',
-                        'video_url' => null,
                     ],
                     [
                         'title' => 'Lovgivning og regler',
                         'body' => '<p>Færdselsloven er grundlaget for al trafik i Danmark. Det er vigtigt at kende de vigtigste regler:</p><ul><li>Vigepligt og forkørselsret</li><li>Hastighedsgrænser</li><li>Alkohol og spiritus</li></ul>',
-                        'video_url' => null,
                         'quiz' => [
                             [
                                 'question' => 'Hvad er den generelle hastighedsgrænse på motorvej i Danmark?',
@@ -154,7 +152,6 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Kryds og vigepligt',
                         'body' => '<p>I kryds gælder særlige regler. Høj- og venstre-reglen siger, at du skal give vigepligt til køretøjer, der kommer fra højre.</p><p>Undtagelser gælder ved skilte og afmærkning på vejen.</p>',
-                        'video_url' => null,
                         'quiz' => [
                             [
                                 'question' => 'Hvem har forkørselsret i et kryds uden skilte?',
@@ -167,7 +164,6 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Motorvejskørsel',
                         'body' => '<p>Motorvejskørsel kræver særlig opmærksomhed. Husk:</p><ul><li>Tjek spejle og blinde vinkler ved ind- og udkørsel</li><li>Hold afstand til forankørende</li><li>Overhaling foregår altid i venstre side</li></ul>',
-                        'video_url' => null,
                     ],
                 ],
             ],
@@ -177,12 +173,10 @@ class DatabaseSeeder extends Seeder
                     [
                         'title' => 'Bilen og dens betjening',
                         'body' => '<p>Inden du kører, skal du tjekke:</p><ul><li>Spejle justeret korrekt</li><li>Sæde og rat i rigtig position</li><li>Sikkerhedssele spændt</li><li>Instrumenter og advarselslamper</li></ul>',
-                        'video_url' => null,
                     ],
                     [
                         'title' => 'Køreprøven – hvad sker der?',
                         'body' => '<p>Køreprøven består af to dele:</p><ol><li><strong>Teoriprøven</strong> – 25 spørgsmål, max 5 fejl</li><li><strong>Praktisk prøve</strong> – ca. 45 minutters kørsel med en censor</li></ol><p>Vær rolig og kør, som du har lært det. Censoren vurderer din adfærd i trafikken.</p>',
-                        'video_url' => null,
                         'quiz' => [
                             [
                                 'question' => 'Hvor mange spørgsmål indeholder teoriprøven?',
@@ -211,7 +205,6 @@ class DatabaseSeeder extends Seeder
                     'offer_module_id' => $module->id,
                     'title' => $pageData['title'],
                     'body' => $pageData['body'],
-                    'video_url' => $pageData['video_url'],
                     'sort_order' => $pageSort + 1,
                 ]);
 

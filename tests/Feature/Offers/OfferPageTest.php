@@ -25,21 +25,6 @@ test('admin can create a page', function () {
     expect(OfferPage::first()->body)->toBe('<p>Velkomst</p>');
 });
 
-test('admin can create a page with video url', function () {
-    $admin = User::factory()->create();
-    $offer = Offer::factory()->create();
-    $module = OfferModule::factory()->for($offer)->create();
-
-    $this->actingAs($admin)
-        ->post(route('offers.modules.pages.store', [$offer, $module]), [
-            'title' => 'Video lektion',
-            'video_url' => 'https://www.youtube.com/embed/abc123',
-        ])
-        ->assertRedirect();
-
-    expect(OfferPage::first()->video_url)->toBe('https://www.youtube.com/embed/abc123');
-});
-
 test('admin can create a page with file attachment', function () {
     Storage::fake('media');
     $admin = User::factory()->create();
