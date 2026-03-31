@@ -1,6 +1,7 @@
 <?php
 
-use App\Actions\Students\CreateStudent;
+use App\Actions\Student\CreateStudent;
+use App\Actions\Student\SendStudentLoginLink;
 use App\Mail\StudentMagicLoginMail;
 use Illuminate\Support\Facades\Mail;
 
@@ -12,7 +13,7 @@ it('sends magic link on student creation and allows login', function () {
     Mail::fake();
 
     $action = app(CreateStudent::class);
-    
+
     $studentData = [
         'name' => 'Magic Link User',
         'email' => 'magic@example.com',
@@ -21,14 +22,16 @@ it('sends magic link on student creation and allows login', function () {
         'start_date' => now()->toDateString(),
     ];
 
-    $student = $action->handle($studentData, app(\App\Actions\Students\SendStudentLoginLink::class));
+    $student = $action->handle($studentData, app(SendStudentLoginLink::class));
 
     $magicLink = '';
     Mail::assertSent(StudentMagicLoginMail::class, function ($mail) use (&$magicLink, $student) {
         if ($mail->hasTo($student->user->email)) {
             $magicLink = $mail->url;
+
             return true;
         }
+
         return false;
     });
 
@@ -39,6 +42,6 @@ it('sends magic link on student creation and allows login', function () {
     $response = get($magicLink);
 
     assertAuthenticatedAs($student->user);
-    
+
     $response->assertRedirect(route('student.dashboard'));
 });

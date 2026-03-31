@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Actions\Students;
+namespace App\Actions\Student;
 
 use App\Enums\StudentStatus;
 use App\Enums\UserRole;
 use App\Events\StudentEnrolled;
+use App\Mail\StudentMagicLoginMail;
 use App\Models\Student;
 use App\Models\User;
-use App\Mail\StudentMagicLoginMail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use MagicLink\Actions\LoginAction;
 use MagicLink\MagicLink;
-use Illuminate\Support\Str;
 
 class CreateStudent
 {
@@ -46,7 +44,7 @@ class CreateStudent
 
             $action = new LoginAction($user, redirect()->route('student.dashboard'));
             $url = MagicLink::create($action)->url;
-            
+
             Mail::to($user)->send(
                 new StudentMagicLoginMail($user->name, $url)
             );

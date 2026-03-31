@@ -9,14 +9,13 @@ use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StudentCalendarController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $student = $request->user()->student;
-
-        abort_unless($student, 404);
+        $student = $request->user()->student ?? throw new NotFoundHttpException;
 
         $events = [];
 

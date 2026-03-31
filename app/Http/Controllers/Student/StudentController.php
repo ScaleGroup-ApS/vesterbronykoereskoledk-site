@@ -1,20 +1,34 @@
 <?php
 
-namespace App\Http\Controllers\Students;
+namespace App\Http\Controllers\Student;
 
 use App\Actions\Progression\BuildStudentJourney;
 use App\Actions\Progression\CheckExamReadiness;
-use App\Actions\Students\CreateStudent;
-use App\Actions\Students\DeleteStudent;
-use App\Actions\Students\UpdateStudent;
+use App\Actions\Student\CreateStudent;
+use App\Actions\Student\DeleteStudent;
+use App\Actions\Student\SendStudentLoginLink;
+use App\Actions\Student\UpdateStudent;
+use App\Events\BookingCancelled;
+use App\Events\BookingCompleted;
+use App\Events\BookingCreated;
+use App\Events\BookingNoShow;
+use App\Events\EnrollmentApproved;
+use App\Events\EnrollmentRejected;
+use App\Events\EnrollmentRequested;
+use App\Events\OfferAssigned;
+use App\Events\PaymentRecorded;
+use App\Events\StripePaymentCompleted;
+use App\Events\StudentEnrolled;
+use App\Events\StudentStatusChanged;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Students\StoreStudentRequest;
-use App\Http\Requests\Students\UpdateStudentRequest;
+use App\Http\Requests\Student\StoreStudentRequest;
+use App\Http\Requests\Student\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Models\Booking;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 use Thunk\Verbs\Models\VerbEvent;
@@ -94,7 +108,7 @@ class StudentController extends Controller
 
         $student->load(['user', 'media', 'offers']);
 
-        $canEdit = $request->user()->isAdmin();
+        $canEdit = Gate::allows('update', $student);
 
         return Inertia::render('students/show', [
             'student' => $student,
@@ -161,32 +175,57 @@ class StudentController extends Controller
             ->with('success', 'Elev slettet.');
     }
 
+    public function sendLoginLink(Student $student, SendStudentLoginLink $action): RedirectResponse
+    {
+        $this->authorize('update', $student);
+
+        $student->load('user');
+        $action->handle($student);
+
+        return back()->with('success', 'Login link sendt til '.$student->user->name.'.');
+    }
+
+    public function storeMedia(Request $request, Student $student): RedirectResponse
+    {
+        $this->authorize('update', $student);
+
+        $request->validate([
+            'file' => ['required', 'file', 'max:10240'],
+            'collection' => ['required', 'string', 'in:documents,photos'],
+        ]);
+
+        $student->addMediaFromRequest('file')
+            ->toMediaCollection($request->input('collection'));
+
+        return back()->with('success', 'Fil uploadet.');
+    }
+
     private function eventSummary(VerbEvent $event): string
     {
-        return match (class_basename($event->type)) {
-            'BookingCreated' => 'Booking oprettet',
-            'BookingCompleted' => 'Booking gennemført',
-            'BookingCancelled' => 'Booking annulleret',
-            'BookingNoShow' => 'Elev mødte ikke op',
-            'EnrollmentRequested' => 'Tilmelding anmodet',
-            'EnrollmentApproved' => 'Tilmelding godkendt',
-            'EnrollmentRejected' => 'Tilmelding afvist',
-            'StudentEnrolled' => 'Elev tilmeldt',
-            'StudentStatusChanged' => 'Status ændret → '.($event->data['new_status'] ?? ''),
-            'OfferAssigned' => 'Tilbud tildelt: '.($event->data['offer_name'] ?? ''),
-            'PaymentRecorded' => 'Betaling registreret: '.number_format((float) ($event->data['amount'] ?? 0), 2, ',', '.').' kr.',
-            'StripePaymentCompleted' => 'Stripe-betaling gennemført',
+        return match ($event->type) {
+            BookingCreated::class => 'Booking oprettet',
+            BookingCompleted::class => 'Booking gennemført',
+            BookingCancelled::class => 'Booking annulleret',
+            BookingNoShow::class => 'Elev mødte ikke op',
+            EnrollmentRequested::class => 'Tilmelding anmodet',
+            EnrollmentApproved::class => 'Tilmelding godkendt',
+            EnrollmentRejected::class => 'Tilmelding afvist',
+            StudentEnrolled::class => 'Elev tilmeldt',
+            StudentStatusChanged::class => 'Status ændret → '.($event->data['new_status'] ?? ''),
+            OfferAssigned::class => 'Tilbud tildelt: '.($event->data['offer_name'] ?? ''),
+            PaymentRecorded::class => 'Betaling registreret: '.number_format((float) ($event->data['amount'] ?? 0), 2, ',', '.').' kr.',
+            StripePaymentCompleted::class => 'Stripe-betaling gennemført',
             default => class_basename($event->type),
         };
     }
 
     private function eventCategory(VerbEvent $event): string
     {
-        return match (class_basename($event->type)) {
-            'BookingCreated', 'BookingCompleted', 'BookingCancelled', 'BookingNoShow' => 'booking',
-            'EnrollmentRequested', 'EnrollmentApproved', 'EnrollmentRejected' => 'enrollment',
-            'StudentEnrolled', 'StudentStatusChanged' => 'student',
-            'OfferAssigned', 'PaymentRecorded', 'StripePaymentCompleted' => 'payment',
+        return match ($event->type) {
+            BookingCreated::class, BookingCompleted::class, BookingCancelled::class, BookingNoShow::class => 'booking',
+            EnrollmentRequested::class, EnrollmentApproved::class, EnrollmentRejected::class => 'enrollment',
+            StudentEnrolled::class, StudentStatusChanged::class => 'student',
+            OfferAssigned::class, PaymentRecorded::class, StripePaymentCompleted::class => 'payment',
             default => 'other',
         };
     }

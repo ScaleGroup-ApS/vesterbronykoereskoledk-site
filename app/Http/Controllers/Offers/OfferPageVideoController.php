@@ -30,9 +30,7 @@ class OfferPageVideoController extends Controller
     {
         $this->authorize('update', $page);
 
-        $media = $page->getFirstMedia('video');
-
-        abort_unless($media !== null, 404);
+        $media = $page->getFirstMedia('video') ?? abort(404);
 
         return $media->toInlineResponse($media->file_name);
     }

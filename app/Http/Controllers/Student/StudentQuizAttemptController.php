@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Student;
 
-use App\Enums\EnrollmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StoreQuizAttemptRequest;
-use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\OfferModule;
 use App\Models\OfferPage;
@@ -16,17 +14,9 @@ class StudentQuizAttemptController extends Controller
 {
     public function store(StoreQuizAttemptRequest $request, Offer $offer, OfferModule $module, OfferPage $page): RedirectResponse
     {
+        $this->authorize('learnContent', $offer);
+
         $student = $request->user()->student;
-
-        abort_unless($student, 404);
-
-        $isEnrolled = Enrollment::query()
-            ->where('student_id', $student->id)
-            ->where('offer_id', $offer->id)
-            ->where('status', EnrollmentStatus::Completed)
-            ->exists();
-
-        abort_unless($isEnrolled, 403);
 
         $answers = $request->validated('answers');
         $questions = $page->quizQuestions()->orderBy('sort_order')->get();

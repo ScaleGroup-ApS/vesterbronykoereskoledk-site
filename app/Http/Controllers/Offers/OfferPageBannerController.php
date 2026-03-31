@@ -30,9 +30,7 @@ class OfferPageBannerController extends Controller
     {
         $this->authorize('update', $page);
 
-        $media = $page->getFirstMedia('banner');
-
-        abort_unless($media !== null, 404);
+        $media = $page->getFirstMedia('banner') ?? abort(404);
 
         return $media->toInlineResponse($media->file_name);
     }

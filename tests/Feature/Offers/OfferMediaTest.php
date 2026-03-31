@@ -72,18 +72,17 @@ test('admin can view offer media', function () {
         ->assertSuccessful();
 });
 
-test('cannot access media belonging to a different offer', function () {
+test('student without enrollment cannot access offer media', function () {
     Storage::fake('media');
-    $admin = User::factory()->create();
-    $offer1 = Offer::factory()->create();
-    $offer2 = Offer::factory()->create();
+    $student = User::factory()->student()->create();
+    $offer = Offer::factory()->create();
 
-    $media = $offer2->addMedia(UploadedFile::fake()->image('photo.jpg'))
+    $media = $offer->addMedia(UploadedFile::fake()->image('photo.jpg'))
         ->toMediaCollection('materials');
 
-    $this->actingAs($admin)
-        ->get(route('offers.media.show', [$offer1, $media]))
-        ->assertNotFound();
+    $this->actingAs($student)
+        ->get(route('offers.media.show', [$offer, $media]))
+        ->assertForbidden();
 });
 
 test('invalid file type is rejected', function () {

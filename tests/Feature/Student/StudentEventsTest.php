@@ -1,8 +1,8 @@
 <?php
 
-use App\Actions\Students\CreateStudent;
-use App\Actions\Students\SendStudentLoginLink;
-use App\Actions\Students\UpdateStudent;
+use App\Actions\Student\CreateStudent;
+use App\Actions\Student\SendStudentLoginLink;
+use App\Actions\Student\UpdateStudent;
 use App\Models\Student;
 use App\States\StudentProgressionState;
 use Illuminate\Support\Facades\Mail;

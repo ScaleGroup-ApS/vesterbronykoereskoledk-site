@@ -20,6 +20,7 @@ use App\Http\Controllers\Marketing\Admin\MarketingTestimonialController;
 use App\Http\Controllers\Marketing\Admin\MarketingValueBlockController;
 use App\Http\Controllers\Marketing\ContactInquiryController;
 use App\Http\Controllers\Marketing\MarketingController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Offers\CourseController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Offers\OfferMediaController;
@@ -32,20 +33,12 @@ use App\Http\Controllers\Offers\OfferPageVideoController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Student\BulkStudentLoginLinkController;
 use App\Http\Controllers\Student\StudentCalendarController;
+use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentDashboardController;
-use App\Http\Controllers\Student\StudentFaerdighederController;
-use App\Http\Controllers\Student\StudentForloebController;
-use App\Http\Controllers\Student\StudentHistorikController;
 use App\Http\Controllers\Student\StudentLearnController;
-use App\Http\Controllers\Student\StudentMaterialeController;
-use App\Http\Controllers\Student\StudentOfferMaterialController;
-use App\Http\Controllers\Student\StudentPageMediaController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
-use App\Http\Controllers\Students\BulkStudentLoginLinkController;
-use App\Http\Controllers\Students\StudentController;
-use App\Http\Controllers\Students\StudentLoginLinkController;
-use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\Timeline\TimelineController;
 use App\Http\Controllers\Vehicles\VehicleController;
@@ -78,35 +71,23 @@ Route::post('book/{offer}', [EnrollmentController::class, 'store'])->name('enrol
 Route::get('blog/{slug}', [BlogPostController::class, 'show'])->name('blog.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('student', StudentDashboardController::class)
-        ->middleware('role:student')
-        ->name('student.dashboard');
-
-    Route::get('student/forloeb', StudentForloebController::class)
-        ->middleware('role:student')
-        ->name('student.forloeb');
-
-    Route::get('student/historik', StudentHistorikController::class)
-        ->middleware('role:student')
-        ->name('student.historik');
-
-    Route::get('student/materiale', StudentMaterialeController::class)
-        ->middleware('role:student')
-        ->name('student.materiale');
-
-    Route::get('student/faerdigheder', StudentFaerdighederController::class)
-        ->middleware('role:student')
-        ->name('student.faerdigheder');
+    Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::get('/', [StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/forloeb', [StudentDashboardController::class, 'forloeb'])->name('forloeb');
+        Route::get('/historik', [StudentDashboardController::class, 'historik'])->name('historik');
+        Route::get('/materiale', [StudentDashboardController::class, 'materiale'])->name('materiale');
+        Route::get('/faerdigheder', [StudentDashboardController::class, 'faerdigheder'])->name('faerdigheder');
+    });
 
     Route::get('student/kalender', StudentCalendarController::class)
         ->middleware('role:student')
         ->name('student.kalender');
 
-    Route::get('student/offers/{offer}/materials/{media}', StudentOfferMaterialController::class)
+    Route::get('student/offers/{offer}/materials/{media}', [MediaController::class, 'show'])
         ->middleware('role:student')
         ->name('student.offers.materials.show');
 
-    Route::get('student/offers/{offer}/pages/{page}/media/{media}', StudentPageMediaController::class)
+    Route::get('student/offers/{offer}/pages/{page}/media/{media}', [MediaController::class, 'show'])
         ->middleware('role:student')
         ->name('student.offers.pages.media.show');
 
@@ -132,10 +113,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('offers.modules.pages', OfferPageController::class)->only(['store', 'edit', 'update', 'destroy']);
     Route::post('offers/{offer}/media', [OfferMediaController::class, 'store'])->name('offers.media.store');
-    Route::get('offers/{offer}/media/{media}', [OfferMediaController::class, 'show'])->name('offers.media.show');
+    Route::get('offers/{offer}/media/{media}', [MediaController::class, 'show'])->name('offers.media.show');
     Route::delete('offers/{offer}/media/{media}', [OfferMediaController::class, 'destroy'])->name('offers.media.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/media', [OfferPageMediaController::class, 'store'])->name('offers.modules.pages.media.store');
-    Route::get('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [OfferPageMediaController::class, 'show'])->name('offers.modules.pages.media.show');
+    Route::get('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [MediaController::class, 'show'])->name('offers.modules.pages.media.show');
     Route::delete('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [OfferPageMediaController::class, 'destroy'])->name('offers.modules.pages.media.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/banner', [OfferPageBannerController::class, 'store'])->name('offers.modules.pages.banner.store');
     Route::get('offers/{offer}/modules/{module}/pages/{page}/banner', [OfferPageBannerController::class, 'show'])->name('offers.modules.pages.banner.show');
@@ -163,11 +144,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
 
-    Route::post('students/{student}/login-link', StudentLoginLinkController::class)->name('students.login-link');
+    Route::post('students/{student}/login-link', [StudentController::class, 'sendLoginLink'])->name('students.login-link');
     Route::post('students/bulk-login-links', BulkStudentLoginLinkController::class)->name('students.bulk-login-links');
-    Route::post('students/{student}/media', [StudentMediaController::class, 'store'])->name('students.media.store');
-    Route::get('students/{student}/media/{media}', [StudentMediaController::class, 'show'])->name('students.media.show');
-    Route::delete('students/{student}/media/{media}', [StudentMediaController::class, 'destroy'])->name('students.media.destroy');
+    Route::post('students/{student}/media', [StudentController::class, 'storeMedia'])->name('students.media.store');
+    Route::get('students/{student}/media/{media}', [MediaController::class, 'show'])->name('students.media.show');
+    Route::delete('students/{student}/media/{media}', [MediaController::class, 'destroy'])->name('students.media.destroy');
 
     Route::get('chat', [ConversationController::class, 'index'])->name('chat.index');
     Route::post('chat', [ConversationController::class, 'store'])->name('chat.store');

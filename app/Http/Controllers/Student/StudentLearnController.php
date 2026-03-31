@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
-use App\Enums\EnrollmentStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\OfferModule;
 use App\Models\OfferPage;
@@ -18,17 +16,9 @@ class StudentLearnController extends Controller
 {
     public function show(Request $request, Offer $offer, OfferModule $module, ?OfferPage $page = null): Response|RedirectResponse
     {
+        $this->authorize('learnContent', $offer);
+
         $student = $request->user()->student;
-
-        abort_unless($student, 404);
-
-        $isEnrolled = Enrollment::query()
-            ->where('student_id', $student->id)
-            ->where('offer_id', $offer->id)
-            ->where('status', EnrollmentStatus::Completed)
-            ->exists();
-
-        abort_unless($isEnrolled, 403);
 
         if ($page === null || ! $page->exists) {
             $firstPage = $module->pages()->orderBy('sort_order')->first();
@@ -75,7 +65,7 @@ class StudentLearnController extends Controller
             'url' => route('student.offers.pages.media.show', [$offer, $page, $media]),
         ])->values()->all();
 
-        $images = $page->getMedia('images')->map(fn ($media) => [
+        $images = $page->getMedia('banner')->map(fn ($media) => [
             'id' => $media->id,
             'url' => route('student.offers.pages.media.show', [$offer, $page, $media]),
             'file_name' => $media->file_name,
@@ -129,17 +119,9 @@ class StudentLearnController extends Controller
 
     public function markComplete(Request $request, Offer $offer, OfferModule $module, OfferPage $page): RedirectResponse
     {
+        $this->authorize('learnContent', $offer);
+
         $student = $request->user()->student;
-
-        abort_unless($student, 404);
-
-        $isEnrolled = Enrollment::query()
-            ->where('student_id', $student->id)
-            ->where('offer_id', $offer->id)
-            ->where('status', EnrollmentStatus::Completed)
-            ->exists();
-
-        abort_unless($isEnrolled, 403);
 
         StudentPageProgress::updateOrCreate(
             ['student_id' => $student->id, 'offer_page_id' => $page->id],

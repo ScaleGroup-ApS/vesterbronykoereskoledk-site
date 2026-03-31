@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Students;
+namespace App\Actions\Student;
 
 use App\Events\StudentLoginLinkSent;
 use App\Mail\StudentMagicLoginMail;

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Students;
+namespace App\Http\Controllers\Student;
 
-use App\Actions\Students\SendStudentLoginLink;
+use App\Actions\Student\SendStudentLoginLink;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;

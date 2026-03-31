@@ -35,7 +35,7 @@ test('student cannot view material from an offer they are not assigned to', func
         ->assertForbidden();
 });
 
-test('student cannot access media from a different offer using mismatched ids', function () {
+test('student cannot access media from a different offer', function () {
     Storage::fake('media');
     $user = User::factory()->student()->create();
     $student = Student::factory()->for($user)->create();
@@ -48,7 +48,7 @@ test('student cannot access media from a different offer using mismatched ids', 
 
     $this->actingAs($user)
         ->get(route('student.offers.materials.show', [$offer1, $media]))
-        ->assertNotFound();
+        ->assertForbidden();
 });
 
 test('student dashboard includes materials from assigned offers', function () {

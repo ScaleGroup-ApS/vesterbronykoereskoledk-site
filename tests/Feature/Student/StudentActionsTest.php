@@ -1,9 +1,9 @@
 <?php
 
-use App\Actions\Students\CreateStudent;
-use App\Actions\Students\DeleteStudent;
-use App\Actions\Students\SendStudentLoginLink;
-use App\Actions\Students\UpdateStudent;
+use App\Actions\Student\CreateStudent;
+use App\Actions\Student\DeleteStudent;
+use App\Actions\Student\SendStudentLoginLink;
+use App\Actions\Student\UpdateStudent;
 use App\Enums\StudentStatus;
 use App\Enums\UserRole;
 use App\Models\Student;

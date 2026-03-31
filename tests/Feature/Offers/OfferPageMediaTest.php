@@ -81,18 +81,17 @@ test('admin can view page attachment', function () {
         ->assertSuccessful();
 });
 
-test('cannot view attachment belonging to a different page', function () {
+test('student without enrollment cannot view page attachment', function () {
     Storage::fake('media');
-    $admin = User::factory()->create();
-    [$offer, $module, $page1] = pageWithModule();
-    $page2 = OfferPage::factory()->for($module, 'module')->create();
+    $student = User::factory()->student()->create();
+    [$offer, $module, $page] = pageWithModule();
 
-    $media = $page2->addMedia(UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'))
+    $media = $page->addMedia(UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'))
         ->toMediaCollection('attachments');
 
-    $this->actingAs($admin)
-        ->get(route('offers.modules.pages.media.show', [$offer, $module, $page1, $media]))
-        ->assertNotFound();
+    $this->actingAs($student)
+        ->get(route('offers.modules.pages.media.show', [$offer, $module, $page, $media]))
+        ->assertForbidden();
 });
 
 test('admin can delete page attachment', function () {
