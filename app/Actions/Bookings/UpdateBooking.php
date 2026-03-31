@@ -2,8 +2,10 @@
 
 namespace App\Actions\Bookings;
 
+use App\Enums\BookingStatus;
 use App\Events\BookingUpdated;
 use App\Models\Booking;
+use App\Notifications\BookingRescheduledNotification;
 
 class UpdateBooking
 {
@@ -12,6 +14,9 @@ class UpdateBooking
      */
     public function handle(Booking $booking, array $data): Booking
     {
+        $originalStarts = $booking->starts_at->copy();
+        $originalEnds = $booking->ends_at->copy();
+
         if (array_key_exists('instructor_id', $data)) {
             $booking->instructor_id = $data['instructor_id'];
         }
@@ -31,6 +36,16 @@ class UpdateBooking
             starts_at: $booking->starts_at->toDateTimeString(),
             ends_at: $booking->ends_at->toDateTimeString(),
         );
+
+        if ($booking->status === BookingStatus::Scheduled) {
+            $timeChanged = ! $booking->starts_at->equalTo($originalStarts)
+                || ! $booking->ends_at->equalTo($originalEnds);
+
+            if ($timeChanged) {
+                $booking->load('student.user');
+                $booking->student->user->notify(new BookingRescheduledNotification($booking));
+            }
+        }
 
         return $booking->refresh();
     }

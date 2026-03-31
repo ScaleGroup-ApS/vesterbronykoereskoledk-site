@@ -9,21 +9,38 @@ use App\Http\Requests\Payments\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PaymentController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Payment::class);
 
-        $payments = Payment::with('student.user')
-            ->latest('recorded_at')
-            ->paginate(25);
+        $query = Payment::with('student.user');
+
+        if ($search = $request->input('search')) {
+            $query->whereHas('student.user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($method = $request->input('method')) {
+            $query->where('method', $method);
+        }
+
+        $payments = $query->latest('recorded_at')
+            ->paginate(25)
+            ->withQueryString();
 
         return Inertia::render('payments/index', [
             'payments' => $payments,
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'method' => $request->input('method', ''),
+            ],
         ]);
     }
 

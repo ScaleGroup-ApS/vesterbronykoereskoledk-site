@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Students\StoreStudentRequest;
 use App\Http\Requests\Students\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Models\Booking;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,16 +21,51 @@ use Thunk\Verbs\Models\VerbEvent;
 
 class StudentController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Student::class);
 
-        $students = Student::with('user')
-            ->latest()
-            ->paginate(15);
+        $query = Student::with('user');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $sortField = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('direction', 'desc');
+
+        $allowedSorts = ['name', 'email', 'status', 'start_date', 'created_at'];
+        if (! in_array($sortField, $allowedSorts)) {
+            $sortField = 'created_at';
+        }
+
+        if (in_array($sortField, ['name', 'email'])) {
+            $query->join('users', 'students.user_id', '=', 'users.id')
+                ->orderBy("users.{$sortField}", $sortDirection)
+                ->select('students.*');
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        $students = $query->paginate(15)->withQueryString();
 
         return Inertia::render('students/index', [
             'students' => StudentResource::collection($students),
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'status' => $request->input('status', ''),
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+            ],
         ]);
     }
 
@@ -77,6 +113,22 @@ class StudentController extends Controller
                         'created_at' => $event->created_at->toISOString(),
                     ])
                 : [],
+            'pastBookings' => $student->bookings()
+                ->with('instructor:id,name')
+                ->orderByDesc('starts_at')
+                ->limit(20)
+                ->get()
+                ->map(fn (Booking $b) => [
+                    'id' => $b->id,
+                    'type_label' => $b->type->label(),
+                    'range_label' => $b->starts_at->translatedFormat('d. MMM yyyy').' · '.$b->starts_at->format('H:i'),
+                    'status' => $b->status->value,
+                    'attended' => $b->attended,
+                    'instructor_note' => $b->instructor_note,
+                    'driving_skills' => $b->driving_skills ?? [],
+                ])
+                ->values()
+                ->all(),
         ]);
     }
 

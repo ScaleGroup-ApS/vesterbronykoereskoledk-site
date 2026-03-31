@@ -10,6 +10,8 @@ export type BookingEvent = {
     notes: string | null;
     attended: boolean | null;
     attendance_recorded_at: string | null;
+    instructor_note: string | null;
+    driving_skills: string[] | null;
 };
 
 export type BookingType =

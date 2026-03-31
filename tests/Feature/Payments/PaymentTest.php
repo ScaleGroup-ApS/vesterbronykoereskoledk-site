@@ -87,3 +87,14 @@ test('admin can delete a payment', function () {
 
     expect(Payment::find($payment->id))->toBeNull();
 });
+
+test('deleting a payment soft deletes it', function () {
+    $admin = User::factory()->create();
+    $payment = Payment::factory()->create();
+
+    $this->actingAs($admin)
+        ->delete(route('payments.destroy', $payment));
+
+    expect(Payment::withTrashed()->find($payment->id))->not->toBeNull()
+        ->and(Payment::withTrashed()->find($payment->id)->deleted_at)->not->toBeNull();
+});

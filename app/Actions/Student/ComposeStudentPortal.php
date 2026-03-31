@@ -6,8 +6,11 @@ use App\Actions\Payments\CalculateBalance;
 use App\Actions\Progression\BuildStudentJourney;
 use App\Actions\Progression\CheckExamReadiness;
 use App\Enums\BookingStatus;
+use App\Enums\BookingType;
+use App\Enums\DrivingSkill;
 use App\Enums\EnrollmentStatus;
 use App\Models\Booking;
+use App\Models\CurriculumTopic;
 use App\Models\Enrollment;
 use App\Models\Student;
 use App\Models\User;
@@ -18,6 +21,7 @@ class ComposeStudentPortal
         private CheckExamReadiness $readiness,
         private CalculateBalance $balance,
         private BuildStudentJourney $buildStudentJourney,
+        private BuildStudentLessonProgress $buildStudentLessonProgress,
     ) {}
 
     /**
@@ -64,6 +68,16 @@ class ComposeStudentPortal
         ])
         )->values()->all();
 
+        $completedTheoryCount = $student->bookings()
+            ->where('type', BookingType::TheoryLesson->value)
+            ->where('status', BookingStatus::Completed->value)
+            ->count();
+
+        $offerIds = $student->offers->pluck('id');
+        $nextTheoryTopic = CurriculumTopic::whereIn('offer_id', $offerIds)
+            ->where('lesson_number', $completedTheoryCount + 1)
+            ->first(['lesson_number', 'title', 'description']);
+
         $props = [
             'pendingEnrollment' => $pendingEnrollment ? [
                 'status' => $pendingEnrollment->status->value,
@@ -73,15 +87,136 @@ class ComposeStudentPortal
             'booking' => $nextLesson,
             'journey' => $this->buildStudentJourney->handle($student),
             'readiness' => $this->readiness->handle($student),
+            'lesson_progress' => $this->buildStudentLessonProgress->handle($student),
             'balance' => $this->balance->handle($student),
             'materials' => $materials,
         ];
+
+        $props['next_theory_topic'] = $nextTheoryTopic ? [
+            'lesson_number' => $nextTheoryTopic->lesson_number,
+            'title' => $nextTheoryTopic->title,
+            'description' => $nextTheoryTopic->description,
+        ] : null;
 
         if ($includePastBookings) {
             $props['past_bookings'] = $this->pastBookings($student);
         }
 
+        $curriculumByLesson = CurriculumTopic::whereIn('offer_id', $offerIds)
+            ->orderBy('lesson_number')
+            ->get(['lesson_number', 'title'])
+            ->keyBy('lesson_number')
+            ->map(fn ($t) => $t->title)
+            ->all();
+
+        $props['curriculum_by_lesson'] = $curriculumByLesson;
+
         return $props;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function buildHistorik(User $user): array
+    {
+        $student = $user->student;
+        abort_unless($student, 404);
+
+        return ['past_bookings' => $this->pastBookingsWithExtras($student)];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function buildMateriale(User $user): array
+    {
+        $student = $user->student;
+        abort_unless($student, 404);
+
+        $student->load(['offers' => fn ($q) => $q->with('media')]);
+
+        $completedTheoryCount = $student->bookings()
+            ->where('type', BookingType::TheoryLesson->value)
+            ->where('status', BookingStatus::Completed->value)
+            ->count();
+
+        $materials = $student->offers->flatMap(fn ($offer) => $offer->getMedia('materials')->map(fn ($media) => [
+            'id' => $media->id,
+            'name' => $media->name,
+            'file_name' => $media->file_name,
+            'size' => $media->human_readable_size,
+            'url' => route('student.offers.materials.show', [$offer->id, $media->id]),
+            'offer_name' => $offer->name,
+            'unlock_at_lesson' => $media->getCustomProperty('unlock_at_lesson'),
+            'is_unlocked' => ((int) ($media->getCustomProperty('unlock_at_lesson') ?? 0)) <= $completedTheoryCount,
+        ])
+        )->values()->all();
+
+        return ['materials' => $materials];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function buildFaerdigheder(User $user): array
+    {
+        $student = $user->student;
+        abort_unless($student, 404);
+
+        $completedDrivingBookings = $student->bookings()
+            ->where('type', BookingType::DrivingLesson->value)
+            ->where('status', BookingStatus::Completed->value)
+            ->whereNotNull('driving_skills')
+            ->get(['driving_skills']);
+
+        $counts = collect(DrivingSkill::cases())->mapWithKeys(fn (DrivingSkill $skill) => [
+            $skill->value => ['key' => $skill->value, 'label' => $skill->label(), 'count' => 0],
+        ])->all();
+
+        foreach ($completedDrivingBookings as $booking) {
+            foreach ($booking->driving_skills ?? [] as $skillValue) {
+                if (isset($counts[$skillValue])) {
+                    $counts[$skillValue]['count']++;
+                }
+            }
+        }
+
+        return ['skills' => array_values($counts)];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function pastBookingsWithExtras(Student $student): array
+    {
+        $tz = config('app.timezone');
+
+        return $student->bookings()
+            ->with('instructor:id,name')
+            ->orderByDesc('starts_at')
+            ->limit(50)
+            ->get()
+            ->map(function (Booking $b) use ($tz) {
+                $start = $b->starts_at->timezone($tz);
+                $end = $b->ends_at->timezone($tz);
+
+                return [
+                    'id' => $b->id,
+                    'type' => $b->type->value,
+                    'type_label' => $b->type->label(),
+                    'status' => $b->status->value,
+                    'starts_at' => $b->starts_at->toIso8601String(),
+                    'ends_at' => $b->ends_at->toIso8601String(),
+                    'range_label' => $start->translatedFormat('d. MMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+                    'attended' => $b->attended,
+                    'attendance_recorded_at' => $b->attendance_recorded_at?->toIso8601String(),
+                    'instructor_note' => $b->instructor_note,
+                    'driving_skills' => $b->driving_skills ?? [],
+                    'instructor_name' => $b->instructor?->name,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**

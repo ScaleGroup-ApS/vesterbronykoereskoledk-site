@@ -4,7 +4,7 @@ import type { DateClickArg } from '@fullcalendar/interaction';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { Award, CalendarDays, CheckCircle2, ClipboardCheck, GraduationCap, TrendingDown, TrendingUp, Users, Wallet, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import { CourseHoldCapacityChart } from '@/components/dashboard/course-hold-capacity-chart';
@@ -42,14 +42,29 @@ type AdminKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
     total_outstanding: number;
+    monthly_revenue: number;
+    completed_this_month: number;
+    exam_pass_rate: number;
 };
 
 type InstructorKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
+    my_students: number;
+    completed_this_month: number;
 };
 
 type Kpis = AdminKpis | InstructorKpis | Record<string, never>;
+
+type TodayBooking = {
+    id: number;
+    student_name: string;
+    type_label: string;
+    time: string;
+    vehicle: string | null;
+    status: string;
+    attended: boolean | null;
+};
 
 type Enrollment = {
     id: number;
@@ -104,11 +119,13 @@ export default function Dashboard({
     courses = [],
     enrollments = [],
     offers = [],
+    todayBookings = [],
 }: {
     kpis: Kpis;
     courses?: CourseEvent[];
     enrollments: Enrollment[];
     offers?: Offer[];
+    todayBookings?: TodayBooking[];
 }) {
     const isAdmin = 'total_students' in kpis;
     const isInstructor = 'upcoming_bookings' in kpis && !isAdmin;
@@ -178,6 +195,21 @@ export default function Dashboard({
                                 label="Udestående saldo"
                                 value={`${Number((kpis as AdminKpis).total_outstanding).toLocaleString('da-DK')} kr.`}
                             />
+                            <KpiCard
+                                icon={TrendingUp}
+                                label="Omsætning (denne måned)"
+                                value={`${Number((kpis as AdminKpis).monthly_revenue).toLocaleString('da-DK')} kr.`}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as AdminKpis).completed_this_month}
+                            />
+                            <KpiCard
+                                icon={Award}
+                                label="Beståelsesrate (prøver)"
+                                value={`${(kpis as AdminKpis).exam_pass_rate}%`}
+                            />
                         </>
                     )}
                     {isInstructor && (
@@ -192,6 +224,16 @@ export default function Dashboard({
                                 label="No-show rate"
                                 value={`${(kpis as InstructorKpis).no_show_rate}%`}
                             />
+                            <KpiCard
+                                icon={GraduationCap}
+                                label="Mine elever"
+                                value={(kpis as InstructorKpis).my_students}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as InstructorKpis).completed_this_month}
+                            />
                         </>
                     )}
                     {!isAdmin && !isInstructor && (
@@ -200,6 +242,48 @@ export default function Dashboard({
                         </div>
                     )}
                 </div>
+
+                {(isAdmin || isInstructor) && todayBookings.length > 0 && (
+                    <div className="rounded-xl border p-5">
+                        <Heading title="Dagens program" description="Bookinger i dag" />
+                        <div className="mt-4 divide-y">
+                            {todayBookings.map((b) => (
+                                <div key={b.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-28 text-sm font-medium">{b.time}</span>
+                                        <div>
+                                            <p className="text-sm font-medium">{b.student_name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {b.type_label}
+                                                {b.vehicle && ` · ${b.vehicle}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {b.attended === true && (
+                                            <Badge variant="default">Mødt</Badge>
+                                        )}
+                                        {b.attended === false && (
+                                            <Badge variant="destructive">Ikke mødt</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'cancelled' && (
+                                            <Badge variant="secondary">Annulleret</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'scheduled' && (
+                                            <Badge variant="outline">Planlagt</Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {(isAdmin || isInstructor) && todayBookings.length === 0 && (
+                    <div className="rounded-xl border px-4 py-6 text-center text-sm text-muted-foreground">
+                        Ingen bookinger i dag.
+                    </div>
+                )}
 
                 {isAdmin && (
                     <div className="rounded-xl border p-5">

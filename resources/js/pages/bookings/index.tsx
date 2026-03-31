@@ -7,8 +7,17 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/BookingNoteController';
+import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { index, create, update, destroy } from '@/routes/bookings';
 import { store as storeAttendance } from '@/routes/bookings/attendance';
@@ -20,7 +29,31 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Bookinger', href: index().url },
 ];
 
-export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }) {
+const ALL_SKILLS = [
+    { key: 'parking', label: 'Parkering' },
+    { key: 'motorvej', label: 'Motorvej' },
+    { key: 'roundabouts', label: 'Rundkørsel' },
+    { key: 'city_driving', label: 'Bykørsel' },
+    { key: 'overtaking', label: 'Overhaling' },
+    { key: 'reversing', label: 'Bakring' },
+    { key: 'lane_change', label: 'Filskifte' },
+    { key: 'emergency_stop', label: 'Nødstop' },
+] as const;
+
+type FilterOption = { id: number; name: string };
+type Filters = { instructor_id: string; vehicle_id: string };
+
+export default function BookingsIndex({
+    bookings,
+    instructors = [],
+    vehicles = [],
+    filters,
+}: {
+    bookings: BookingEvent[];
+    instructors?: FilterOption[];
+    vehicles?: FilterOption[];
+    filters?: Filters;
+}) {
     const [selected, setSelected] = useState<BookingEvent | null>(null);
 
     const events = bookings.map((b) => ({
@@ -80,17 +113,60 @@ export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }
                     </Button>
                 </div>
 
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3 text-sm">
-                    {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
-                        <span key={type} className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block size-3 rounded-sm"
-                                style={{ backgroundColor: bookingTypeColors[type] }}
-                            />
-                            {label}
-                        </span>
-                    ))}
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Legend */}
+                    <div className="flex flex-wrap gap-3 text-sm">
+                        {(Object.entries(bookingTypeLabels) as [keyof typeof bookingTypeLabels, string][]).map(([type, label]) => (
+                            <span key={type} className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block size-3 rounded-sm"
+                                    style={{ backgroundColor: bookingTypeColors[type] }}
+                                />
+                                {label}
+                            </span>
+                        ))}
+                    </div>
+
+                    <div className="ml-auto flex gap-2">
+                        <Select
+                            value={filters?.instructor_id || 'all'}
+                            onValueChange={(v) => {
+                                router.get(index().url, {
+                                    ...(filters?.vehicle_id ? { vehicle_id: filters.vehicle_id } : {}),
+                                    ...(v !== 'all' ? { instructor_id: v } : {}),
+                                }, { preserveState: true, replace: true });
+                            }}
+                        >
+                            <SelectTrigger className="w-44 bg-background">
+                                <SelectValue placeholder="Alle instruktører" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Alle instruktører</SelectItem>
+                                {instructors.map((i) => (
+                                    <SelectItem key={i.id} value={String(i.id)}>{i.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters?.vehicle_id || 'all'}
+                            onValueChange={(v) => {
+                                router.get(index().url, {
+                                    ...(filters?.instructor_id ? { instructor_id: filters.instructor_id } : {}),
+                                    ...(v !== 'all' ? { vehicle_id: v } : {}),
+                                }, { preserveState: true, replace: true });
+                            }}
+                        >
+                            <SelectTrigger className="w-44 bg-background">
+                                <SelectValue placeholder="Alle køretøjer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Alle køretøjer</SelectItem>
+                                {vehicles.map((v) => (
+                                    <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="rounded-xl border p-4">
@@ -181,9 +257,70 @@ export default function BookingsIndex({ bookings }: { bookings: BookingEvent[] }
                                 </Button>
                             </div>
                         </div>
+                        {/* Instructor note */}
+                        <div className="mt-3 space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">Note til elev</p>
+                            <NoteForm bookingId={selected.id} initialNote={selected.instructor_note} />
+                        </div>
+
+                        {/* Driving skills — only for driving_lesson */}
+                        {selected.type === 'driving_lesson' && (
+                            <div className="mt-3 space-y-1.5">
+                                <p className="text-xs font-medium text-muted-foreground">Færdigheder øvet</p>
+                                <SkillPicker bookingId={selected.id} initialSkills={selected.driving_skills ?? []} />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </AppLayout>
+    );
+}
+
+function NoteForm({ bookingId, initialNote }: { bookingId: number; initialNote: string | null }) {
+    const [note, setNote] = useState(initialNote ?? '');
+
+    function save() {
+        router.patch(BookingNoteController({ id: bookingId }).url, { instructor_note: note }, { preserveScroll: true });
+    }
+
+    return (
+        <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            onBlur={save}
+            rows={3}
+            placeholder="Skriv note til elev..."
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+    );
+}
+
+function SkillPicker({ bookingId, initialSkills }: { bookingId: number; initialSkills: string[] }) {
+    const [skills, setSkills] = useState(initialSkills);
+
+    function toggleSkill(key: string) {
+        const next = skills.includes(key) ? skills.filter((s) => s !== key) : [...skills, key];
+        setSkills(next);
+        router.patch(BookingSkillsController({ id: bookingId }).url, { driving_skills: next }, { preserveScroll: true });
+    }
+
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {ALL_SKILLS.map((skill) => (
+                <button
+                    key={skill.key}
+                    type="button"
+                    onClick={() => toggleSkill(skill.key)}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                        skills.includes(skill.key)
+                            ? 'border-primary bg-primary/10 font-medium text-primary'
+                            : 'border-input text-muted-foreground hover:border-primary/40'
+                    }`}
+                >
+                    {skill.label}
+                </button>
+            ))}
+        </div>
     );
 }

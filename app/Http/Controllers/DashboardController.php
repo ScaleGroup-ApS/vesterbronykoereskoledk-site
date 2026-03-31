@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Dashboard\CalculateKpis;
 use App\Enums\EnrollmentStatus;
 use App\Enums\OfferType;
+use App\Models\Booking;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Offer;
@@ -75,11 +76,33 @@ class DashboardController extends Controller
             ->get(['id', 'name'])
             ->all();
 
+        $todayBookings = [];
+        if ($user->isInstructor() || $user->isAdmin()) {
+            $todayQuery = Booking::with(['student.user', 'vehicle'])
+                ->whereDate('starts_at', today())
+                ->orderBy('starts_at');
+
+            if ($user->isInstructor()) {
+                $todayQuery->where('instructor_id', $user->id);
+            }
+
+            $todayBookings = $todayQuery->get()->map(fn (Booking $b) => [
+                'id' => $b->id,
+                'student_name' => $b->student->user->name,
+                'type_label' => $b->type->label(),
+                'time' => $b->starts_at->format('H:i').' – '.$b->ends_at->format('H:i'),
+                'vehicle' => $b->vehicle?->name,
+                'status' => $b->status->value,
+                'attended' => $b->attended,
+            ])->all();
+        }
+
         return Inertia::render('dashboard', [
             'kpis' => $kpis->handle($user),
             'courses' => $courses,
             'enrollments' => $enrollments,
             'offers' => $offers,
+            'todayBookings' => $todayBookings,
         ]);
     }
 }

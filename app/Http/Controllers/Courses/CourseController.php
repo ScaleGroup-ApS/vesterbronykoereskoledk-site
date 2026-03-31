@@ -89,6 +89,14 @@ class CourseController extends Controller
                         'name' => $enrollment->student->user->name,
                         'email' => $enrollment->student->user->email,
                     ],
+                    'attended_count' => \App\Models\Booking::where('student_id', $enrollment->student_id)
+                        ->where('status', \App\Enums\BookingStatus::Completed->value)
+                        ->whereNotNull('attended')
+                        ->where('attended', true)
+                        ->count(),
+                    'total_bookings' => \App\Models\Booking::where('student_id', $enrollment->student_id)
+                        ->whereNotIn('status', [\App\Enums\BookingStatus::Cancelled->value])
+                        ->count(),
                 ]),
             ],
         ]);

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -24,12 +25,21 @@ class BookingReminderNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $label = $this->booking->type->label();
+
+        $isStudent = $notifiable instanceof User && $notifiable->isStudent();
+
+        $actionText = $isStudent ? 'Se kalenderen' : 'Se bookinger';
+        $actionUrl = $isStudent
+            ? route('student.kalender')
+            : route('bookings.index');
+
         return (new MailMessage)
             ->subject('Påmindelse om booking i morgen')
             ->greeting("Hej {$notifiable->name}!")
-            ->line("Du har en booking i morgen: {$this->booking->type->value}")
+            ->line("Du har en booking i morgen: {$label}")
             ->line("Tidspunkt: {$this->booking->starts_at->format('H:i')} — {$this->booking->ends_at->format('H:i')}")
-            ->action('Se booking', url('/bookings'))
+            ->action($actionText, $actionUrl)
             ->line('Husk at møde til tiden.');
     }
 

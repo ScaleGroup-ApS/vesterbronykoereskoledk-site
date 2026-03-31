@@ -17,6 +17,8 @@ type Enrollment = {
     status: string;
     payment_method: string;
     student: { id: number; name: string; email: string };
+    attended_count: number;
+    total_bookings: number;
 };
 
 type CourseDetail = {
@@ -151,6 +153,7 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                         <th className="px-4 py-2 text-left font-medium">E-mail</th>
                                         <th className="px-4 py-2 text-left font-medium">Betaling</th>
                                         <th className="px-4 py-2 text-left font-medium">Status</th>
+                                        <th className="px-4 py-2 text-left font-medium">Fremmøde</th>
                                         <th className="px-4 py-2" />
                                     </tr>
                                 </thead>
@@ -167,6 +170,9 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                                 {enrollment.status === 'pending_payment' && 'Afventer betaling'}
                                                 {enrollment.status === 'completed' && 'Godkendt'}
                                                 {enrollment.status === 'rejected' && 'Afvist'}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm text-muted-foreground">
+                                                {enrollment.attended_count} / {enrollment.total_bookings}
                                             </td>
                                             <td className="px-4 py-2 text-right">
                                                 {enrollment.status === 'pending_approval' && (
