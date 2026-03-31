@@ -12,6 +12,7 @@ import {
     MessageSquareQuote,
     ScrollText,
     Tag,
+    UserCog,
     UserPlus,
     Users,
 } from 'lucide-react';
@@ -28,6 +29,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { index as enrollmentsIndex } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { index as staffIndex } from '@/actions/App/Http/Controllers/Staff/StaffController';
 import { dashboard } from '@/routes';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
@@ -93,6 +95,11 @@ const sharedNavItems: NavItem[] = [
 ];
 
 const adminOnlyNavItems: NavItem[] = [
+    {
+        title: 'Medarbejdere',
+        href: staffIndex(),
+        icon: UserCog,
+    },
     {
         title: 'Tilmeldinger',
         href: enrollmentsIndex(),

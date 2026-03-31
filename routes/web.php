@@ -22,6 +22,7 @@ use App\Http\Controllers\Marketing\MarketingController;
 use App\Http\Controllers\Offers\OfferController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
+use App\Http\Controllers\Staff\StaffController;
 use App\Http\Controllers\Student\StudentCalendarController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentFaerdighederController;
@@ -133,6 +134,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('enrollments/{enrollment}/reject', [EnrollmentApprovalController::class, 'reject'])->name('enrollments.reject');
 
     Route::get('timeline', TimelineController::class)->middleware('role:admin')->name('timeline.index');
+
+    Route::resource('staff', StaffController::class)
+        ->only(['index', 'create', 'store'])
+        ->middleware('role:admin');
 
     Route::get('offers/{offer}/curriculum', [CurriculumTopicController::class, 'index'])
         ->name('curriculum.index');
