@@ -58,6 +58,24 @@ test('reminder is not sent for bookings outside the 23-25h window', function () 
     Notification::assertNothingSent();
 });
 
+test('reminder mail links students to elevkalender and staff to bookings index', function () {
+    $instructor = User::factory()->create(['role' => UserRole::Instructor]);
+    $student = Student::factory()->for(User::factory()->create(['role' => UserRole::Student]), 'user')->create();
+
+    $booking = Booking::factory()->create([
+        'student_id' => $student->id,
+        'instructor_id' => $instructor->id,
+        'status' => BookingStatus::Scheduled,
+        'starts_at' => now()->addHours(24),
+        'ends_at' => now()->addHours(25),
+    ]);
+
+    $notification = new BookingReminderNotification($booking);
+
+    expect($notification->toMail($student->user)->actionUrl)->toBe(route('student.kalender'));
+    expect($notification->toMail($instructor)->actionUrl)->toBe(route('bookings.index'));
+});
+
 test('reminder is not sent for cancelled bookings', function () {
     Notification::fake();
 

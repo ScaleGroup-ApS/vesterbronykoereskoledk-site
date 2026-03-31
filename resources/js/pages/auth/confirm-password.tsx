@@ -10,21 +10,21 @@ import { store } from '@/routes/password/confirm';
 export default function ConfirmPassword() {
     return (
         <AuthLayout
-            title="Confirm your password"
-            description="This is a secure area of the application. Please confirm your password before continuing."
+            title="Bekræft din adgangskode"
+            description="Dette er et beskyttet område. Bekræft din adgangskode for at fortsætte."
         >
-            <Head title="Confirm password" />
+            <Head title="Bekræft adgangskode" />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">Adgangskode</Label>
                             <Input
                                 id="password"
                                 type="password"
                                 name="password"
-                                placeholder="Password"
+                                placeholder="Adgangskode"
                                 autoComplete="current-password"
                                 autoFocus
                             />
@@ -34,12 +34,12 @@ export default function ConfirmPassword() {
 
                         <div className="flex items-center">
                             <Button
-                                className="w-full"
+                                className="w-full shadow-[0_8px_28px_-8px_rgba(37,99,235,0.45)]"
                                 disabled={processing}
                                 data-test="confirm-password-button"
                             >
                                 {processing && <Spinner />}
-                                Confirm password
+                                Bekræft
                             </Button>
                         </div>
                     </div>

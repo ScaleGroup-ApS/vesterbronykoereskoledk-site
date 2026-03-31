@@ -18,6 +18,8 @@ class Course extends Model
         'start_at',
         'end_at',
         'max_students',
+        'featured_on_home',
+        'public_spots_remaining',
     ];
 
     protected function casts(): array
@@ -26,6 +28,8 @@ class Course extends Model
             'start_at' => 'datetime',
             'end_at' => 'datetime',
             'max_students' => 'integer',
+            'featured_on_home' => 'boolean',
+            'public_spots_remaining' => 'integer',
         ];
     }
 

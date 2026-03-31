@@ -1,7 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { AttendanceCheckbox } from '@/components/bookings/attendance-checkbox';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/BookingNoteController';
+import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import { dashboard } from '@/routes';
 import { update } from '@/routes/bookings';
 import type { BreadcrumbItem } from '@/types';
@@ -21,6 +25,9 @@ type DayEvent = {
     vehicle_id: number | null;
     vehicle: string | null;
     notes: string | null;
+    attended: boolean | null;
+    instructor_note: string | null;
+    driving_skills: string[] | null;
 };
 
 type Instructor = { id: number; name: string };
@@ -43,6 +50,64 @@ function formatDateTime(iso: string): string {
         hour: '2-digit',
         minute: '2-digit',
     });
+}
+
+const ALL_SKILLS = [
+    { key: 'parking', label: 'Parkering' },
+    { key: 'motorvej', label: 'Motorvej' },
+    { key: 'roundabouts', label: 'Rundkørsel' },
+    { key: 'city_driving', label: 'Bykørsel' },
+    { key: 'overtaking', label: 'Overhaling' },
+    { key: 'reversing', label: 'Bakring' },
+    { key: 'lane_change', label: 'Filskifte' },
+    { key: 'emergency_stop', label: 'Nødstop' },
+] as const;
+
+function InlineNoteSkills({ event }: { event: DayEvent }) {
+    const [note, setNote] = useState(event.instructor_note ?? '');
+    const [skills, setSkills] = useState<string[]>(event.driving_skills ?? []);
+
+    function saveNote() {
+        router.patch(BookingNoteController({ id: event.booking_id! }).url, { instructor_note: note }, { preserveScroll: true });
+    }
+
+    function toggleSkill(key: string) {
+        const next = skills.includes(key) ? skills.filter((s) => s !== key) : [...skills, key];
+        setSkills(next);
+        router.patch(BookingSkillsController({ id: event.booking_id! }).url, { driving_skills: next }, { preserveScroll: true });
+    }
+
+    return (
+        <div className="rounded-lg border bg-muted/20 px-4 py-3">
+            <p className="mb-2 text-sm font-medium">{event.title} — {bookingTypeLabels[event.type as keyof typeof bookingTypeLabels] ?? event.type}</p>
+            <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                onBlur={saveNote}
+                placeholder="Skriv note til elev..."
+                rows={2}
+                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            {event.type === 'driving_lesson' && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                    {ALL_SKILLS.map((skill) => (
+                        <button
+                            key={skill.key}
+                            type="button"
+                            onClick={() => toggleSkill(skill.key)}
+                            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                                skills.includes(skill.key)
+                                    ? 'border-primary bg-primary/10 font-medium text-primary'
+                                    : 'border-input text-muted-foreground hover:border-primary/40'
+                            }`}
+                        >
+                            {skill.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default function BookingDay({
@@ -89,6 +154,7 @@ export default function BookingDay({
                                 <th className="px-4 py-3 font-medium">Status</th>
                                 <th className="px-4 py-3 font-medium">Instruktør</th>
                                 <th className="px-4 py-3 font-medium">Køretøj</th>
+                                <th className="px-4 py-3 font-medium">Fremmøde</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -170,12 +236,19 @@ export default function BookingDay({
                                             </span>
                                         )}
                                     </td>
+                                    <td className="px-4 py-2">
+                                        {event.booking_id !== null ? (
+                                            <AttendanceCheckbox bookingId={event.booking_id} attended={event.attended} />
+                                        ) : (
+                                            <span className="text-muted-foreground">–</span>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                             {events.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
                                         Ingen bookinger denne dag.
@@ -185,6 +258,18 @@ export default function BookingDay({
                         </tbody>
                     </table>
                 </div>
+
+                {/* Instructor notes section below table */}
+                {events.filter((e) => e.booking_id !== null).length > 0 && (
+                    <div className="mt-4 space-y-3 rounded-xl border p-4">
+                        <p className="text-sm font-medium text-muted-foreground">Notater & færdigheder</p>
+                        {events
+                            .filter((e) => e.booking_id !== null)
+                            .map((event) => (
+                                <InlineNoteSkills key={event.id} event={event} />
+                            ))}
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

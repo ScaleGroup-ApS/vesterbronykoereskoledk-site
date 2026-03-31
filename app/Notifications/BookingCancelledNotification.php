@@ -27,8 +27,8 @@ class BookingCancelledNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Din booking er annulleret')
             ->greeting("Hej {$notifiable->name}!")
-            ->line("Din booking ({$this->booking->type->value}) d. {$this->booking->starts_at->format('d/m/Y H:i')} er blevet annulleret.")
-            ->action('Se dine bookinger', url('/bookings'));
+            ->line("Din booking ({$this->booking->type->label()}) d. {$this->booking->starts_at->format('d/m/Y H:i')} er blevet annulleret.")
+            ->action('Se kalenderen', route('student.kalender'));
     }
 
     /**

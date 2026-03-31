@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Enums\EnrollmentStatus;
+use App\Enums\OfferType;
 use App\Models\Enrollment;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -84,6 +86,33 @@ class HandleInertiaRequests extends Middleware
 
                 return route('student.learn.page', [$enrollment->offer, $firstModule, $firstPage]);
             },
+            'marketingOffers' => fn (): array => Offer::query()
+                ->where('type', OfferType::Primary)
+                ->orderBy('name')
+                ->get()
+                ->map(fn (Offer $offer) => [
+                    'id' => $offer->id,
+                    'name' => $offer->name,
+                    'slug' => $offer->slug,
+                    'description' => $offer->description,
+                    'price' => (string) $offer->price,
+                    'type' => $offer->type->value,
+                    'theory_lessons' => $offer->theory_lessons,
+                    'driving_lessons' => $offer->driving_lessons,
+                    'track_required' => $offer->track_required,
+                    'slippery_required' => $offer->slippery_required,
+                ])
+                ->values()
+                ->all(),
+            'marketingContact' => fn (): array => [
+                'phone' => config('marketing.contact.phone'),
+                'phone_href' => config('marketing.contact.phone_href'),
+                'email' => config('marketing.contact.email'),
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

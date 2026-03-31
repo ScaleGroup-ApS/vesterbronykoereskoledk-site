@@ -1,7 +1,11 @@
 <?php
 
+use App\Enums\EnrollmentStatus;
 use App\Models\Booking;
+use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Offer;
+use App\Models\Student;
 use App\Models\Team;
 use App\Models\User;
 
@@ -18,7 +22,7 @@ test('authenticated users can visit the dashboard', function () {
     actingAs($user)->get(route('dashboard'))->assertOk();
 });
 
-test('admin receives day counts and enrollments props', function () {
+test('admin dashboard includes kpis courses and enrollments', function () {
     $admin = User::factory()->create();
     Booking::factory()->create();
     Enrollment::factory()->create();
@@ -28,14 +32,14 @@ test('admin receives day counts and enrollments props', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('dashboard')
-            ->has('dayCounts', 1)
-            ->has('dayCounts.0.date')
-            ->has('dayCounts.0.count')
+            ->has('kpis')
+            ->has('kpis.total_students')
+            ->has('courses')
             ->has('enrollments', 1)
         );
 });
 
-test('instructor receives day counts prop with empty enrollments', function () {
+test('instructor dashboard includes kpis and empty enrollments when none pending', function () {
     $instructor = User::factory()->instructor()->create();
     Booking::factory()->create();
 
@@ -44,29 +48,35 @@ test('instructor receives day counts prop with empty enrollments', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('dashboard')
-            ->has('dayCounts', 1)
+            ->has('kpis.upcoming_bookings')
             ->has('enrollments', 0)
         );
 });
 
-test('team bookings on same slot count as one in day counts', function () {
+test('admin dashboard courses include occupancy counts', function () {
     $admin = User::factory()->create();
-    $team = Team::factory()->create();
-    $startsAt = now()->addDay()->setHour(10)->setMinute(0)->setSecond(0);
-
-    // Two bookings same team, same slot
-    Booking::factory()->count(2)->create([
-        'team_id' => $team->id,
-        'starts_at' => $startsAt,
-        'ends_at' => $startsAt->copy()->addHour(),
+    $offer = Offer::factory()->create();
+    $course = Course::factory()->for($offer)->create([
+        'max_students' => 10,
+        'start_at' => now()->addWeek(),
+        'end_at' => now()->addWeek()->addHours(8),
+    ]);
+    Enrollment::factory()->create([
+        'student_id' => Student::factory(),
+        'offer_id' => $offer->id,
+        'course_id' => $course->id,
+        'status' => EnrollmentStatus::Completed,
     ]);
 
     actingAs($admin)
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->has('dayCounts', 1)
-            ->where('dayCounts.0.count', 1)
+            ->component('dashboard')
+            ->has('courses', 1)
+            ->where('courses.0.enrollments_completed_count', 1)
+            ->where('courses.0.enrollments_pending_count', 0)
+            ->where('courses.0.max_students', 10)
         );
 });
 

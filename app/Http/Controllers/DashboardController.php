@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\Dashboard\CalculateKpis;
 use App\Enums\EnrollmentStatus;
+use App\Enums\OfferType;
+use App\Models\Booking;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Offer;
@@ -47,6 +49,13 @@ class DashboardController extends Controller
 
         $courses = Course::query()
             ->with('offer:id,name')
+            ->withCount([
+                'enrollments as enrollments_completed_count' => fn ($query) => $query->where('status', EnrollmentStatus::Completed),
+                'enrollments as enrollments_pending_count' => fn ($query) => $query->whereIn('status', [
+                    EnrollmentStatus::PendingApproval,
+                    EnrollmentStatus::PendingPayment,
+                ]),
+            ])
             ->orderBy('start_at')
             ->get()
             ->map(fn (Course $course) => [
@@ -54,16 +63,46 @@ class DashboardController extends Controller
                 'title' => $course->offer->name,
                 'start' => $course->start_at->toIso8601String(),
                 'end' => $course->end_at->toIso8601String(),
+                'max_students' => $course->max_students,
+                'public_spots_remaining' => $course->public_spots_remaining,
+                'enrollments_completed_count' => $course->enrollments_completed_count,
+                'enrollments_pending_count' => $course->enrollments_pending_count,
             ])
             ->all();
 
-        $offers = Offer::query()->orderBy('type')->orderBy('name')->get(['id', 'name'])->all();
+        $offers = Offer::query()
+            ->where('type', OfferType::Primary)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->all();
+
+        $todayBookings = [];
+        if ($user->isInstructor() || $user->isAdmin()) {
+            $todayQuery = Booking::with(['student.user', 'vehicle'])
+                ->whereDate('starts_at', today())
+                ->orderBy('starts_at');
+
+            if ($user->isInstructor()) {
+                $todayQuery->where('instructor_id', $user->id);
+            }
+
+            $todayBookings = $todayQuery->get()->map(fn (Booking $b) => [
+                'id' => $b->id,
+                'student_name' => $b->student->user->name,
+                'type_label' => $b->type->label(),
+                'time' => $b->starts_at->format('H:i').' – '.$b->ends_at->format('H:i'),
+                'vehicle' => $b->vehicle?->name,
+                'status' => $b->status->value,
+                'attended' => $b->attended,
+            ])->all();
+        }
 
         return Inertia::render('dashboard', [
             'kpis' => $kpis->handle($user),
             'courses' => $courses,
             'enrollments' => $enrollments,
             'offers' => $offers,
+            'todayBookings' => $todayBookings,
         ]);
     }
 }

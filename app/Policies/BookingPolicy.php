@@ -31,4 +31,9 @@ class BookingPolicy
     {
         return $user->isAdmin();
     }
+
+    public function recordAttendance(User $user, Booking $booking): bool
+    {
+        return $this->update($user, $booking);
+    }
 }

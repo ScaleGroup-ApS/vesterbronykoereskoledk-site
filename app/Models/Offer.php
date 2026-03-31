@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Enums\OfferType;
+use App\Models\CurriculumTopic;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -17,6 +20,7 @@ class Offer extends Model implements HasMedia
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
         'type',
@@ -24,6 +28,8 @@ class Offer extends Model implements HasMedia
         'driving_lessons',
         'track_required',
         'slippery_required',
+        'requires_theory_exam',
+        'requires_practical_exam',
     ];
 
     protected function casts(): array
@@ -35,7 +41,45 @@ class Offer extends Model implements HasMedia
             'driving_lessons' => 'integer',
             'track_required' => 'boolean',
             'slippery_required' => 'boolean',
+            'requires_theory_exam' => 'boolean',
+            'requires_practical_exam' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Offer $offer) {
+            if (blank($offer->slug) && filled($offer->name)) {
+                $offer->slug = static::uniqueSlugFromName($offer->name);
+            }
+        });
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?static
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)->first()
+            ?? $this->where('id', $value)->first();
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public static function uniqueSlugFromName(string $name): string
+    {
+        $base = Str::slug($name);
+        if ($base === '') {
+            $base = 'pakke';
+        }
+        $slug = $base;
+        $i = 2;
+        while (static::query()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$i;
+            $i++;
+        }
+
+        return $slug;
     }
 
     public function registerMediaCollections(): void
@@ -57,5 +101,27 @@ class Offer extends Model implements HasMedia
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
+    }
+
+    public function curriculumTopics(): HasMany
+    {
+        return $this->hasMany(CurriculumTopic::class)->orderBy('lesson_number');
+    }
+
+    /** @param Builder<Offer> $query */
+    public function scopePrimary(Builder $query): void
+    {
+        $query->where('type', OfferType::Primary);
+    }
+
+    /** @param Builder<Offer> $query */
+    public function scopeAddon(Builder $query): void
+    {
+        $query->where('type', OfferType::Addon);
+    }
+
+    public function isPrimary(): bool
+    {
+        return $this->type === OfferType::Primary;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Actions\Bookings;
 
 use App\Events\BookingCreated;
 use App\Models\Booking;
+use App\Notifications\BookingScheduledNotification;
 
 class CreateBooking
 {
@@ -20,6 +21,9 @@ class CreateBooking
             type: $booking->type->value,
             starts_at: $booking->starts_at->toDateTimeString(),
         );
+
+        $booking->load('student.user');
+        $booking->student->user->notify(new BookingScheduledNotification($booking));
 
         return $booking;
     }

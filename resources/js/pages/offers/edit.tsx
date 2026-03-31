@@ -1,6 +1,6 @@
-import { Head, useForm, Form, Link } from '@inertiajs/react';
-import { Trash2, Plus, BookOpen } from 'lucide-react';
-import { store as storeCourse, destroy as destroyCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
+import { Form, Head, Link, useForm } from '@inertiajs/react';
+import { BookOpen, Plus, Trash2 } from 'lucide-react';
+import { destroy as destroyCourse, store as storeCourse } from '@/actions/App/Http/Controllers/Offers/CourseController';
 import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import { index as modulesIndex } from '@/actions/App/Http/Controllers/Offers/OfferModuleController';
 import Heading from '@/components/heading';
@@ -26,16 +26,11 @@ type Offer = {
     driving_lessons: number;
     track_required: boolean;
     slippery_required: boolean;
+    requires_theory_exam: boolean;
+    requires_practical_exam: boolean;
 };
 
 type OfferType = { value: string; label: string };
-
-type Course = {
-    id: number;
-    start_at: string;
-    end_at: string;
-    max_students: number | null;
-};
 
 export default function OfferEdit({
     offer,
@@ -64,6 +59,8 @@ export default function OfferEdit({
         driving_lessons: String(offer.driving_lessons),
         track_required: offer.track_required,
         slippery_required: offer.slippery_required,
+        requires_theory_exam: offer.requires_theory_exam,
+        requires_practical_exam: offer.requires_practical_exam,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -99,7 +96,9 @@ export default function OfferEdit({
                             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
                         >
                             {offerTypes.map((t) => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
+                                <option key={t.value} value={t.value}>
+                                    {t.label}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -157,6 +156,22 @@ export default function OfferEdit({
                                 onCheckedChange={(v) => form.setData('slippery_required', v === true)}
                             />
                             <Label htmlFor="slippery_required">Glat bane krævet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_theory_exam"
+                                checked={form.data.requires_theory_exam}
+                                onCheckedChange={(v) => form.setData('requires_theory_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_theory_exam">Teoriprøve i forløbet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_practical_exam"
+                                checked={form.data.requires_practical_exam}
+                                onCheckedChange={(v) => form.setData('requires_practical_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_practical_exam">Køreprøve i forløbet</Label>
                         </div>
                     </div>
 

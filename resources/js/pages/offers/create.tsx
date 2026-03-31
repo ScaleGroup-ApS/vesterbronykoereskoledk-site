@@ -27,6 +27,8 @@ export default function OfferCreate({ offerTypes }: { offerTypes: OfferType[] })
         driving_lessons: '0',
         track_required: false,
         slippery_required: false,
+        requires_theory_exam: true,
+        requires_practical_exam: true,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -121,6 +123,22 @@ export default function OfferCreate({ offerTypes }: { offerTypes: OfferType[] })
                                 onCheckedChange={(v) => form.setData('slippery_required', v === true)}
                             />
                             <Label htmlFor="slippery_required">Glat bane krævet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_theory_exam"
+                                checked={form.data.requires_theory_exam}
+                                onCheckedChange={(v) => form.setData('requires_theory_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_theory_exam">Teoriprøve i forløbet</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="requires_practical_exam"
+                                checked={form.data.requires_practical_exam}
+                                onCheckedChange={(v) => form.setData('requires_practical_exam', v === true)}
+                            />
+                            <Label htmlFor="requires_practical_exam">Køreprøve i forløbet</Label>
                         </div>
                     </div>
 

@@ -32,10 +32,22 @@ class ConversationController extends Controller
                     'created_at' => $conversation->lastMessage->created_at->toISOString(),
                 ] : null,
                 'unread' => $this->resolveUnreadCount($conversation),
+                'users' => $conversation->users->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                ])->values()->all(),
             ]);
+
+        $users = User::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (User $user) => ['id' => $user->id, 'name' => $user->name])
+            ->values()
+            ->all();
 
         return Inertia::render('chat/index', [
             'conversations' => $conversations,
+            'users' => $users,
         ]);
     }
 
@@ -65,7 +77,13 @@ class ConversationController extends Controller
                 'type' => ConversationType::Group,
                 'name' => $data['name'],
             ]);
-            $conversation->users()->attach(auth()->id());
+
+            $memberIds = array_unique(array_merge(
+                [auth()->id()],
+                $data['user_ids'] ?? []
+            ));
+
+            $conversation->users()->attach($memberIds);
         }
 
         return redirect()->route('chat.index', ['conversation' => $conversation->id]);

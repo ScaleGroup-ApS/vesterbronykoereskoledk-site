@@ -21,6 +21,8 @@ class OfferFactory extends Factory
             'driving_lessons' => fake()->numberBetween(15, 30),
             'track_required' => true,
             'slippery_required' => true,
+            'requires_theory_exam' => true,
+            'requires_practical_exam' => true,
         ];
     }
 

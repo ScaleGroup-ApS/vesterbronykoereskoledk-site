@@ -1,11 +1,13 @@
+import type { EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import type { DateClickArg } from '@fullcalendar/interaction';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import { Form, Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarDays, CheckCircle2, Plus, TrendingDown, Users, Wallet, XCircle } from 'lucide-react';
+import { Award, CalendarDays, CheckCircle2, ClipboardCheck, GraduationCap, TrendingDown, TrendingUp, Users, Wallet, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { approve, reject } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { CourseHoldCapacityChart } from '@/components/dashboard/course-hold-capacity-chart';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,9 +31,8 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import { show as showCourse } from '@/routes/courses';
+import { show as showCourse, store as storeCourse } from '@/routes/courses';
 import { index as enrollmentsIndex } from '@/routes/enrollments';
-import { store as storeCourse } from '@/routes/offers/courses';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: dashboard().url }];
@@ -41,14 +42,29 @@ type AdminKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
     total_outstanding: number;
+    monthly_revenue: number;
+    completed_this_month: number;
+    exam_pass_rate: number;
 };
 
 type InstructorKpis = {
     upcoming_bookings: number;
     no_show_rate: number;
+    my_students: number;
+    completed_this_month: number;
 };
 
 type Kpis = AdminKpis | InstructorKpis | Record<string, never>;
+
+type TodayBooking = {
+    id: number;
+    student_name: string;
+    type_label: string;
+    time: string;
+    vehicle: string | null;
+    status: string;
+    attended: boolean | null;
+};
 
 type Enrollment = {
     id: number;
@@ -87,18 +103,29 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ElementType; label:
 }
 
 type Offer = { id: number; name: string };
-type CourseEvent = { id: number; title: string; start: string; end: string };
+type CourseEvent = {
+    id: number;
+    title: string;
+    start: string;
+    end: string;
+    max_students: number | null;
+    public_spots_remaining: number | null;
+    enrollments_completed_count: number;
+    enrollments_pending_count: number;
+};
 
 export default function Dashboard({
     kpis,
     courses = [],
     enrollments = [],
     offers = [],
+    todayBookings = [],
 }: {
     kpis: Kpis;
     courses?: CourseEvent[];
     enrollments: Enrollment[];
     offers?: Offer[];
+    todayBookings?: TodayBooking[];
 }) {
     const isAdmin = 'total_students' in kpis;
     const isInstructor = 'upcoming_bookings' in kpis && !isAdmin;
@@ -106,9 +133,8 @@ export default function Dashboard({
     const [enrollmentDialogOpen, setEnrollmentDialogOpen] = useState(false);
     const [rejectTarget, setRejectTarget] = useState<Enrollment | null>(null);
     const [courseDialogDate, setCourseDialogDate] = useState<string | null>(null);
-    const [selectedOfferId, setSelectedOfferId] = useState<string>('');
 
-    const courseForm = useForm({ start_at: '', end_at: '', max_students: '' });
+    const courseForm = useForm({ offer_id: '', start_at: '', max_students: '' });
 
     const events = courses.map((course) => ({
         id: String(course.id),
@@ -118,21 +144,26 @@ export default function Dashboard({
         color: 'var(--color-primary)',
     }));
 
-    function handleEventClick(info: import('@fullcalendar/core').EventClickArg) {
+    function handleEventClick(info: EventClickArg) {
         const id = info.event.id ? Number(info.event.id) : null;
         if (id) { router.visit(showCourse(id).url); }
     }
 
     function handleDateClick(info: DateClickArg) {
-        courseForm.setData({ start_at: `${info.dateStr}T09:00`, end_at: `${info.dateStr}T17:00`, max_students: '' });
-        setSelectedOfferId('');
+        courseForm.setData({
+            offer_id: '',
+            start_at: `${info.dateStr}T09:00`,
+            max_students: '',
+        });
         setCourseDialogDate(info.dateStr);
     }
 
     function handleCourseSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!selectedOfferId) { return; }
-        courseForm.post(storeCourse(Number(selectedOfferId)).url, {
+        if (!courseForm.data.offer_id) {
+            return;
+        }
+        courseForm.post(storeCourse.url(), {
             onSuccess: () => setCourseDialogDate(null),
         });
     }
@@ -164,6 +195,21 @@ export default function Dashboard({
                                 label="Udestående saldo"
                                 value={`${Number((kpis as AdminKpis).total_outstanding).toLocaleString('da-DK')} kr.`}
                             />
+                            <KpiCard
+                                icon={TrendingUp}
+                                label="Omsætning (denne måned)"
+                                value={`${Number((kpis as AdminKpis).monthly_revenue).toLocaleString('da-DK')} kr.`}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as AdminKpis).completed_this_month}
+                            />
+                            <KpiCard
+                                icon={Award}
+                                label="Beståelsesrate (prøver)"
+                                value={`${(kpis as AdminKpis).exam_pass_rate}%`}
+                            />
                         </>
                     )}
                     {isInstructor && (
@@ -178,6 +224,16 @@ export default function Dashboard({
                                 label="No-show rate"
                                 value={`${(kpis as InstructorKpis).no_show_rate}%`}
                             />
+                            <KpiCard
+                                icon={GraduationCap}
+                                label="Mine elever"
+                                value={(kpis as InstructorKpis).my_students}
+                            />
+                            <KpiCard
+                                icon={ClipboardCheck}
+                                label="Lektioner gennemført (måned)"
+                                value={(kpis as InstructorKpis).completed_this_month}
+                            />
                         </>
                     )}
                     {!isAdmin && !isInstructor && (
@@ -186,6 +242,60 @@ export default function Dashboard({
                         </div>
                     )}
                 </div>
+
+                {(isAdmin || isInstructor) && todayBookings.length > 0 && (
+                    <div className="rounded-xl border p-5">
+                        <Heading title="Dagens program" description="Bookinger i dag" />
+                        <div className="mt-4 divide-y">
+                            {todayBookings.map((b) => (
+                                <div key={b.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-28 text-sm font-medium">{b.time}</span>
+                                        <div>
+                                            <p className="text-sm font-medium">{b.student_name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {b.type_label}
+                                                {b.vehicle && ` · ${b.vehicle}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {b.attended === true && (
+                                            <Badge variant="default">Mødt</Badge>
+                                        )}
+                                        {b.attended === false && (
+                                            <Badge variant="destructive">Ikke mødt</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'cancelled' && (
+                                            <Badge variant="secondary">Annulleret</Badge>
+                                        )}
+                                        {b.attended === null && b.status === 'scheduled' && (
+                                            <Badge variant="outline">Planlagt</Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {(isAdmin || isInstructor) && todayBookings.length === 0 && (
+                    <div className="rounded-xl border px-4 py-6 text-center text-sm text-muted-foreground">
+                        Ingen bookinger i dag.
+                    </div>
+                )}
+
+                {isAdmin && (
+                    <div className="rounded-xl border p-5">
+                        <Heading
+                            title="Hold & kapacitet"
+                            description="Kommende hold med godkendte tilmeldinger, afventende og ledige pladser."
+                        />
+                        <div className="mt-5">
+                            <CourseHoldCapacityChart courses={courses} />
+                        </div>
+                    </div>
+                )}
 
                 {(isAdmin || isInstructor) && (
                     <>
@@ -229,12 +339,15 @@ export default function Dashboard({
                         </DialogHeader>
                         <form onSubmit={handleCourseSubmit} className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="course_offer">Tilbud</Label>
-                                <Select value={selectedOfferId} onValueChange={setSelectedOfferId}>
-                                    <SelectTrigger id="course_offer">
-                                        <SelectValue placeholder="Vælg tilbud…" />
+                                <Label htmlFor="course_offer">Lovpakke (tilbud)</Label>
+                                <Select
+                                    value={courseForm.data.offer_id || undefined}
+                                    onValueChange={(v) => courseForm.setData('offer_id', v)}
+                                >
+                                    <SelectTrigger id="course_offer" className="bg-background">
+                                        <SelectValue placeholder="Vælg lovpakke…" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent position="popper" className="z-[200]">
                                         {offers.map((offer) => (
                                             <SelectItem key={offer.id} value={String(offer.id)}>
                                                 {offer.name}
@@ -244,7 +357,7 @@ export default function Dashboard({
                                 </Select>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="course_start_at">Start</Label>
+                                <Label htmlFor="course_start_at">Start (dato og tid)</Label>
                                 <Input
                                     id="course_start_at"
                                     type="datetime-local"
@@ -252,16 +365,9 @@ export default function Dashboard({
                                     onChange={(e) => courseForm.setData('start_at', e.target.value)}
                                     required
                                 />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="course_end_at">Slut</Label>
-                                <Input
-                                    id="course_end_at"
-                                    type="datetime-local"
-                                    value={courseForm.data.end_at}
-                                    onChange={(e) => courseForm.setData('end_at', e.target.value)}
-                                    required
-                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Sluttid sættes automatisk efter standard kursuslængde.
+                                </p>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="course_max_students">
@@ -281,7 +387,11 @@ export default function Dashboard({
                                 <Button type="button" variant="outline" onClick={() => setCourseDialogDate(null)}>
                                     Annuller
                                 </Button>
-                                <Button type="submit" disabled={courseForm.processing || !selectedOfferId} className="gap-1.5">
+                                <Button
+                                    type="submit"
+                                    disabled={courseForm.processing || !courseForm.data.offer_id}
+                                    className="gap-1.5"
+                                >
                                     {courseForm.processing && <Spinner />}
                                     Opret kursus
                                 </Button>

@@ -1,5 +1,16 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, Car, CreditCard, GraduationCap, LayoutGrid, Library, MessageSquare, ScrollText, Tag } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    CalendarDays,
+    CreditCard,
+    GraduationCap,
+    LayoutGrid,
+    MessageSquare,
+    ScrollText,
+    Tag,
+    UserCog,
+    UserPlus,
+} from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,18 +23,20 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { index as enrollmentsIndex } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { index as staffIndex } from '@/actions/App/Http/Controllers/Staff/StaffController';
 import { dashboard } from '@/routes';
+import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
 import { index as coursesIndex } from '@/routes/courses';
 import { index as offersIndex } from '@/routes/offers';
 import { index as paymentsIndex } from '@/routes/payments';
 import { index as studentsIndex } from '@/routes/students';
 import { index as timelineIndex } from '@/routes/timeline';
-import { index as vehiclesIndex } from '@/routes/vehicles';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const sharedNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -34,17 +47,7 @@ const mainNavItems: NavItem[] = [
         href: studentsIndex(),
         icon: GraduationCap,
     },
-    // {
-    //     title: 'Hold',
-    //     href: teamsIndex(),
-    //     icon: Users,
-    // },
-    {
-        title: 'Køretøjer',
-        href: vehiclesIndex(),
-        icon: Car,
-    },
-    {
+{
         title: 'Tilbud',
         href: offersIndex(),
         icon: Tag,
@@ -59,16 +62,11 @@ const mainNavItems: NavItem[] = [
         href: coursesIndex(),
         icon: BookOpen,
     },
-    // {
-    //     title: 'Tilmeldinger',
-    //     href: enrollmentsIndex(),
-    //     icon: CalendarDays,
-    // },
-    // {
-    //     title: 'Bookinger',
-    //     href: bookingsIndex(),
-    //     icon: CalendarDays,
-    // },
+    {
+        title: 'Bookinger',
+        href: bookingsIndex(),
+        icon: CalendarDays,
+    },
     {
         title: 'Betalinger',
         href: paymentsIndex(),
@@ -78,6 +76,19 @@ const mainNavItems: NavItem[] = [
         title: 'Chat',
         href: chatIndex(),
         icon: MessageSquare,
+    },
+];
+
+const adminOnlyNavItems: NavItem[] = [
+    {
+        title: 'Medarbejdere',
+        href: staffIndex(),
+        icon: UserCog,
+    },
+    {
+        title: 'Tilmeldinger',
+        href: enrollmentsIndex(),
+        icon: UserPlus,
     },
     {
         title: 'Hændelseslog',
@@ -89,6 +100,13 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const isAdmin = auth.user?.role === 'admin';
+
+    const mainNavItems = isAdmin
+        ? [...sharedNavItems, ...adminOnlyNavItems]
+        : sharedNavItems;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

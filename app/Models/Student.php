@@ -48,6 +48,16 @@ class Student extends Model implements HasMedia
         return $this->belongsToMany(Offer::class)->withPivot('assigned_at');
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
     public function pageProgress(): HasMany
     {
         return $this->hasMany(StudentPageProgress::class);

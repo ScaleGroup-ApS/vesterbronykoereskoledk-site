@@ -4,7 +4,7 @@ export type ConversationUser = {
 };
 
 export type LastMessage = {
-    body: string;
+    body: string | null;
     user_name: string;
     created_at: string;
 };
@@ -15,11 +15,21 @@ export type Conversation = {
     type: 'direct' | 'group';
     last_message: LastMessage | null;
     unread: number;
+    users: ConversationUser[];
+};
+
+export type Attachment = {
+    id: number;
+    name: string;
+    mime_type: string;
+    size: number;
+    url: string;
 };
 
 export type Message = {
     id: number;
-    body: string;
+    body: string | null;
     user: { id: number; name: string };
     created_at: string;
+    attachments: Attachment[];
 };

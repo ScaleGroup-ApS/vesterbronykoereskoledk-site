@@ -1,7 +1,16 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Search, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { index, create, destroy } from '@/routes/payments';
 import type { BreadcrumbItem } from '@/types';
@@ -25,6 +34,11 @@ type PaginatedPayments = {
     meta: { from: number | null; to: number | null; total: number; last_page: number };
 };
 
+type Filters = {
+    search: string;
+    method: string;
+};
+
 const methodLabels: Record<string, string> = {
     cash: 'Kontant',
     card: 'Kort',
@@ -32,7 +46,33 @@ const methodLabels: Record<string, string> = {
     invoice: 'Faktura',
 };
 
-export default function PaymentsIndex({ payments }: { payments: PaginatedPayments }) {
+export default function PaymentsIndex({
+    payments,
+    filters,
+}: {
+    payments: PaginatedPayments;
+    filters?: Filters;
+}) {
+    const [search, setSearch] = useState(filters?.search ?? '');
+
+    function applyFilters(overrides: Partial<Filters>) {
+        const params = { ...filters, ...overrides };
+        router.get(index().url, Object.fromEntries(Object.entries(params).filter(([, v]) => v)), {
+            preserveState: true,
+            replace: true,
+        });
+    }
+
+    function handleSearch(e: React.FormEvent) {
+        e.preventDefault();
+        applyFilters({ search });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        applyFilters({ search: '' });
+    }
+
     function handleDelete(payment: Payment) {
         if (confirm('Er du sikker på, at du vil slette denne betaling?')) {
             router.delete(destroy(payment).url);
@@ -52,6 +92,42 @@ export default function PaymentsIndex({ payments }: { payments: PaginatedPayment
                             Registrer betaling
                         </Link>
                     </Button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <form onSubmit={handleSearch} className="relative flex-1 sm:max-w-xs">
+                        <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Søg elevnavn…"
+                            className="pl-9 pr-8"
+                        />
+                        {search && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        )}
+                    </form>
+                    <Select
+                        value={filters?.method || 'all'}
+                        onValueChange={(v) => applyFilters({ method: v === 'all' ? '' : v })}
+                    >
+                        <SelectTrigger className="w-40 bg-background">
+                            <SelectValue placeholder="Alle metoder" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Alle metoder</SelectItem>
+                            <SelectItem value="cash">Kontant</SelectItem>
+                            <SelectItem value="card">Kort</SelectItem>
+                            <SelectItem value="mobile_pay">MobilePay</SelectItem>
+                            <SelectItem value="invoice">Faktura</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="rounded-xl border">
@@ -91,6 +167,26 @@ export default function PaymentsIndex({ payments }: { payments: PaginatedPayment
                         </tbody>
                     </table>
                 </div>
+
+                {payments.meta.last_page > 1 && (
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            Viser {payments.meta.from}-{payments.meta.to} af {payments.meta.total} betalinger
+                        </p>
+                        <div className="flex gap-2">
+                            {payments.links.prev && (
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={payments.links.prev}>Forrige</Link>
+                                </Button>
+                            )}
+                            {payments.links.next && (
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={payments.links.next}>Næste</Link>
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
