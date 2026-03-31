@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import StudentLayout from '@/layouts/student-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { Conversation, ConversationUser, Message } from '@/types/chat';
 
@@ -242,6 +243,8 @@ function GroupMembersPanel({
 export default function ChatIndex({ conversations, users }: Props) {
     const { auth } = usePage().props as { auth: { user: PageUser } };
     const isAdmin = auth.user.role === 'admin';
+    const isStudent = auth.user.role === 'student';
+    const Layout = isStudent ? StudentLayout : AppLayout;
 
     const [activeId, setActiveId] = useState<number | null>(conversations[0]?.id ?? null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -297,7 +300,7 @@ export default function ChatIndex({ conversations, users }: Props) {
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <Layout breadcrumbs={breadcrumbs}>
             <Head title="Chat" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <Heading title="Chat" description="Samtaler med instruktører og elever" />
@@ -354,6 +357,6 @@ export default function ChatIndex({ conversations, users }: Props) {
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </Layout>
     );
 }
