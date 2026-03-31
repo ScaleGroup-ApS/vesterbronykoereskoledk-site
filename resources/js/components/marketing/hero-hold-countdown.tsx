@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
-import { CalendarDays, MapPin } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 

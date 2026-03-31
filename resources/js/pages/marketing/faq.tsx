@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import MarketingLayout from '@/layouts/marketing-layout';
-import { contact } from '@/routes/marketing';
 import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
+import { contact } from '@/routes/marketing';
 
 type FaqItem = { question: string; answer: string };
 

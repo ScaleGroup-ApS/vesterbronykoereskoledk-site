@@ -58,6 +58,16 @@ class Student extends Model implements HasMedia
         return $this->hasMany(Enrollment::class);
     }
 
+    public function pageProgress(): HasMany
+    {
+        return $this->hasMany(StudentPageProgress::class);
+    }
+
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(StudentQuizAttempt::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('documents');

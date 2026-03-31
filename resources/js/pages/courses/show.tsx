@@ -1,6 +1,5 @@
 import { Head, Link, useForm, Form } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { destroy, update } from '@/routes/courses';
 import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -9,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { destroy, update } from '@/routes/courses';
 import { index } from '@/routes/courses';
 import type { BreadcrumbItem } from '@/types';
 

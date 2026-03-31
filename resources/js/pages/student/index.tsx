@@ -1,9 +1,10 @@
-import { Head, Link, router, usePoll } from '@inertiajs/react';
-import { ArrowRight, Clock, CreditCard, Loader2 } from 'lucide-react';
+import { Head, Link, router, usePage, usePoll } from '@inertiajs/react';
+import { ArrowRight, BookOpen, Clock, CreditCard, Loader2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import Heading from '@/components/heading';
 import { StudentLessonProgress } from '@/components/student/student-lesson-progress';
 import type { LessonProgressRow } from '@/components/student/student-lesson-progress';
+import { Button } from '@/components/ui/button';
 import StudentLayout from '@/layouts/student-layout';
 import { dashboard, forloeb, kalender } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
@@ -41,6 +42,7 @@ export default function StudentDashboard({
     balance: Balance;
     lesson_progress: LessonProgressRow[];
 }) {
+    const { studentLearnUrl } = usePage<{ studentLearnUrl: string | null }>().props;
     const wasPending = useRef(!!pendingEnrollment);
     const { stop } = usePoll(5000, { only: ['pendingEnrollment'] }, { autoStart: !!pendingEnrollment });
 
@@ -105,6 +107,22 @@ export default function StudentDashboard({
                         </Link>
                     </p>
                 </div>
+
+                {studentLearnUrl && (
+                    <div className="flex items-center justify-between rounded-xl border p-5">
+                        <div className="flex items-center gap-3">
+                            <BookOpen className="size-5 text-muted-foreground" />
+                            <div>
+                                <p className="font-medium">Kursusmateriale</p>
+                                <p className="text-sm text-muted-foreground">Gennemgå moduler, videoer og quizzer</p>
+                            </div>
+                        </div>
+                        <Button asChild>
+                            <Link href={studentLearnUrl}>Gå til kursus</Link>
+                        </Button>
+                    </div>
+                )}
+
 
                 <div className="space-y-3">
                     <Heading variant="small" title="Næste aktivitet" />

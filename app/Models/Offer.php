@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OfferType;
-use App\Models\CurriculumTopic;
+use Database\Factories\OfferFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +15,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Offer extends Model implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\OfferFactory> */
+    /** @use HasFactory<OfferFactory> */
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
@@ -85,6 +85,11 @@ class Offer extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('materials');
+    }
+
+    public function modules(): HasMany
+    {
+        return $this->hasMany(OfferModule::class)->orderBy('sort_order');
     }
 
     public function students(): BelongsToMany

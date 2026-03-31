@@ -2,11 +2,11 @@ import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
 import MarketingLayout from '@/layouts/marketing-layout';
-import type { MarketingOffer } from '@/types/marketing-offer';
 import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
 import { home } from '@/routes';
 import { show as bookOffer } from '@/routes/enrollment';
 import { contact, packages } from '@/routes/marketing';
+import type { MarketingOffer } from '@/types/marketing-offer';
 
 export default function PakkeShow({ offer }: { offer: MarketingOffer }) {
     const priceFormatted = Number(offer.price).toLocaleString('da-DK');

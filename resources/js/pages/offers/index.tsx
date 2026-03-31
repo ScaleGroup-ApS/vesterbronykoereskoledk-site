@@ -1,10 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { BookOpen, Pencil, Plus, Trash2 } from 'lucide-react';
+import { index as curriculumIndex } from '@/actions/App/Http/Controllers/Curriculum/CurriculumTopicController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { index as curriculumIndex } from '@/actions/App/Http/Controllers/Curriculum/CurriculumTopicController';
 import { index, create, edit, destroy } from '@/routes/offers';
 import type { BreadcrumbItem } from '@/types';
 

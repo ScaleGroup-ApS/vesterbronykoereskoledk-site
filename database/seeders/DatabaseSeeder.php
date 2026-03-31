@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Enums\OfferType;
 use App\Enums\UserRole;
 use App\Models\Offer;
+use App\Models\OfferModule;
+use App\Models\OfferPage;
+use App\Models\OfferPageQuizQuestion;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -25,6 +28,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->seedOffers();
+        $this->seedModules();
     }
 
     private function seedOffers(): void
@@ -103,6 +107,118 @@ class DatabaseSeeder extends Seeder
                 'track_required' => false,
                 'slippery_required' => false,
             ]);
+        }
+    }
+
+    private function seedModules(): void
+    {
+        $offer = Offer::where('type', OfferType::Primary)->first();
+
+        if (! $offer) {
+            return;
+        }
+
+        $modules = [
+            [
+                'title' => 'Introduktion til kørekortet',
+                'pages' => [
+                    [
+                        'title' => 'Velkommen til kurset',
+                        'body' => '<p>Velkommen til dit køreuddannelsesforløb. I dette kursus gennemgår vi alt, hvad du skal vide for at bestå køreprøven og blive en sikker trafikant.</p><p>Du vil møde teori, øvelser og quizzer undervejs. Tag det i dit eget tempo.</p>',
+                    ],
+                    [
+                        'title' => 'Lovgivning og regler',
+                        'body' => '<p>Færdselsloven er grundlaget for al trafik i Danmark. Det er vigtigt at kende de vigtigste regler:</p><ul><li>Vigepligt og forkørselsret</li><li>Hastighedsgrænser</li><li>Alkohol og spiritus</li></ul>',
+                        'quiz' => [
+                            [
+                                'question' => 'Hvad er den generelle hastighedsgrænse på motorvej i Danmark?',
+                                'options' => ['100 km/t', '110 km/t', '120 km/t', '130 km/t'],
+                                'correct_option' => 2,
+                                'explanation' => 'Den generelle hastighedsgrænse på motorvej i Danmark er 120 km/t, medmindre andet er skiltet.',
+                            ],
+                            [
+                                'question' => 'Hvad er promillegrænsen for nye bilister (under 2 år)?',
+                                'options' => ['0,5 promille', '0,2 promille', '0,8 promille', '0,0 promille'],
+                                'correct_option' => 1,
+                                'explanation' => 'For nye bilister med kørekort under 2 år er promillegrænsen 0,2 promille.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Trafikantadfærd',
+                'pages' => [
+                    [
+                        'title' => 'Kryds og vigepligt',
+                        'body' => '<p>I kryds gælder særlige regler. Høj- og venstre-reglen siger, at du skal give vigepligt til køretøjer, der kommer fra højre.</p><p>Undtagelser gælder ved skilte og afmærkning på vejen.</p>',
+                        'quiz' => [
+                            [
+                                'question' => 'Hvem har forkørselsret i et kryds uden skilte?',
+                                'options' => ['Den, der kører hurtigst', 'Den, der kommer fra højre', 'Den, der er på hovdvejen', 'Den, der kom først'],
+                                'correct_option' => 1,
+                                'explanation' => 'Uden skilte gælder højrereglen: du skal give vigepligt til trafikanter fra højre.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'title' => 'Motorvejskørsel',
+                        'body' => '<p>Motorvejskørsel kræver særlig opmærksomhed. Husk:</p><ul><li>Tjek spejle og blinde vinkler ved ind- og udkørsel</li><li>Hold afstand til forankørende</li><li>Overhaling foregår altid i venstre side</li></ul>',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Praktisk forberedelse',
+                'pages' => [
+                    [
+                        'title' => 'Bilen og dens betjening',
+                        'body' => '<p>Inden du kører, skal du tjekke:</p><ul><li>Spejle justeret korrekt</li><li>Sæde og rat i rigtig position</li><li>Sikkerhedssele spændt</li><li>Instrumenter og advarselslamper</li></ul>',
+                    ],
+                    [
+                        'title' => 'Køreprøven – hvad sker der?',
+                        'body' => '<p>Køreprøven består af to dele:</p><ol><li><strong>Teoriprøven</strong> – 25 spørgsmål, max 5 fejl</li><li><strong>Praktisk prøve</strong> – ca. 45 minutters kørsel med en censor</li></ol><p>Vær rolig og kør, som du har lært det. Censoren vurderer din adfærd i trafikken.</p>',
+                        'quiz' => [
+                            [
+                                'question' => 'Hvor mange spørgsmål indeholder teoriprøven?',
+                                'options' => ['20', '25', '30', '40'],
+                                'correct_option' => 1,
+                                'explanation' => 'Teoriprøven består af 25 spørgsmål. Du må højst lave 5 fejl for at bestå.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        foreach ($modules as $sortOrder => $moduleData) {
+            $module = OfferModule::create([
+                'offer_id' => $offer->id,
+                'title' => $moduleData['title'],
+                'sort_order' => $sortOrder + 1,
+            ]);
+
+            foreach ($moduleData['pages'] as $pageSort => $pageData) {
+                $quizQuestions = $pageData['quiz'] ?? [];
+                unset($pageData['quiz']);
+
+                $page = OfferPage::create([
+                    'offer_module_id' => $module->id,
+                    'title' => $pageData['title'],
+                    'body' => $pageData['body'],
+                    'sort_order' => $pageSort + 1,
+                ]);
+
+                foreach ($quizQuestions as $questionSort => $questionData) {
+                    OfferPageQuizQuestion::create([
+                        'offer_page_id' => $page->id,
+                        'question' => $questionData['question'],
+                        'options' => $questionData['options'],
+                        'correct_option' => $questionData['correct_option'],
+                        'explanation' => $questionData['explanation'] ?? null,
+                        'sort_order' => $questionSort + 1,
+                    ]);
+                }
+            }
         }
     }
 }

@@ -1,19 +1,19 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { index as offersIndex } from '@/routes/offers';
+import CurriculumMaterialUnlockController from '@/actions/App/Http/Controllers/Curriculum/CurriculumMaterialUnlockController';
 import {
     destroy,
     index as curriculumIndex,
     store,
 } from '@/actions/App/Http/Controllers/Curriculum/CurriculumTopicController';
-import CurriculumMaterialUnlockController from '@/actions/App/Http/Controllers/Curriculum/CurriculumMaterialUnlockController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import { index as offersIndex } from '@/routes/offers';
 import type { BreadcrumbItem } from '@/types';
 
 type CurriculumTopic = {
