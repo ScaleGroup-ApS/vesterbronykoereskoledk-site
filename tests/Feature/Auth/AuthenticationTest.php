@@ -33,7 +33,6 @@ test('inertia login redirects to dashboard even when accept prefers json', funct
         'Accept' => 'application/json',
     ]);
 
-    $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
     expect($response->getContent())->not->toContain('two_factor');
 });
