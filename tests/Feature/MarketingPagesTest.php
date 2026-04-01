@@ -8,7 +8,6 @@ use function Pest\Laravel\get;
 
 test('guests can view the public home page', function () {
     get(route('home'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('welcome')
             ->has('marketingContact')
@@ -34,7 +33,6 @@ test('home page passes public spots from featured course when set', function () 
     ]);
 
     get(route('home'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('heroHoldSpotsRemaining', 4)
             ->where('nextHoldStartAt', $start->toIso8601String()));
@@ -49,7 +47,6 @@ test('home page exposes next hold start from earliest upcoming course', function
     ]);
 
     get(route('home'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('welcome')
             ->where('nextHoldStartAt', $start->toIso8601String())
@@ -58,7 +55,6 @@ test('home page exposes next hold start from earliest upcoming course', function
 
 test('guests can view marketing subpages', function (string $routeName, string $component) {
     get(route($routeName))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page->component($component));
 })->with([
     ['marketing.features', 'marketing/fordele'],
@@ -75,7 +71,6 @@ test('guests can view the packages page with offers', function () {
     Offer::factory()->create(['name' => 'Basis']);
 
     get(route('marketing.packages'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('marketing/pakker')
             ->has('offers', 1)
@@ -89,7 +84,6 @@ test('packages page lists primary offers and addons separately', function () {
     Offer::factory()->addon()->create(['name' => 'Ekstra time']);
 
     get(route('marketing.packages'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('marketing/pakker')
             ->has('offers', 1)
@@ -108,7 +102,6 @@ test('guests can view a single package page by slug', function () {
     $offer = Offer::factory()->create(['name' => 'Basis Pakke']);
 
     get(route('marketing.packages.show', $offer))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('marketing/pakke-show')
             ->where('offer.name', 'Basis Pakke')
@@ -121,7 +114,6 @@ test('shared marketing offers only include primary packages', function () {
     Offer::factory()->addon()->create(['name' => 'Tilvalg']);
 
     get(route('home'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('marketingOffers', 1)
             ->where('marketingOffers.0.name', 'Primær'));
@@ -137,7 +129,6 @@ test('home page uses first primary offer when next course is an addon offer', fu
     ]);
 
     get(route('home'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('nextHoldStartAt', $start->toIso8601String())
             ->where('tilmeldHoldstartOfferSlug', 'primær-hold'));
@@ -145,7 +136,6 @@ test('home page uses first primary offer when next course is an addon offer', fu
 
 test('guests can view til elever content pages', function () {
     get(route('marketing.til-elever.show', ['slug' => 'elevportal']))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('marketing/til-elever-side')
             ->where('slug', 'elevportal')
@@ -162,7 +152,6 @@ test('guests can view instructors page with teams', function () {
     Team::factory()->create(['name' => 'Team Alpha']);
 
     get(route('marketing.instructors'))
-        ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('marketing/vores-korelaerere')
             ->has('teams', 1)

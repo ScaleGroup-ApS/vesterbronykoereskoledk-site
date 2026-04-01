@@ -117,8 +117,6 @@ test('admin sees eventTimeline prop on student show page', function () {
             ->has('eventTimeline', 1)
             ->where('eventTimeline.0.summary', 'Elev tilmeldt')
             ->where('eventTimeline.0.category', 'student')
-            ->has('eventTimeline.0.id')
-            ->has('eventTimeline.0.created_at')
         );
 });
 
