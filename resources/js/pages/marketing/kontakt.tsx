@@ -1,15 +1,15 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { CalendarClock, CheckCircle2, Mail, MapPin, Package, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { CalendarClock, CheckCircle2, Mail, MapPin, Package, Phone } from 'lucide-react';
 import ContactInquiryController from '@/actions/App/Http/Controllers/Marketing/ContactInquiryController';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import InputError from '@/components/input-error';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import MarketingLayout from '@/layouts/marketing-layout';
-import { cn } from '@/lib/utils';
 import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 import { packages } from '@/routes/marketing';
 import type { MarketingContact } from '@/types/marketing-contact';
 import type { ContactPageOffer, HoldStartOption } from '@/types/marketing-contact-page';

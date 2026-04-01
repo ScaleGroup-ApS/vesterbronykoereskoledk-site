@@ -1,12 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { destroy } from '@/actions/App/Http/Controllers/Marketing/Admin/MarketingTestimonialController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { destroy } from '@/actions/App/Http/Controllers/Marketing/Admin/MarketingTestimonialController';
 import AppLayout from '@/layouts/app-layout';
-import { create, edit, index } from '@/routes/marketing/testimonials';
 import { edit as editHomeCopy } from '@/routes/marketing/home-copy';
+import { create, edit, index } from '@/routes/marketing/testimonials';
 import type { BreadcrumbItem } from '@/types';
 import type { MarketingTestimonialProps } from '@/types/marketing-public';
 

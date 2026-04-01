@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import MarketingLayout from '@/layouts/marketing-layout';
 import { accentLineVariants, cardContainerVariants, cardVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
-import type { MarketingOffer } from '@/types/marketing-offer';
 import { show as bookOffer } from '@/routes/enrollment';
 import { contact } from '@/routes/marketing';
 import { show as packageShow } from '@/routes/marketing/packages';
+import type { MarketingOffer } from '@/types/marketing-offer';
 
 type PakkerProps = {
     offers?: MarketingOffer[];

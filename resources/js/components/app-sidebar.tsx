@@ -11,6 +11,8 @@ import {
     UserCog,
     UserPlus,
 } from 'lucide-react';
+import { index as enrollmentsIndex } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
+import { index as staffIndex } from '@/actions/App/Http/Controllers/Staff/StaffController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -23,8 +25,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { index as enrollmentsIndex } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
-import { index as staffIndex } from '@/actions/App/Http/Controllers/Staff/StaffController';
 import { dashboard } from '@/routes';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as chatIndex } from '@/routes/chat';
@@ -51,6 +51,11 @@ const sharedNavItems: NavItem[] = [
         title: 'Tilbud',
         href: offersIndex(),
         icon: Tag,
+    },
+    {
+        title: 'Læringsindhold',
+        href: offersIndex(),
+        icon: Library,
     },
     {
         title: 'Kurser',

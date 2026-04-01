@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import MarketingLayout from '@/layouts/marketing-layout';
-import { contact } from '@/routes/marketing';
 import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
+import { contact } from '@/routes/marketing';
 
 const values = [
     {

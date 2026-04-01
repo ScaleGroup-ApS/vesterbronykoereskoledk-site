@@ -2,7 +2,6 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { da } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
-import { show, store } from '@/routes/courses';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,6 +15,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import { show, store } from '@/routes/courses';
 import type { BreadcrumbItem } from '@/types';
 
 type OfferOption = { id: number; name: string };

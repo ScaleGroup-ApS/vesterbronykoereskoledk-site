@@ -1,6 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import {
     ArrowRight,
     BookOpen,
@@ -12,10 +11,12 @@ import {
     Users,
     type LucideIcon,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { HeroHoldCountdown } from '@/components/marketing/hero-hold-countdown';
 import { PackageCarousel } from '@/components/marketing/package-carousel';
 import { TestimonialCarousel } from '@/components/marketing/testimonial-carousel';
 import MarketingLayout from '@/layouts/marketing-layout';
+import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
 import { login } from '@/routes';
 import { show as enrollShow } from '@/routes/enrollment';
 import { about, contact, features, instructors, packages } from '@/routes/marketing';
@@ -104,7 +105,6 @@ const heroCollageTiles = [
     },
 ] as const;
 
-import { accentLineVariants, sectionHeadVariants, sectionLineVariants } from '@/lib/motion';
 
 /* Word-split animation variants */
 const wordContainerVariants = {

@@ -27,6 +27,7 @@ class TimelineController extends Controller
         'App\Events\EnrollmentApproved' => 'enrollment',
         'App\Events\EnrollmentRejected' => 'enrollment',
         'App\Events\StripePaymentCompleted' => 'enrollment',
+        'App\Events\MaterialUnlockSet' => 'curriculum',
     ];
 
     public function __invoke(): Response

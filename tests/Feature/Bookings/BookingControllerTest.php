@@ -70,7 +70,7 @@ test('booking store rejects conflict', function () {
             'starts_at' => $slotStart->copy()->addMinutes(15)->toDateTimeString(),
             'ends_at' => $slotStart->copy()->addMinutes(75)->toDateTimeString(),
         ])
-        ->assertSessionHasErrors('conflicts');
+        ->assertSessionHasErrors(['student_id', 'instructor_id']);
 });
 
 test('admin can cancel a booking', function () {

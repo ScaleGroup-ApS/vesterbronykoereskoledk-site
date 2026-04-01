@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
     Bike,
     BookOpen,
@@ -10,10 +11,8 @@ import {
     Receipt,
     Users,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { MarketingOffer } from '@/types/marketing-offer';
 import {
     about,
     contact,
@@ -23,6 +22,7 @@ import {
 } from '@/routes/marketing';
 import { show as marketingPackageShow } from '@/routes/marketing/packages';
 import { show as tilEleverShow } from '@/routes/marketing/til-elever';
+import type { MarketingOffer } from '@/types/marketing-offer';
 
 const tilEleverLinks: { slug: string; label: string; description: string; icon: React.ElementType }[] = [
     { slug: 'elektronisk-lektionsplan', label: 'Elektronisk lektionsplan', description: 'Følg din fremgang løbende', icon: BookOpen },

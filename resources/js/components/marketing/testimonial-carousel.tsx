@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { MarketingTestimonialProps } from '@/types/marketing-public';
 
@@ -27,7 +27,7 @@ function AuthorAvatar({ name }: { name: string }) {
 export function TestimonialCarousel({ items }: Props) {
     const [index, setIndex] = useState(0);
     const [progress, setProgress] = useState(0);
-    const startRef = useRef<number>(Date.now());
+    const startRef = useRef<number>(0);
     const rafRef = useRef<number>(0);
 
     const go = useCallback(

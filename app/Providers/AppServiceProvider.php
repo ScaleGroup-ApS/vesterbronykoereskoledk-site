@@ -2,12 +2,15 @@
 
 namespace App\Providers;
 
+use App\Policies\MediaPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
         if (! app()->isLocal()) {
             URL::forceScheme('https');
         }
+
+        Gate::policy(Media::class, MediaPolicy::class);
 
         $this->configureDefaults();
     }

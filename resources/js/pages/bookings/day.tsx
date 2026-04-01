@@ -1,11 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/BookingNoteController';
+import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import { AttendanceCheckbox } from '@/components/bookings/attendance-checkbox';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import BookingNoteController from '@/actions/App/Http/Controllers/Bookings/BookingNoteController';
-import BookingSkillsController from '@/actions/App/Http/Controllers/Bookings/BookingSkillsController';
 import { dashboard } from '@/routes';
 import { update } from '@/routes/bookings';
 import type { BreadcrumbItem } from '@/types';
