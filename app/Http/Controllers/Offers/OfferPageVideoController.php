@@ -8,7 +8,6 @@ use App\Models\OfferModule;
 use App\Models\OfferPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OfferPageVideoController extends Controller
 {
@@ -24,23 +23,5 @@ class OfferPageVideoController extends Controller
             ->toMediaCollection('video');
 
         return back()->with('success', 'Video uploadet.');
-    }
-
-    public function show(Offer $offer, OfferModule $module, OfferPage $page): StreamedResponse
-    {
-        $this->authorize('update', $page);
-
-        $media = $page->getFirstMedia('video') ?? abort(404);
-
-        return $media->toInlineResponse($media->file_name);
-    }
-
-    public function destroy(Offer $offer, OfferModule $module, OfferPage $page): RedirectResponse
-    {
-        $this->authorize('update', $page);
-
-        $page->clearMediaCollection('video');
-
-        return back()->with('success', 'Video slettet.');
     }
 }

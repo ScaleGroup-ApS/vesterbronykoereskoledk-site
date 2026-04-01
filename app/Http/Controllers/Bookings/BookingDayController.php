@@ -21,7 +21,7 @@ class BookingDayController extends Controller
             ->orderBy('starts_at')
             ->get();
 
-        $individualEvents = $bookings
+        $individualBookings = $bookings
             ->whereNull('team_id')
             ->map(fn (Booking $booking) => [
                 'id' => 'booking-'.$booking->id,
@@ -42,7 +42,7 @@ class BookingDayController extends Controller
                 'driving_skills' => $booking->driving_skills ?? [],
             ]);
 
-        $teamEvents = $bookings
+        $teamBookings = $bookings
             ->whereNotNull('team_id')
             ->groupBy(fn (Booking $b) => $b->team_id.'_'.$b->starts_at->toIso8601String())
             ->map(fn ($group) => $group->first())
@@ -77,7 +77,7 @@ class BookingDayController extends Controller
 
         return Inertia::render('bookings/day', [
             'date' => $date,
-            'events' => collect($individualEvents->values())->merge(collect($teamEvents->values()))->values()->all(),
+            'events' => collect($individualBookings->values())->merge($teamBookings->values())->values()->all(),
             'instructors' => $instructors,
             'vehicles' => $vehicles,
         ]);

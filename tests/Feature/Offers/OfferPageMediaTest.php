@@ -261,20 +261,20 @@ test('admin can view video', function () {
     $admin = User::factory()->create();
     [$offer, $module, $page] = pageWithModule();
 
-    $page->addMedia(UploadedFile::fake()->create('lesson.mp4', 512, 'video/mp4'))
+    $media = $page->addMedia(UploadedFile::fake()->create('lesson.mp4', 512, 'video/mp4'))
         ->toMediaCollection('video');
 
     $this->actingAs($admin)
-        ->get(route('offers.modules.pages.video.show', [$offer, $module, $page]))
+        ->get(route('offers.modules.pages.video.show', [$offer, $module, $page, $media]))
         ->assertSuccessful();
 });
 
-test('viewing video returns 404 when none uploaded', function () {
+test('viewing video returns 404 when media id does not exist', function () {
     $admin = User::factory()->create();
     [$offer, $module, $page] = pageWithModule();
 
     $this->actingAs($admin)
-        ->get(route('offers.modules.pages.video.show', [$offer, $module, $page]))
+        ->get(route('offers.modules.pages.video.show', [$offer, $module, $page, 99999]))
         ->assertNotFound();
 });
 
@@ -283,11 +283,11 @@ test('admin can delete video', function () {
     $admin = User::factory()->create();
     [$offer, $module, $page] = pageWithModule();
 
-    $page->addMedia(UploadedFile::fake()->create('lesson.mp4', 512, 'video/mp4'))
+    $media = $page->addMedia(UploadedFile::fake()->create('lesson.mp4', 512, 'video/mp4'))
         ->toMediaCollection('video');
 
     $this->actingAs($admin)
-        ->delete(route('offers.modules.pages.video.destroy', [$offer, $module, $page]))
+        ->delete(route('offers.modules.pages.video.destroy', [$offer, $module, $page, $media]))
         ->assertRedirect();
 
     expect($page->fresh()->getFirstMedia('video'))->toBeNull();

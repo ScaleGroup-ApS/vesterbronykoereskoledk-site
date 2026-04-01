@@ -117,13 +117,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('offers/{offer}/media/{media}', [OfferMediaController::class, 'destroy'])->name('offers.media.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/media', [OfferPageMediaController::class, 'store'])->name('offers.modules.pages.media.store');
     Route::get('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [MediaController::class, 'show'])->name('offers.modules.pages.media.show');
-    Route::delete('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [OfferPageMediaController::class, 'destroy'])->name('offers.modules.pages.media.destroy');
+    Route::delete('offers/{offer}/modules/{module}/pages/{page}/media/{media}', [MediaController::class, 'destroy'])->name('offers.modules.pages.media.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/banner', [OfferPageBannerController::class, 'store'])->name('offers.modules.pages.banner.store');
     Route::get('offers/{offer}/modules/{module}/pages/{page}/banner', [OfferPageBannerController::class, 'show'])->name('offers.modules.pages.banner.show');
     Route::delete('offers/{offer}/modules/{module}/pages/{page}/banner', [OfferPageBannerController::class, 'destroy'])->name('offers.modules.pages.banner.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/video', [OfferPageVideoController::class, 'store'])->name('offers.modules.pages.video.store');
-    Route::get('offers/{offer}/modules/{module}/pages/{page}/video', [OfferPageVideoController::class, 'show'])->name('offers.modules.pages.video.show');
-    Route::delete('offers/{offer}/modules/{module}/pages/{page}/video', [OfferPageVideoController::class, 'destroy'])->name('offers.modules.pages.video.destroy');
+    Route::get('offers/{offer}/modules/{module}/pages/{page}/video/{media}', [MediaController::class, 'show'])->name('offers.modules.pages.video.show');
+    Route::delete('offers/{offer}/modules/{module}/pages/{page}/video/{media}', [MediaController::class, 'destroy'])->name('offers.modules.pages.video.destroy');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/move-up', [OfferPageController::class, 'moveUp'])->name('offers.modules.pages.move-up');
     Route::post('offers/{offer}/modules/{module}/pages/{page}/move-down', [OfferPageController::class, 'moveDown'])->name('offers.modules.pages.move-down');
 
