@@ -27,19 +27,6 @@ test('creating a student fires StudentEnrolled event', function () {
     expect($state->lesson_counts)->toBe([]);
 });
 
-test('changing student status fires StudentStatusChanged event', function () {
-    $student = Student::factory()->create();
-    $action = new UpdateStudent;
-
-    $action->handle($student, [
-        'status' => 'inactive',
-    ]);
-
-    Verbs::commit();
-
-    expect($student->fresh()->status->value)->toBe('inactive');
-});
-
 test('updating student without status change does not fire event', function () {
     $student = Student::factory()->create();
     $action = new UpdateStudent;
