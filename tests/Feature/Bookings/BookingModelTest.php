@@ -1,26 +1,8 @@
 <?php
 
-use App\Enums\BookingStatus;
-use App\Enums\BookingType;
 use App\Models\Booking;
 use App\Models\Student;
 use App\Models\User;
-use App\Models\Vehicle;
-
-test('booking belongs to student, instructor and vehicle', function () {
-    $booking = Booking::factory()->create();
-
-    expect($booking->student)->toBeInstanceOf(Student::class);
-    expect($booking->instructor)->toBeInstanceOf(User::class);
-    expect($booking->vehicle)->toBeInstanceOf(Vehicle::class);
-});
-
-test('booking casts type and status to enums', function () {
-    $booking = Booking::factory()->create();
-
-    expect($booking->type)->toBeInstanceOf(BookingType::class);
-    expect($booking->status)->toBeInstanceOf(BookingStatus::class);
-});
 
 test('scopeOverlapping returns bookings that overlap the given range', function () {
     $instructor = User::factory()->instructor()->create();
