@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Bookings;
 
 use App\Actions\Bookings\CancelBooking;
-use App\Actions\Bookings\CheckBookingConflicts;
 use App\Actions\Bookings\CreateBooking;
 use App\Actions\Bookings\UpdateBooking;
 use App\Actions\Student\BuildStudentLessonProgress;
@@ -109,39 +108,16 @@ class BookingController extends Controller
         ]);
     }
 
-    public function store(
-        StoreBookingRequest $request,
-        CheckBookingConflicts $conflictChecker,
-        CreateBooking $action,
-    ): RedirectResponse {
-        $data = $request->validated();
+    public function store(StoreBookingRequest $request, CreateBooking $action): RedirectResponse
+    {
+        $action->handle($request->validated());
 
-        $student = Student::findOrFail($data['student_id']);
-        $instructor = User::findOrFail($data['instructor_id']);
-        $vehicle = isset($data['vehicle_id']) ? Vehicle::find($data['vehicle_id']) : null;
-
-        $conflicts = $conflictChecker->handle(
-            startsAt: $data['starts_at'],
-            endsAt: $data['ends_at'],
-            instructor: $instructor,
-            student: $student,
-            vehicle: $vehicle,
-        );
-
-        if (! empty($conflicts)) {
-            return back()->withErrors(['conflicts' => $conflicts]);
-        }
-
-        $action->handle($data);
-
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking oprettet.');
+        return redirect()->route('bookings.index')->with('success', 'Booking oprettet.');
     }
 
     public function update(
         UpdateBookingRequest $request,
         Booking $booking,
-        CheckBookingConflicts $conflictChecker,
         UpdateBooking $updateAction,
         CancelBooking $cancelAction,
     ): RedirectResponse {
@@ -156,35 +132,13 @@ class BookingController extends Controller
                 return back()->withErrors([
                     'status' => 'Brug «Registrer fremmøde» for at gennemføre lektionen og tælle den med i elevens forløb.',
                 ]);
-            } elseif ($newStatus === BookingStatus::Cancelled) {
+            }
+
+            if ($newStatus === BookingStatus::Cancelled) {
                 $cancelAction->handle($booking);
             }
 
             return back()->with('success', 'Booking opdateret.');
-        }
-
-        $startsAt = $data['starts_at'] ?? $booking->starts_at->toDateTimeString();
-        $endsAt = $data['ends_at'] ?? $booking->ends_at->toDateTimeString();
-
-        $instructor = array_key_exists('instructor_id', $data)
-            ? ($data['instructor_id'] ? User::find($data['instructor_id']) : null)
-            : $booking->instructor;
-
-        $vehicle = array_key_exists('vehicle_id', $data)
-            ? ($data['vehicle_id'] ? Vehicle::find($data['vehicle_id']) : null)
-            : $booking->vehicle;
-
-        $conflicts = $conflictChecker->handle(
-            startsAt: $startsAt,
-            endsAt: $endsAt,
-            instructor: $instructor,
-            student: $booking->student,
-            vehicle: $vehicle,
-            excludeBookingId: $booking->id,
-        );
-
-        if (! empty($conflicts)) {
-            return back()->withErrors(['conflicts' => $conflicts]);
         }
 
         $updateAction->handle($booking, $data);
@@ -198,7 +152,6 @@ class BookingController extends Controller
 
         $action->handle($booking);
 
-        return redirect()->route('bookings.index')
-            ->with('success', 'Booking annulleret.');
+        return redirect()->route('bookings.index')->with('success', 'Booking annulleret.');
     }
 }

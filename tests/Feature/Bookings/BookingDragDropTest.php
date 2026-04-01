@@ -50,7 +50,7 @@ test('drag and drop is rejected when new slot conflicts', function () {
             'starts_at' => '2026-03-10 14:15:00',
             'ends_at' => '2026-03-10 15:00:00',
         ])
-        ->assertSessionHasErrors('conflicts');
+        ->assertSessionHasErrors('instructor_id');
 
     // Original times preserved
     expect($dragged->fresh()->starts_at->format('H:i'))->toBe('10:00');

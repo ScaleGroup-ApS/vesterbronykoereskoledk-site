@@ -8,8 +8,6 @@ use App\Models\OfferModule;
 use App\Models\OfferPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OfferPageMediaController extends Controller
 {
@@ -25,25 +23,5 @@ class OfferPageMediaController extends Controller
             ->toMediaCollection('attachments');
 
         return back()->with('success', 'Fil uploadet.');
-    }
-
-    public function show(Offer $offer, OfferModule $module, OfferPage $page, Media $media): StreamedResponse
-    {
-        $this->authorize('update', $page);
-
-        abort_unless((int) $media->model_id === $page->id, 404);
-
-        return $media->toInlineResponse($media->file_name);
-    }
-
-    public function destroy(Offer $offer, OfferModule $module, OfferPage $page, Media $media): RedirectResponse
-    {
-        $this->authorize('update', $page);
-
-        abort_unless((int) $media->model_id === $page->id, 404);
-
-        $media->delete();
-
-        return back()->with('success', 'Fil slettet.');
     }
 }
