@@ -5,6 +5,7 @@ import {
     CreditCard,
     GraduationCap,
     LayoutGrid,
+    LifeBuoy,
     MessageSquare,
     ScrollText,
     Tag,
@@ -76,6 +77,11 @@ const sharedNavItems: NavItem[] = [
         title: 'Chat',
         href: chatIndex(),
         icon: MessageSquare,
+    },
+    {
+        title: 'Support',
+        href: '/support',
+        icon: LifeBuoy,
     },
 ];
 
