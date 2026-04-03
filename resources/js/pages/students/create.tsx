@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { store } from '@/actions/App/Http/Controllers/Students/StudentController';
+import { store } from '@/actions/App/Http/Controllers/Student/StudentController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';

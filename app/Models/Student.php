@@ -22,6 +22,7 @@ class Student extends Model implements HasMedia
         'cpr',
         'status',
         'start_date',
+        'completed_skills',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class Student extends Model implements HasMedia
             'cpr' => 'encrypted',
             'status' => StudentStatus::class,
             'start_date' => 'date',
+            'completed_skills' => 'array',
         ];
     }
 

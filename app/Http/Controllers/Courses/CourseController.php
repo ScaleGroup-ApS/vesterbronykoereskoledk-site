@@ -84,6 +84,7 @@ class CourseController extends Controller
                     'id' => $enrollment->id,
                     'status' => $enrollment->status->value,
                     'payment_method' => $enrollment->payment_method->value,
+                    'attended' => $enrollment->attended,
                     'student' => [
                         'id' => $enrollment->student->id,
                         'name' => $enrollment->student->user->name,

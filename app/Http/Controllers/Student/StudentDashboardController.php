@@ -122,6 +122,7 @@ class StudentDashboardController extends Controller
 
         return Inertia::render('student/faerdigheder', [
             'skills' => array_values($counts),
+            'completedSkills' => $student->completed_skills ?? [],
         ]);
     }
 
