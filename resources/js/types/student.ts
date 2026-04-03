@@ -8,6 +8,7 @@ export type Student = {
     cpr: string | null;
     status: StudentStatus;
     start_date: string | null;
+    completed_skills: string[] | null;
     created_at: string;
     updated_at: string;
 };

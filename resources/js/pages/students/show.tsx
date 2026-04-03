@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FileText, Pencil, Trash2, Upload } from 'lucide-react';
+import StudentSkillController from '@/actions/App/Http/Controllers/Students/StudentSkillController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { StudentJourneyRoadmap, type JourneyStep, type UpcomingBookingRow } from '@/components/student/student-journey-roadmap';
@@ -204,6 +205,41 @@ export default function StudentShow({
                         <span className="text-sm">{new Date(student.created_at).toLocaleDateString('da-DK')}</span>
                     </div>
                 </div>
+
+                {canEdit && (
+                    <div className="max-w-2xl space-y-4">
+                        <Heading variant="small" title="Færdigheder" />
+                        <div className="flex flex-wrap gap-2">
+                            {Object.entries(skillLabels).map(([key, label]) => {
+                                const isCompleted = (student.completed_skills ?? []).includes(key);
+                                return (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => {
+                                            const current = student.completed_skills ?? [];
+                                            const updated = isCompleted
+                                                ? current.filter((s) => s !== key)
+                                                : [...current, key];
+                                            router.patch(
+                                                StudentSkillController(student).url,
+                                                { skills: updated },
+                                                { preserveScroll: true },
+                                            );
+                                        }}
+                                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                                            isCompleted
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <div className="max-w-lg space-y-4">
                     <Heading variant="small" title="Dokumenter" />

@@ -5,9 +5,9 @@ import { destroy as destroyCourse, store as storeCourse } from '@/actions/App/Ht
 import { update } from '@/actions/App/Http/Controllers/Offers/OfferController';
 import {
     destroy as destroyMaterial,
-    show as showMaterial,
     store as storeMaterial,
 } from '@/actions/App/Http/Controllers/Offers/OfferMediaController';
+import { show as showMaterialVariants } from '@/actions/App/Http/Controllers/MediaController';
 import { index as modulesIndex } from '@/actions/App/Http/Controllers/Offers/OfferModuleController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -294,7 +294,7 @@ function MaterialsList({ offer, materials }: { offer: Offer; materials: Material
                                 <FileText className="size-4 shrink-0 text-muted-foreground" />
                             )}
                             <a
-                                href={showMaterial({ offer, media: m }).url}
+                                href={showMaterialVariants['/offers/{offer}/media/{media}']({ offer, media: m }).url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 truncate hover:underline"
