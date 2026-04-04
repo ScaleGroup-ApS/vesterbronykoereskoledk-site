@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Search, Send, X } from 'lucide-react';
 import { useState } from 'react';
-import BulkStudentLoginLinkController from '@/actions/App/Http/Controllers/Students/BulkStudentLoginLinkController';
+import BulkStudentLoginLinkController from '@/actions/App/Http/Controllers/Student/BulkStudentLoginLinkController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

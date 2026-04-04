@@ -15,17 +15,17 @@ import {
 } from '@/actions/App/Http/Controllers/Offers/OfferPageController';
 import {
     store as storeAttachment,
-    show as showAttachment,
-    destroy as destroyAttachment,
 } from '@/actions/App/Http/Controllers/Offers/OfferPageMediaController';
+import {
+    show as showMediaVariants,
+    destroy as destroyMediaVariants,
+} from '@/actions/App/Http/Controllers/MediaController';
 import {
     store as storeQuestion,
     destroy as destroyQuestion,
 } from '@/actions/App/Http/Controllers/Offers/OfferPageQuizController';
 import {
     store as storeVideo,
-    show as showVideo,
-    destroy as destroyVideo,
 } from '@/actions/App/Http/Controllers/Offers/OfferPageVideoController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -305,7 +305,7 @@ function VideoSection({
 
     function handleDelete() {
         if (!confirm('Slet videoen?')) return;
-        router.delete(destroyVideo({ offer, module, page }).url, { preserveScroll: true });
+        router.delete(destroyMediaVariants['/offers/{offer}/modules/{module}/pages/{page}/video/{media}']({ offer, module, page, media: video! }).url, { preserveScroll: true });
     }
 
     return (
@@ -319,7 +319,7 @@ function VideoSection({
                         </div>
                     ) : (
                         <video
-                            src={showVideo({ offer, module, page }).url}
+                            src={showMediaVariants['/offers/{offer}/modules/{module}/pages/{page}/video/{media}']({ offer, module, page, media: video }).url}
                             poster={video.thumbnail_url ?? undefined}
                             controls
                             className="aspect-video w-full bg-black"
@@ -398,7 +398,7 @@ function AttachmentsSection({
 
     function handleDelete(attachment: AttachmentMedia) {
         if (!confirm('Slet denne fil?')) return;
-        router.delete(destroyAttachment({ offer, module, page, media: attachment }).url, { preserveScroll: true });
+        router.delete(destroyMediaVariants['/offers/{offer}/modules/{module}/pages/{page}/media/{media}']({ offer, module, page, media: attachment }).url, { preserveScroll: true });
     }
 
     return (
@@ -409,7 +409,7 @@ function AttachmentsSection({
                         <li key={att.id} className="flex items-center gap-3 px-3 py-2">
                             <FileText className="size-4 shrink-0 text-muted-foreground" />
                             <a
-                                href={showAttachment({ offer, module, page, media: att }).url}
+                                href={showMediaVariants['/offers/{offer}/modules/{module}/pages/{page}/media/{media}']({ offer, module, page, media: att }).url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 truncate hover:underline"

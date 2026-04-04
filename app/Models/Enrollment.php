@@ -21,6 +21,7 @@ class Enrollment extends Model
         'status',
         'stripe_session_id',
         'rejection_reason',
+        'attended',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class Enrollment extends Model
         return [
             'payment_method' => EnrollmentPaymentMethod::class,
             'status' => EnrollmentStatus::class,
+            'attended' => 'boolean',
         ];
     }
 

@@ -40,6 +40,7 @@ use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLearnController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
 use App\Http\Controllers\Teams\TeamController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Timeline\TimelineController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
@@ -133,6 +134,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'show'])->name('courses.show');
     Route::patch('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'update'])->name('courses.update');
     Route::delete('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'destroy'])->name('courses.destroy');
+    Route::patch('courses/{course}/enrollments/{enrollment}/attendance', \App\Http\Controllers\Courses\CourseAttendanceController::class)
+        ->name('courses.enrollments.attendance');
     Route::get('bookings/day/{date}', BookingDayController::class)->name('bookings.day');
     Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)
         ->name('bookings.attendance.store');
@@ -144,6 +147,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
 
+    Route::patch('students/{student}/skills', \App\Http\Controllers\Students\StudentSkillController::class)->name('students.skills');
     Route::post('students/{student}/login-link', [StudentController::class, 'sendLoginLink'])->name('students.login-link');
     Route::post('students/bulk-login-links', BulkStudentLoginLinkController::class)->name('students.bulk-login-links');
     Route::post('students/{student}/media', [StudentController::class, 'storeMedia'])->name('students.media.store');
@@ -162,6 +166,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('enrollments', [EnrollmentApprovalController::class, 'index'])->name('enrollments.index');
     Route::post('enrollments/{enrollment}/approve', [EnrollmentApprovalController::class, 'approve'])->name('enrollments.approve');
     Route::post('enrollments/{enrollment}/reject', [EnrollmentApprovalController::class, 'reject'])->name('enrollments.reject');
+
+    Route::middleware('role:admin,instructor')->group(function () {
+        Route::get('support', [TicketController::class, 'index'])->name('support.index');
+        Route::post('support', [TicketController::class, 'store'])->name('support.store');
+        Route::get('support/{ticketId}', [TicketController::class, 'show'])->name('support.show');
+        Route::post('support/{ticketId}/comments', [TicketController::class, 'addComment'])->name('support.comment');
+    });
 
     Route::get('timeline', TimelineController::class)->middleware('role:admin')->name('timeline.index');
 

@@ -1,5 +1,6 @@
-import { Head, Link, useForm, Form } from '@inertiajs/react';
+import { Head, Link, router, useForm, Form } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import CourseAttendanceController from '@/actions/App/Http/Controllers/Courses/CourseAttendanceController';
 import { approve } from '@/actions/App/Http/Controllers/Enrollment/EnrollmentApprovalController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -16,6 +17,7 @@ type Enrollment = {
     id: number;
     status: string;
     payment_method: string;
+    attended: boolean | null;
     student: { id: number; name: string; email: string };
     attended_count: number;
     total_bookings: number;
@@ -171,8 +173,18 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                                                 {enrollment.status === 'completed' && 'Godkendt'}
                                                 {enrollment.status === 'rejected' && 'Afvist'}
                                             </td>
-                                            <td className="px-4 py-2 text-sm text-muted-foreground">
-                                                {enrollment.attended_count} / {enrollment.total_bookings}
+                                            <td className="px-4 py-2">
+                                                <Checkbox
+                                                    checked={enrollment.attended === true}
+                                                    onCheckedChange={() =>
+                                                        router.patch(
+                                                            CourseAttendanceController({ course: course.id, enrollment: enrollment.id }).url,
+                                                            {},
+                                                            { preserveScroll: true },
+                                                        )
+                                                    }
+                                                    aria-label={`Fremmøde for ${enrollment.student.name}`}
+                                                />
                                             </td>
                                             <td className="px-4 py-2 text-right">
                                                 {enrollment.status === 'pending_approval' && (
