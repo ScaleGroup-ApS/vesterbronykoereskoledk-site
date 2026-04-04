@@ -142,6 +142,7 @@ class StudentDashboardController extends Controller
         $tz = config('app.timezone');
 
         $booking = Booking::query()
+            ->with('instructor:id,name')
             ->where('student_id', $student->id)
             ->where('starts_at', '>=', now())
             ->whereNotIn('status', [BookingStatus::Cancelled->value, BookingStatus::NoShow->value])
@@ -186,6 +187,7 @@ class StudentDashboardController extends Controller
             'starts_at' => $booking->starts_at->toIso8601String(),
             'ends_at' => $booking->ends_at->toIso8601String(),
             'range_label' => $start->translatedFormat('EEEE d. MMMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+            'instructor_name' => $booking->instructor?->name,
         ];
     }
 
