@@ -37,10 +37,10 @@ test('student can visit mit forloeb page', function () {
     Student::factory()->for($user)->create();
 
     $this->actingAs($user)
-        ->get(route('student.forloeb'))
+        ->get(route('student.progress'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('student/forloeb')
+            ->component('student/progress')
             ->has('past_bookings')
             ->has('journey')
             ->has('readiness')
@@ -54,7 +54,7 @@ test('admin cannot visit student forloeb page', function () {
     $admin = User::factory()->create();
 
     $this->actingAs($admin)
-        ->get(route('student.forloeb'))
+        ->get(route('student.progress'))
         ->assertForbidden();
 });
 
@@ -121,7 +121,7 @@ test('student lesson progress reflects offer requirements and scheduled bookings
     ]);
 
     $this->actingAs($user)
-        ->get(route('student.forloeb'))
+        ->get(route('student.progress'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->where('lesson_progress.0.type', 'theory_lesson')

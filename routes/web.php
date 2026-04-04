@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\RequestMagicLinkController;
 use App\Http\Controllers\Blog\BlogPostController;
 use App\Http\Controllers\Bookings\BookingAttendanceController;
 use App\Http\Controllers\Bookings\BookingController;
@@ -63,6 +64,10 @@ Route::post('kontakt', ContactInquiryController::class)
 Route::get('handelsbetingelser', [MarketingController::class, 'terms'])->name('marketing.terms');
 Route::get('privatlivspolitik', [MarketingController::class, 'privacy'])->name('marketing.privacy');
 Route::get('cookiepolitik', [MarketingController::class, 'cookies'])->name('marketing.cookies');
+
+Route::post('login/magic-link', RequestMagicLinkController::class)
+    ->middleware('throttle:5,1')
+    ->name('login.magic-link');
 
 Route::get('dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 

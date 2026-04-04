@@ -11,8 +11,8 @@ it('student can view their historik page', function () {
     $student = Student::factory()->for($user)->create();
 
     $this->actingAs($user)
-        ->get(route('student.historik'))
-        ->assertInertia(fn ($page) => $page->component('student/historik'));
+        ->get(route('student.history'))
+        ->assertInertia(fn ($page) => $page->component('student/history'));
 });
 
 it('historik includes instructor note and driving skills', function () {
@@ -28,9 +28,9 @@ it('historik includes instructor note and driving skills', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('student.historik'))
+        ->get(route('student.history'))
         ->assertInertia(fn ($page) => $page
-            ->component('student/historik')
+            ->component('student/history')
             ->has('past_bookings', 1, fn ($b) => $b
                 ->where('instructor_note', 'Good highway driving today.')
                 ->where('driving_skills', ['motorvej', 'lane_change'])

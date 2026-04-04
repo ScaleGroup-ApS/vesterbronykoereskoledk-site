@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -26,6 +26,15 @@ createInertiaApp({
     progress: {
         color: '#4B5563',
     },
+});
+
+router.on('navigate', (event) => {
+    const user = event.detail.page.props?.auth?.user as { name?: string; email?: string; role?: string } | undefined;
+    if (user?.name && user?.email && user.role === 'student') {
+        try {
+            localStorage.setItem('koereskole_returning_user', JSON.stringify({ name: user.name, email: user.email }));
+        } catch { /* localStorage unavailable */ }
+    }
 });
 
 // This will set light / dark mode on load...

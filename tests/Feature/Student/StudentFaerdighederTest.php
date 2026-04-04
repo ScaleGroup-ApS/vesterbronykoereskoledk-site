@@ -11,8 +11,8 @@ it('student can view the faerdigheder page', function () {
     Student::factory()->for($user)->create();
 
     $this->actingAs($user)
-        ->get(route('student.faerdigheder'))
-        ->assertInertia(fn ($page) => $page->component('student/faerdigheder'));
+        ->get(route('student.skills'))
+        ->assertInertia(fn ($page) => $page->component('student/skills'));
 });
 
 it('skill counts reflect completed driving lessons', function () {
@@ -35,9 +35,9 @@ it('skill counts reflect completed driving lessons', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('student.faerdigheder'))
+        ->get(route('student.skills'))
         ->assertInertia(fn ($page) => $page
-            ->component('student/faerdigheder')
+            ->component('student/skills')
             ->has('skills')
             ->where('skills.0.key', 'parking')
             ->where('skills.0.count', 2)
