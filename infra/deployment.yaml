@@ -87,6 +87,26 @@ spec:
                   name: koereskole-secrets
                   key: STRIPE_PUBLISHABLE_KEY
 
+            # CRM
+            - name: CRM_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: koereskole-secrets
+                  key: CRM_API_URL
+                  optional: true
+            - name: CRM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: koereskole-secrets
+                  key: CRM_API_KEY
+                  optional: true
+            - name: CRM_CUSTOMER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: koereskole-secrets
+                  key: CRM_CUSTOMER_ID
+                  optional: true
+
             # Mail (AWS SES via HTTP API - outbound SMTP ports are blocked on this cluster)
             - name: MAIL_MAILER
               value: "ses"
