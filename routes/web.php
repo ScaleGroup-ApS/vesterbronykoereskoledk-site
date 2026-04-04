@@ -35,12 +35,16 @@ use App\Http\Controllers\Offers\OfferPageVideoController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Progression\ProgressionController;
 use App\Http\Controllers\Staff\StaffController;
+use App\Http\Controllers\Student\BookingFeedbackController;
 use App\Http\Controllers\Student\BulkStudentLoginLinkController;
 use App\Http\Controllers\Student\StudentCalendarController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLearnController;
+use App\Http\Controllers\Student\StudentNotificationController;
+use App\Http\Controllers\Student\StudentPaymentController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
+use App\Http\Controllers\Student\TheoryPracticeController;
 use App\Http\Controllers\Students\StudentSkillController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\TicketController;
@@ -85,6 +89,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/historik', [StudentDashboardController::class, 'history'])->name('history');
         Route::get('/materiale', [StudentDashboardController::class, 'materials'])->name('materials');
         Route::get('/faerdigheder', [StudentDashboardController::class, 'skills'])->name('skills');
+
+        Route::get('/teoritraening', [TheoryPracticeController::class, 'index'])->name('theory-practice');
+        Route::get('/teoritraening/start', [TheoryPracticeController::class, 'start'])->name('theory-practice.start');
+        Route::post('/teoritraening', [TheoryPracticeController::class, 'store'])->name('theory-practice.store');
+        Route::get('/teoritraening/{attempt}', [TheoryPracticeController::class, 'result'])->name('theory-practice.result');
+
+        Route::get('/notifikationer', [StudentNotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifikationer/{id}/read', [StudentNotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifikationer/read-all', [StudentNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+        Route::get('/feedback', [BookingFeedbackController::class, 'index'])->name('feedback');
+        Route::post('/feedback/{booking}', [BookingFeedbackController::class, 'store'])->name('feedback.store');
+
+        Route::get('/betalinger', StudentPaymentController::class)->name('payments');
     });
 
     Route::get('student/kalender', StudentCalendarController::class)
