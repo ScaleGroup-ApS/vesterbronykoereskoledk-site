@@ -14,7 +14,7 @@ class TicketController extends Controller
     public function index(): Response
     {
         $tickets = Http::crm()
-            ->get('/api/tickets', ['customerId' => config('services.crm.customer_id')])
+            ->get('/api/driving-schools/tickets', ['customerId' => config('services.crm.customer_id')])
             ->json();
 
         return Inertia::render('Support/Index', [
@@ -24,12 +24,11 @@ class TicketController extends Controller
 
     public function store(CreateTicketRequest $request): RedirectResponse
     {
-        Http::crm()->post('/api/tickets', [
+        Http::crm()->post('/api/driving-schools/tickets', [
             'customerId' => (int) config('services.crm.customer_id'),
             'subject' => $request->validated('subject'),
             'initialMessage' => $request->validated('message'),
             'priority' => $request->validated('priority'),
-            'origin' => 'Køreskole',
         ]);
 
         return redirect()->route('support.index')
@@ -39,7 +38,7 @@ class TicketController extends Controller
     public function show(int $ticketId): Response
     {
         $ticket = Http::crm()
-            ->get("/api/tickets/{$ticketId}", ['customerId' => config('services.crm.customer_id')])
+            ->get("/api/driving-schools/tickets/{$ticketId}", ['customerId' => config('services.crm.customer_id')])
             ->json();
 
         return Inertia::render('Support/Show', [
@@ -49,7 +48,7 @@ class TicketController extends Controller
 
     public function addComment(CreateTicketCommentRequest $request, int $ticketId): RedirectResponse
     {
-        Http::crm()->post("/api/tickets/{$ticketId}/comments", [
+        Http::crm()->post("/api/driving-schools/tickets/{$ticketId}/comments", [
             'customerId' => (int) config('services.crm.customer_id'),
             'message' => $request->validated('message'),
         ]);
