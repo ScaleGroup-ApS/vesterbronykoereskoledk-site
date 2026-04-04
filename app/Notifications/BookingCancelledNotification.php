@@ -28,7 +28,7 @@ class BookingCancelledNotification extends Notification implements ShouldQueue
             ->subject('Din booking er annulleret')
             ->greeting("Hej {$notifiable->name}!")
             ->line("Din booking ({$this->booking->type->label()}) d. {$this->booking->starts_at->format('d/m/Y H:i')} er blevet annulleret.")
-            ->action('Se kalenderen', route('student.kalender'));
+            ->action('Se kalenderen', route('student.calendar'));
     }
 
     /**

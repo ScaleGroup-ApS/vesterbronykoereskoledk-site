@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import StudentLayout from '@/layouts/student-layout';
-import { historik } from '@/routes/student';
+import { history } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
 type PastBooking = {
@@ -35,7 +35,7 @@ const skillLabels: Record<string, string> = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Historik', href: historik().url },
+    { title: 'Historik', href: history().url },
 ];
 
 export default function StudentHistorik({ past_bookings }: { past_bookings: PastBooking[] }) {

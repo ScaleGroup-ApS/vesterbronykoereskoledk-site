@@ -8,7 +8,7 @@ import { Head } from '@inertiajs/react';
 import { Calendar } from 'lucide-react';
 import Heading from '@/components/heading';
 import StudentLayout from '@/layouts/student-layout';
-import { dashboard, kalender } from '@/routes/student';
+import { calendar, dashboard } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 import { bookingTypeColors, bookingTypeLabels } from '@/types/booking';
 
@@ -25,7 +25,7 @@ const courseHoldColor = '#64748b';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Oversigt', href: dashboard().url },
-    { title: 'Kalender', href: kalender().url },
+    { title: 'Kalender', href: calendar().url },
 ];
 
 function colorForType(type: string): string {

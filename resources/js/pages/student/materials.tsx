@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { Download, FileText, Lock } from 'lucide-react';
 import Heading from '@/components/heading';
 import StudentLayout from '@/layouts/student-layout';
-import { materiale } from '@/routes/student';
+import { materials } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
 type Material = {
@@ -16,7 +16,7 @@ type Material = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Materiale', href: materiale().url },
+    { title: 'Materiale', href: materials().url },
 ];
 
 function MaterialRow({ material }: { material: Material }) {

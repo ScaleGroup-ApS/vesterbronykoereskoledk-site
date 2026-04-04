@@ -10,6 +10,7 @@ use App\Http\Controllers\Chat\ConversationController;
 use App\Http\Controllers\Chat\ConversationMemberController;
 use App\Http\Controllers\Chat\MessageAttachmentController;
 use App\Http\Controllers\Chat\MessageController;
+use App\Http\Controllers\Courses\CourseAttendanceController;
 use App\Http\Controllers\Curriculum\CurriculumMaterialUnlockController;
 use App\Http\Controllers\Curriculum\CurriculumTopicController;
 use App\Http\Controllers\DashboardController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLearnController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
+use App\Http\Controllers\Students\StudentSkillController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Timeline\TimelineController;
@@ -52,7 +54,7 @@ Route::get('pakker', [MarketingController::class, 'packages'])->name('marketing.
 Route::get('pakker/{offer}', [MarketingController::class, 'packageShow'])->name('marketing.packages.show');
 Route::get('faq', [MarketingController::class, 'faq'])->name('marketing.faq');
 Route::get('vores-korelaerere', [MarketingController::class, 'instructors'])->name('marketing.instructors');
-Route::get('til-elever/{slug}', [MarketingController::class, 'tilElever'])->name('marketing.til-elever.show');
+Route::get('til-elever/{slug}', [MarketingController::class, 'forStudents'])->name('marketing.for-students.show');
 Route::get('om-os', [MarketingController::class, 'about'])->name('marketing.about');
 Route::get('kontakt', [MarketingController::class, 'contact'])->name('marketing.contact');
 Route::post('kontakt', ContactInquiryController::class)
@@ -74,15 +76,15 @@ Route::get('blog/{slug}', [BlogPostController::class, 'show'])->name('blog.show'
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
         Route::get('/', [StudentDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/forloeb', [StudentDashboardController::class, 'forloeb'])->name('forloeb');
-        Route::get('/historik', [StudentDashboardController::class, 'historik'])->name('historik');
-        Route::get('/materiale', [StudentDashboardController::class, 'materiale'])->name('materiale');
-        Route::get('/faerdigheder', [StudentDashboardController::class, 'faerdigheder'])->name('faerdigheder');
+        Route::get('/forloeb', [StudentDashboardController::class, 'progress'])->name('progress');
+        Route::get('/historik', [StudentDashboardController::class, 'history'])->name('history');
+        Route::get('/materiale', [StudentDashboardController::class, 'materials'])->name('materials');
+        Route::get('/faerdigheder', [StudentDashboardController::class, 'skills'])->name('skills');
     });
 
     Route::get('student/kalender', StudentCalendarController::class)
         ->middleware('role:student')
-        ->name('student.kalender');
+        ->name('student.calendar');
 
     Route::get('student/offers/{offer}/materials/{media}', [MediaController::class, 'show'])
         ->middleware('role:student')
@@ -134,7 +136,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'show'])->name('courses.show');
     Route::patch('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'update'])->name('courses.update');
     Route::delete('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'destroy'])->name('courses.destroy');
-    Route::patch('courses/{course}/enrollments/{enrollment}/attendance', \App\Http\Controllers\Courses\CourseAttendanceController::class)
+    Route::patch('courses/{course}/enrollments/{enrollment}/attendance', CourseAttendanceController::class)
         ->name('courses.enrollments.attendance');
     Route::get('bookings/day/{date}', BookingDayController::class)->name('bookings.day');
     Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)
@@ -147,7 +149,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::get('students/{student}/progression', [ProgressionController::class, 'show'])->name('students.progression.show');
 
-    Route::patch('students/{student}/skills', \App\Http\Controllers\Students\StudentSkillController::class)->name('students.skills');
+    Route::patch('students/{student}/skills', StudentSkillController::class)->name('students.skills');
     Route::post('students/{student}/login-link', [StudentController::class, 'sendLoginLink'])->name('students.login-link');
     Route::post('students/bulk-login-links', BulkStudentLoginLinkController::class)->name('students.bulk-login-links');
     Route::post('students/{student}/media', [StudentController::class, 'storeMedia'])->name('students.media.store');

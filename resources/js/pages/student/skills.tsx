@@ -3,7 +3,7 @@ import { CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Heading from '@/components/heading';
 import StudentLayout from '@/layouts/student-layout';
-import { faerdigheder } from '@/routes/student';
+import { skills } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
 type Skill = {
@@ -13,7 +13,7 @@ type Skill = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Færdigheder', href: faerdigheder().url },
+    { title: 'Færdigheder', href: skills().url },
 ];
 
 function SkillCard({ skill, isApproved }: { skill: Skill; isApproved: boolean }) {
