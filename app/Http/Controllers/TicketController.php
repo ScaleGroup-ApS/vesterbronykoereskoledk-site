@@ -4,18 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTicketCommentRequest;
 use App\Http\Requests\CreateTicketRequest;
-use App\Services\CrmTicketService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TicketController extends Controller
 {
-    public function __construct(private readonly CrmTicketService $crm) {}
-
     public function index(): Response
     {
-        $tickets = $this->crm->getTickets();
+        $tickets = Http::crm()
+            ->post('/api/trpc/tickets.getByCustomerExternal', ['json' => [
+                'customerId' => (int) config('services.crm.customer_id'),
+            ]])
+            ->json('result.data', []);
 
         return Inertia::render('Support/Index', [
             'tickets' => $tickets,
@@ -24,11 +26,14 @@ class TicketController extends Controller
 
     public function store(CreateTicketRequest $request): RedirectResponse
     {
-        $this->crm->createTicket(
-            subject: $request->validated('subject'),
-            message: $request->validated('message'),
-            priority: $request->validated('priority'),
-        );
+        Http::crm()
+            ->post('/api/trpc/tickets.createFromExternal', ['json' => [
+                'customerId' => (int) config('services.crm.customer_id'),
+                'subject' => $request->validated('subject'),
+                'initialMessage' => $request->validated('message'),
+                'priority' => $request->validated('priority'),
+                'origin' => 'Køreskole',
+            ]]);
 
         return redirect()->route('support.index')
             ->with('success', 'Ticket oprettet.');
@@ -36,7 +41,12 @@ class TicketController extends Controller
 
     public function show(int $ticketId): Response
     {
-        $ticket = $this->crm->getTicket($ticketId);
+        $ticket = Http::crm()
+            ->post('/api/trpc/tickets.getByIdExternal', ['json' => [
+                'ticketId' => $ticketId,
+                'customerId' => (int) config('services.crm.customer_id'),
+            ]])
+            ->json('result.data', []);
 
         return Inertia::render('Support/Show', [
             'ticket' => $ticket,
@@ -45,10 +55,12 @@ class TicketController extends Controller
 
     public function addComment(CreateTicketCommentRequest $request, int $ticketId): RedirectResponse
     {
-        $this->crm->addComment(
-            ticketId: $ticketId,
-            message: $request->validated('message'),
-        );
+        Http::crm()
+            ->post('/api/trpc/tickets.addCommentExternal', ['json' => [
+                'ticketId' => $ticketId,
+                'customerId' => (int) config('services.crm.customer_id'),
+                'message' => $request->validated('message'),
+            ]]);
 
         return redirect()->route('support.show', $ticketId)
             ->with('success', 'Svar sendt.');

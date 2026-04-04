@@ -94,12 +94,6 @@ spec:
                   name: koereskole-secrets
                   key: CRM_API_URL
                   optional: true
-            - name: CRM_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: koereskole-secrets
-                  key: CRM_API_KEY
-                  optional: true
             - name: CRM_CUSTOMER_ID
               valueFrom:
                 secretKeyRef:
