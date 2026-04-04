@@ -5,7 +5,7 @@ import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
 import ThemeProvider from '@/components/theme-provider';
 import { index as chatIndex } from '@/routes/chat';
-import { dashboard, faerdigheder, forloeb, historik, kalender, materiale } from '@/routes/student';
+import { calendar, dashboard, history, materials, progress, skills } from '@/routes/student';
 import type { AppLayoutProps, NavItem } from '@/types';
 
 export default function StudentLayout({ children, breadcrumbs }: AppLayoutProps) {
@@ -13,11 +13,11 @@ export default function StudentLayout({ children, breadcrumbs }: AppLayoutProps)
 
     const navItems: NavItem[] = [
         { title: 'Oversigt', href: dashboard(), icon: LayoutGrid },
-        { title: 'Kalender', href: kalender(), icon: CalendarDays },
-        { title: 'Mit forløb', href: forloeb(), icon: Route },
-        { title: 'Færdigheder', href: faerdigheder(), icon: Sparkles },
-        { title: 'Materiale', href: materiale(), icon: BookOpen },
-        { title: 'Historik', href: historik(), icon: ClipboardList },
+        { title: 'Kalender', href: calendar(), icon: CalendarDays },
+        { title: 'Mit forløb', href: progress(), icon: Route },
+        { title: 'Færdigheder', href: skills(), icon: Sparkles },
+        { title: 'Materiale', href: materials(), icon: BookOpen },
+        { title: 'Historik', href: history(), icon: ClipboardList },
         { title: 'Chat', href: chatIndex(), icon: MessageSquare },
         ...(studentLearnUrl ? [{ title: 'Kursusmateriale', href: studentLearnUrl, icon: BookOpen }] : []),
     ];

@@ -37,13 +37,13 @@ class StudentDashboardController extends Controller
             'readiness' => $readiness->handle($student),
             'lesson_progress' => $buildProgress->handle($student),
             'balance' => $balance->handle($student),
-            'materials' => $this->materials($student),
+            'materials' => $this->studentMaterials($student),
             'curriculum_by_lesson' => $this->curriculumByLesson($student),
             'next_theory_topic' => $this->nextTheoryTopic($student),
         ]);
     }
 
-    public function forloeb(
+    public function progress(
         Request $request,
         CheckExamReadiness $readiness,
         CalculateBalance $balance,
@@ -52,27 +52,27 @@ class StudentDashboardController extends Controller
     ): Response {
         $student = $this->student($request);
 
-        return Inertia::render('student/forloeb', [
+        return Inertia::render('student/progress', [
             'past_bookings' => $this->pastBookings($student),
             'journey' => $buildJourney->handle($student),
             'readiness' => $readiness->handle($student),
             'lesson_progress' => $buildProgress->handle($student),
             'balance' => $balance->handle($student),
-            'materials' => $this->materials($student),
+            'materials' => $this->studentMaterials($student),
             'curriculum_by_lesson' => $this->curriculumByLesson($student),
         ]);
     }
 
-    public function historik(Request $request): Response
+    public function history(Request $request): Response
     {
         $student = $this->student($request);
 
-        return Inertia::render('student/historik', [
+        return Inertia::render('student/history', [
             'past_bookings' => $this->pastBookingsWithExtras($student),
         ]);
     }
 
-    public function materiale(Request $request): Response
+    public function materials(Request $request): Response
     {
         $student = $this->student($request);
         $student->load(['offers' => fn ($q) => $q->with('media')]);
@@ -93,12 +93,12 @@ class StudentDashboardController extends Controller
             'is_unlocked' => ((int) ($media->getCustomProperty('unlock_at_lesson') ?? 0)) <= $completedTheoryCount,
         ]))->values()->all();
 
-        return Inertia::render('student/materiale', [
+        return Inertia::render('student/materials', [
             'materials' => $materials,
         ]);
     }
 
-    public function faerdigheder(Request $request): Response
+    public function skills(Request $request): Response
     {
         $student = $this->student($request);
 
@@ -120,7 +120,7 @@ class StudentDashboardController extends Controller
             }
         }
 
-        return Inertia::render('student/faerdigheder', [
+        return Inertia::render('student/skills', [
             'skills' => array_values($counts),
             'completedSkills' => $student->completed_skills ?? [],
         ]);
@@ -232,7 +232,7 @@ class StudentDashboardController extends Controller
     /**
      * @return list<array<string, mixed>>
      */
-    private function materials(Student $student): array
+    private function studentMaterials(Student $student): array
     {
         $student->loadMissing(['offers' => fn ($q) => $q->with('media')]);
 

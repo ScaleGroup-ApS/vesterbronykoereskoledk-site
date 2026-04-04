@@ -90,7 +90,7 @@ class MarketingController extends Controller
         ]);
     }
 
-    public function tilElever(string $slug): Response
+    public function forStudents(string $slug): Response
     {
         $pages = config('marketing.til_elever', []);
         if (! isset($pages[$slug])) {
@@ -99,7 +99,7 @@ class MarketingController extends Controller
 
         $page = $pages[$slug];
 
-        return Inertia::render('marketing/til-elever-side', [
+        return Inertia::render('marketing/for-students', [
             'slug' => $slug,
             'metaTitle' => $page['metaTitle'],
             'heading' => $page['heading'],

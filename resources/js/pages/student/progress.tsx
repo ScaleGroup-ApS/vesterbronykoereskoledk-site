@@ -7,7 +7,7 @@ import { StudentLessonProgress } from '@/components/student/student-lesson-progr
 import type { LessonProgressRow } from '@/components/student/student-lesson-progress';
 import { Badge } from '@/components/ui/badge';
 import StudentLayout from '@/layouts/student-layout';
-import { dashboard, forloeb } from '@/routes/student';
+import { dashboard, progress } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
 type JourneyPayload = {
@@ -39,7 +39,7 @@ const readinessTypeLabels: Record<string, string> = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Oversigt', href: dashboard().url },
-    { title: 'Mit forløb', href: forloeb().url },
+    { title: 'Mit forløb', href: progress().url },
 ];
 
 export default function StudentForloeb({

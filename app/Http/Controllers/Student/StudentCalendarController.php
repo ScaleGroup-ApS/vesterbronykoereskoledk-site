@@ -55,7 +55,7 @@ class StudentCalendarController extends Controller
             ];
         }
 
-        return Inertia::render('student/kalender', [
+        return Inertia::render('student/calendar', [
             'events' => $events,
         ]);
     }

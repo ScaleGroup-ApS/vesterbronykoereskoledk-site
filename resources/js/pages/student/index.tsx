@@ -6,7 +6,7 @@ import { StudentLessonProgress } from '@/components/student/student-lesson-progr
 import type { LessonProgressRow } from '@/components/student/student-lesson-progress';
 import { Button } from '@/components/ui/button';
 import StudentLayout from '@/layouts/student-layout';
-import { dashboard, forloeb, kalender } from '@/routes/student';
+import { calendar, dashboard, progress } from '@/routes/student';
 import type { BreadcrumbItem } from '@/types';
 
 type NextHighlight = {
@@ -102,7 +102,7 @@ export default function StudentDashboard({
                     <Heading title="Oversigt" />
                     <p className="text-sm text-muted-foreground">
                         Din hurtige status — progression, materiale og historik finder du under Mit forløb.{' '}
-                        <Link href={kalender().url} className="font-medium text-primary hover:underline">
+                        <Link href={calendar().url} className="font-medium text-primary hover:underline">
                             Åbn kalender
                         </Link>
                     </p>
@@ -151,7 +151,7 @@ export default function StudentDashboard({
                 )}
 
                 <Link
-                    href={forloeb().url}
+                    href={progress().url}
                     className="group flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-transparent to-transparent p-5 shadow-sm transition hover:border-primary/40"
                 >
                     <div className="space-y-1">

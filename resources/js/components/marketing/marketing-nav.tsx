@@ -21,10 +21,10 @@ import {
     packages,
 } from '@/routes/marketing';
 import { show as marketingPackageShow } from '@/routes/marketing/packages';
-import { show as tilEleverShow } from '@/routes/marketing/til-elever';
+import { show as forStudentsShow } from '@/routes/marketing/for-students';
 import type { MarketingOffer } from '@/types/marketing-offer';
 
-const tilEleverLinks: { slug: string; label: string; description: string; icon: React.ElementType }[] = [
+const forStudentLinks: { slug: string; label: string; description: string; icon: React.ElementType }[] = [
     { slug: 'elektronisk-lektionsplan', label: 'Elektronisk lektionsplan', description: 'Følg din fremgang løbende', icon: BookOpen },
     { slug: 'online-teori', label: 'Online teoriundervisning', description: 'Lær teorien i dit eget tempo', icon: Monitor },
     { slug: 'korekort-bil', label: 'Kørekort til bil', description: 'Alt du skal vide om kategori B', icon: Car },
@@ -39,7 +39,7 @@ const panelVariants = {
     exit: { opacity: 0, y: -6, scale: 0.99, transition: { duration: 0.13 } },
 };
 
-type OpenMenu = 'pakker' | 'til-elever' | null;
+type OpenMenu = 'pakker' | 'for-students' | null;
 
 function useHoverMenu() {
     const [open, setOpen] = useState<OpenMenu>(null);
@@ -162,24 +162,24 @@ export function MarketingNavDesktop() {
 
             {/* ── Til elever ── */}
             <div
-                onMouseEnter={() => enter('til-elever')}
+                onMouseEnter={() => enter('for-students')}
                 onMouseLeave={leave}
                 className="relative"
             >
                 <button
                     type="button"
-                    className={triggerClass(tilEleverActive, 'til-elever')}
-                    aria-expanded={open === 'til-elever'}
+                    className={triggerClass(tilEleverActive, 'for-students')}
+                    aria-expanded={open === 'for-students'}
                     aria-haspopup="true"
                 >
                     Til elever
                     <ChevronDown
-                        className={cn('size-3.5 opacity-60 transition-transform duration-200', open === 'til-elever' && 'rotate-180')}
+                        className={cn('size-3.5 opacity-60 transition-transform duration-200', open === 'for-students' && 'rotate-180')}
                     />
                 </button>
 
                 <AnimatePresence>
-                    {open === 'til-elever' && (
+                    {open === 'for-students' && (
                         <motion.div
                             variants={panelVariants}
                             initial="hidden"
@@ -196,13 +196,13 @@ export function MarketingNavDesktop() {
 
                             {/* 2-col grid */}
                             <div className="grid grid-cols-2 gap-1 px-2 py-2">
-                                {tilEleverLinks.map((item) => {
+                                {forStudentLinks.map((item) => {
                                     const Icon = item.icon;
-                                    const isActive = url === tilEleverShow.url(item.slug);
+                                    const isActive = url === forStudentsShow.url(item.slug);
                                     return (
                                         <Link
                                             key={item.slug}
-                                            href={tilEleverShow.url(item.slug)}
+                                            href={forStudentsShow.url(item.slug)}
                                             onClick={close}
                                             className={cn(
                                                 'group flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.05]',
@@ -249,13 +249,13 @@ export function MarketingNavMobile({ onNavigate }: { onNavigate?: () => void }) 
     const offers = marketingOffers ?? [];
 
     const isPackagesRoute = url === packages.url() || url.startsWith('/pakker/');
-    const isTilEleverRoute = url.startsWith('/til-elever/');
+    const isForStudentsRoute = url.startsWith('/til-elever/');
 
     const [pakkerOpen, setPakkerOpen] = useState(() => isPackagesRoute);
-    const [tilEleverOpen, setTilEleverOpen] = useState(() => isTilEleverRoute);
+    const [forStudentsOpen, setForStudentsOpen] = useState(() => isForStudentsRoute);
 
     useEffect(() => { setPakkerOpen(isPackagesRoute); }, [isPackagesRoute]);
-    useEffect(() => { setTilEleverOpen(isTilEleverRoute); }, [isTilEleverRoute]);
+    useEffect(() => { setForStudentsOpen(isForStudentsRoute); }, [isForStudentsRoute]);
 
     const linkClass = (active: boolean) =>
         cn(
@@ -306,19 +306,19 @@ export function MarketingNavMobile({ onNavigate }: { onNavigate?: () => void }) 
                 <button
                     type="button"
                     className="flex w-full items-center justify-between gap-2 rounded-xl border border-mk-border bg-mk-surface/60 px-3 py-2.5 text-left text-sm font-semibold text-mk-text transition-colors hover:bg-mk-surface"
-                    aria-expanded={tilEleverOpen}
-                    onClick={() => setTilEleverOpen((o) => !o)}
+                    aria-expanded={forStudentsOpen}
+                    onClick={() => setForStudentsOpen((o) => !o)}
                 >
                     <span>Til elever</span>
-                    <ChevronDown className={cn('size-4 shrink-0 text-mk-muted transition-transform duration-200', tilEleverOpen && 'rotate-180')} aria-hidden />
+                    <ChevronDown className={cn('size-4 shrink-0 text-mk-muted transition-transform duration-200', forStudentsOpen && 'rotate-180')} aria-hidden />
                 </button>
-                {tilEleverOpen && (
+                {forStudentsOpen && (
                     <div className="space-y-0.5 border-t border-mk-border/60 px-2 pb-2 pt-1.5">
-                        {tilEleverLinks.map((item) => (
+                        {forStudentLinks.map((item) => (
                             <Link
                                 key={item.slug}
-                                href={tilEleverShow.url(item.slug)}
-                                className={linkClass(url === tilEleverShow.url(item.slug))}
+                                href={forStudentsShow.url(item.slug)}
+                                className={linkClass(url === forStudentsShow.url(item.slug))}
                                 onClick={onNavigate}
                             >
                                 {item.label}

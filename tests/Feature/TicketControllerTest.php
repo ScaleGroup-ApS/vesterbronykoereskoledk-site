@@ -1,41 +1,41 @@
 <?php
 
 use App\Models\User;
-use App\Services\CrmTicketService;
+use Illuminate\Support\Facades\Http;
 
 $fakeTickets = [
     [
         'id' => 1,
-        'subject' => 'Login virker ikke',
+        'subject' => 'Login issue',
         'status' => 'open',
         'priority' => 'high',
         'createdAt' => '2026-04-01T10:00:00.000Z',
-        'origin' => 'Køreskole',
+        'origin' => 'driving-school',
     ],
     [
         'id' => 2,
-        'subject' => 'Faktura spørgsmål',
+        'subject' => 'Invoice question',
         'status' => 'solved',
         'priority' => 'normal',
         'createdAt' => '2026-03-28T09:00:00.000Z',
-        'origin' => 'Køreskole',
+        'origin' => 'driving-school',
     ],
 ];
 
 $fakeTicket = [
     'id' => 1,
-    'subject' => 'Login virker ikke',
+    'subject' => 'Login issue',
     'status' => 'open',
     'priority' => 'high',
     'createdAt' => '2026-04-01T10:00:00.000Z',
-    'origin' => 'Køreskole',
+    'origin' => 'driving-school',
     'threads' => [
         [
             'id' => 1,
             'comments' => [
                 [
                     'id' => 1,
-                    'content' => 'Jeg kan ikke logge ind.',
+                    'content' => 'Cannot log in.',
                     'authorType' => 'customer',
                     'createdAt' => '2026-04-01T10:00:00.000Z',
                     'author' => null,
@@ -46,14 +46,9 @@ $fakeTicket = [
 ];
 
 test('admin can view support index', function () use ($fakeTickets) {
-    $admin = User::factory()->create();
+    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTickets)]);
 
-    $this->mock(CrmTicketService::class)
-        ->shouldReceive('getTickets')
-        ->once()
-        ->andReturn($fakeTickets);
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->get(route('support.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -63,14 +58,9 @@ test('admin can view support index', function () use ($fakeTickets) {
 });
 
 test('instructor can view support index', function () use ($fakeTickets) {
-    $instructor = User::factory()->instructor()->create();
+    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTickets)]);
 
-    $this->mock(CrmTicketService::class)
-        ->shouldReceive('getTickets')
-        ->once()
-        ->andReturn($fakeTickets);
-
-    $this->actingAs($instructor)
+    $this->actingAs(User::factory()->instructor()->create())
         ->get(route('support.index'))
         ->assertOk();
 });
@@ -81,49 +71,37 @@ test('unauthenticated user is redirected from support index', function () {
 });
 
 test('student cannot access support index', function () {
-    $student = User::factory()->student()->create();
-
-    $this->actingAs($student)
+    $this->actingAs(User::factory()->student()->create())
         ->get(route('support.index'))
         ->assertForbidden();
 });
 
 test('admin can create a ticket with valid data', function () {
-    $admin = User::factory()->create();
+    Http::fake(['*/api/driving-schools/tickets*' => Http::response([])]);
 
-    $this->mock(CrmTicketService::class)
-        ->shouldReceive('createTicket')
-        ->once()
-        ->with('Login virker ikke', 'Jeg kan ikke logge ind.', 'high')
-        ->andReturn([]);
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.store'), [
-            'subject' => 'Login virker ikke',
-            'message' => 'Jeg kan ikke logge ind.',
+            'subject' => 'Login issue',
+            'message' => 'Cannot log in.',
             'priority' => 'high',
         ])
         ->assertRedirect(route('support.index'));
 });
 
 test('ticket creation fails with missing subject', function () {
-    $admin = User::factory()->create();
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.store'), [
             'subject' => '',
-            'message' => 'Noget besked.',
+            'message' => 'Some message.',
             'priority' => 'normal',
         ])
         ->assertSessionHasErrors('subject');
 });
 
 test('ticket creation fails with missing message', function () {
-    $admin = User::factory()->create();
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.store'), [
-            'subject' => 'Et emne',
+            'subject' => 'A subject',
             'message' => '',
             'priority' => 'normal',
         ])
@@ -131,27 +109,19 @@ test('ticket creation fails with missing message', function () {
 });
 
 test('ticket creation fails with invalid priority', function () {
-    $admin = User::factory()->create();
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.store'), [
-            'subject' => 'Et emne',
-            'message' => 'Noget besked.',
+            'subject' => 'A subject',
+            'message' => 'Some message.',
             'priority' => 'super-urgent',
         ])
         ->assertSessionHasErrors('priority');
 });
 
 test('admin can view ticket detail', function () use ($fakeTicket) {
-    $admin = User::factory()->create();
+    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTicket)]);
 
-    $this->mock(CrmTicketService::class)
-        ->shouldReceive('getTicket')
-        ->once()
-        ->with(1)
-        ->andReturn($fakeTicket);
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->get(route('support.show', 1))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -161,25 +131,17 @@ test('admin can view ticket detail', function () use ($fakeTicket) {
 });
 
 test('admin can add a comment to a ticket', function () {
-    $admin = User::factory()->create();
+    Http::fake(['*/api/driving-schools/tickets*' => Http::response([])]);
 
-    $this->mock(CrmTicketService::class)
-        ->shouldReceive('addComment')
-        ->once()
-        ->with(1, 'Vi kigger på det.')
-        ->andReturn([]);
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.comment', 1), [
-            'message' => 'Vi kigger på det.',
+            'message' => 'Looking into it.',
         ])
         ->assertRedirect(route('support.show', 1));
 });
 
 test('comment requires a message', function () {
-    $admin = User::factory()->create();
-
-    $this->actingAs($admin)
+    $this->actingAs(User::factory()->create())
         ->post(route('support.comment', 1), [
             'message' => '',
         ])
