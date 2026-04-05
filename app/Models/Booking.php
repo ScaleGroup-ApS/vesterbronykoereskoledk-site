@@ -19,6 +19,7 @@ class Booking extends Model
     protected $fillable = [
         'student_id',
         'team_id',
+        'course_session_id',
         'instructor_id',
         'vehicle_id',
         'type',
@@ -74,6 +75,11 @@ class Booking extends Model
     public function feedback(): HasOne
     {
         return $this->hasOne(BookingFeedback::class);
+    }
+
+    public function courseSession(): BelongsTo
+    {
+        return $this->belongsTo(CourseSession::class);
     }
 
     /**
