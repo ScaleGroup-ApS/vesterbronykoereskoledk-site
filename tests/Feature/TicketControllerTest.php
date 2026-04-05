@@ -45,26 +45,6 @@ $fakeTicket = [
     ],
 ];
 
-test('admin can view support index', function () use ($fakeTickets) {
-    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTickets)]);
-
-    $this->actingAs(User::factory()->create())
-        ->get(route('support.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('Support/Index')
-            ->has('tickets', 2)
-        );
-});
-
-test('instructor can view support index', function () use ($fakeTickets) {
-    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTickets)]);
-
-    $this->actingAs(User::factory()->instructor()->create())
-        ->get(route('support.index'))
-        ->assertOk();
-});
-
 test('unauthenticated user is redirected from support index', function () {
     $this->get(route('support.index'))
         ->assertRedirect(route('login'));
@@ -116,18 +96,6 @@ test('ticket creation fails with invalid priority', function () {
             'priority' => 'super-urgent',
         ])
         ->assertSessionHasErrors('priority');
-});
-
-test('admin can view ticket detail', function () use ($fakeTicket) {
-    Http::fake(['*/api/driving-schools/tickets*' => Http::response($fakeTicket)]);
-
-    $this->actingAs(User::factory()->create())
-        ->get(route('support.show', 1))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('Support/Show')
-            ->has('ticket')
-        );
 });
 
 test('admin can add a comment to a ticket', function () {

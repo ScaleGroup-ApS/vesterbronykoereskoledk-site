@@ -12,25 +12,13 @@ use App\Models\Offer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class EnrollmentController extends Controller
 {
-    public function show(Offer $offer): Response
+    public function show(Offer $offer): never
     {
-        $courses = $offer->courses()->upcoming()->orderBy('start_at')->get();
-
-        return Inertia::render('enroll', [
-            'offer' => $offer,
-            'courseEvents' => $courses->map(fn ($c) => [
-                'id' => $c->id,
-                'title' => $offer->name,
-                'start' => $c->start_at->format('Y-m-d H:i'),
-                'end' => $c->end_at->format('Y-m-d H:i'),
-            ])->values(),
-        ]);
+        abort(501, 'Enrollment page not yet implemented in Blade/Livewire.');
     }
 
     public function store(
@@ -48,10 +36,10 @@ class EnrollmentController extends Controller
         if (EnrollmentPaymentMethod::from($validated['payment_method']) === EnrollmentPaymentMethod::Stripe) {
             $checkoutUrl = $createStripeCheckoutSession->handle($enrollment);
 
-            return Inertia::location($checkoutUrl);
+            return redirect()->away($checkoutUrl);
         }
 
-        return redirect()->route('dashboard');
+        return redirect('/app');
     }
 
     public function stripeReturn(Request $request, CompleteStripeEnrollment $completeStripeEnrollment): RedirectResponse
@@ -60,6 +48,6 @@ class EnrollmentController extends Controller
 
         $completeStripeEnrollment->handle($sessionId);
 
-        return redirect()->route('dashboard');
+        return redirect('/app');
     }
 }

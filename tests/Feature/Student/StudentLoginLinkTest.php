@@ -43,5 +43,5 @@ it('sends magic link on student creation and allows login', function () {
 
     assertAuthenticatedAs($student->user);
 
-    $response->assertRedirect(route('student.dashboard'));
+    $response->assertRedirect('/app');
 });

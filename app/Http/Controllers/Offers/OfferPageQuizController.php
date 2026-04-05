@@ -21,7 +21,7 @@ class OfferPageQuizController extends Controller
             'sort_order' => $maxOrder + 1,
         ]));
 
-        return redirect()->route('offers.modules.pages.edit', [$offer, $module, $page])
+        return redirect()->back()
             ->with('success', 'Spørgsmål tilføjet.');
     }
 

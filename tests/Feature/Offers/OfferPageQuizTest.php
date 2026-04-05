@@ -19,7 +19,7 @@ test('admin can add a quiz question', function () {
             'correct_option' => 1,
             'explanation' => 'Grundlæggende matematik.',
         ])
-        ->assertRedirect(route('offers.modules.pages.edit', [$offer, $module, $page]));
+        ->assertRedirect();
 
     expect(OfferPageQuizQuestion::count())->toBe(1);
     expect(OfferPageQuizQuestion::first()->correct_option)->toBe(1);

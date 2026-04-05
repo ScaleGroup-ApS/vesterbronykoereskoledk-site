@@ -5,21 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateTicketCommentRequest;
 use App\Http\Requests\CreateTicketRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class TicketController extends Controller
 {
     public function index(): Response
     {
-        $tickets = Http::crm()
-            ->get('/api/driving-schools/tickets', ['customerId' => config('services.crm.customer_id')])
-            ->json();
-
-        return Inertia::render('Support/Index', [
-            'tickets' => $tickets,
-        ]);
+        abort(501, 'Support page not yet implemented in Filament.');
     }
 
     public function store(CreateTicketRequest $request): RedirectResponse
@@ -37,13 +30,7 @@ class TicketController extends Controller
 
     public function show(int $ticketId): Response
     {
-        $ticket = Http::crm()
-            ->get("/api/driving-schools/tickets/{$ticketId}", ['customerId' => config('services.crm.customer_id')])
-            ->json();
-
-        return Inertia::render('Support/Show', [
-            'ticket' => $ticket,
-        ]);
+        abort(501, 'Support page not yet implemented in Filament.');
     }
 
     public function addComment(CreateTicketCommentRequest $request, int $ticketId): RedirectResponse
