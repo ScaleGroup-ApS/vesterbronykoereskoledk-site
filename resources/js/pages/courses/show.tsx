@@ -23,6 +23,22 @@ type Enrollment = {
     total_bookings: number;
 };
 
+type SessionAttendance = {
+    booking_id: number;
+    student_id: number;
+    attended: boolean | null;
+};
+
+type CourseSessionRow = {
+    id: number;
+    session_number: number;
+    starts_at: string;
+    ends_at: string;
+    is_cancelled: boolean;
+    is_past: boolean;
+    attendance: SessionAttendance[];
+};
+
 type CourseDetail = {
     id: number;
     start_at: string;
@@ -32,6 +48,7 @@ type CourseDetail = {
     public_spots_remaining: number | null;
     offer: { id: number; name: string };
     enrollments: Enrollment[];
+    sessions: CourseSessionRow[];
 };
 
 export default function CourseShow({ course }: { course: CourseDetail }) {
@@ -204,6 +221,93 @@ export default function CourseShow({ course }: { course: CourseDetail }) {
                         </div>
                     )}
                 </div>
+
+                {course.sessions.length > 0 && (
+                    <div className="max-w-2xl">
+                        <h2 className="mb-4 text-base font-semibold">
+                            Teoritimer ({course.sessions.filter((s) => !s.is_cancelled).length})
+                        </h2>
+                        <div className="rounded-md border">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b bg-muted/50">
+                                        <th className="px-4 py-2 text-left font-medium">#</th>
+                                        <th className="px-4 py-2 text-left font-medium">Dato</th>
+                                        <th className="px-4 py-2 text-left font-medium">Tid</th>
+                                        <th className="px-4 py-2 text-left font-medium">Fremmøde</th>
+                                        <th className="px-4 py-2" />
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {course.sessions.map((session) => {
+                                        const start = new Date(session.starts_at);
+                                        const end = new Date(session.ends_at);
+                                        const presentCount = session.attendance.filter((a) => a.attended === true).length;
+                                        const totalCount = session.attendance.length;
+
+                                        return (
+                                            <tr
+                                                key={session.id}
+                                                className={`border-b last:border-0 ${session.is_cancelled ? 'opacity-40 line-through' : ''}`}
+                                            >
+                                                <td className="px-4 py-2 font-medium">Teori {session.session_number}</td>
+                                                <td className="px-4 py-2">
+                                                    {start.toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {start.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' })}–
+                                                    {end.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' })}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {session.is_cancelled
+                                                        ? 'Aflyst'
+                                                        : totalCount > 0
+                                                            ? `${presentCount}/${totalCount}`
+                                                            : '—'}
+                                                </td>
+                                                <td className="px-4 py-2 text-right">
+                                                    {!session.is_cancelled && (
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => {
+                                                                    const allStudentIds = session.attendance.map((a) => a.student_id);
+                                                                    router.patch(
+                                                                        `/courses/${course.id}/sessions/${session.id}/attendance`,
+                                                                        { present_student_ids: allStudentIds },
+                                                                        { preserveScroll: true },
+                                                                    );
+                                                                }}
+                                                            >
+                                                                Alle til stede
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                onClick={() => {
+                                                                    if (confirm('Aflys denne teoritime?')) {
+                                                                        router.post(
+                                                                            `/courses/${course.id}/sessions/${session.id}/cancel`,
+                                                                            {},
+                                                                            { preserveScroll: true },
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Aflys
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
