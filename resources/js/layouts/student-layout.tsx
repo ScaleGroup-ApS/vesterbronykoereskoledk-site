@@ -1,11 +1,11 @@
 import { usePage } from '@inertiajs/react';
-import { BookOpen, CalendarDays, ClipboardList, LayoutGrid, MessageSquare, Route, Sparkles } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, ClipboardList, CreditCard, GraduationCap, LayoutGrid, MessageSquare, Route, Sparkles, Star } from 'lucide-react';
 import { AppContent } from '@/components/app-content';
 import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
 import ThemeProvider from '@/components/theme-provider';
 import { index as chatIndex } from '@/routes/chat';
-import { calendar, dashboard, history, materials, progress, skills } from '@/routes/student';
+import { calendar, dashboard, feedback, history, materials, notifications, payments, progress, skills, theoryPractice } from '@/routes/student';
 import type { AppLayoutProps, NavItem } from '@/types';
 
 export default function StudentLayout({ children, breadcrumbs }: AppLayoutProps) {
@@ -18,6 +18,10 @@ export default function StudentLayout({ children, breadcrumbs }: AppLayoutProps)
         { title: 'Færdigheder', href: skills(), icon: Sparkles },
         { title: 'Materiale', href: materials(), icon: BookOpen },
         { title: 'Historik', href: history(), icon: ClipboardList },
+        { title: 'Teoritræning', href: theoryPractice(), icon: GraduationCap },
+        { title: 'Feedback', href: feedback(), icon: Star },
+        { title: 'Betalinger', href: payments(), icon: CreditCard },
+        { title: 'Notifikationer', href: notifications(), icon: Bell },
         { title: 'Chat', href: chatIndex(), icon: MessageSquare },
         ...(studentLearnUrl ? [{ title: 'Kursusmateriale', href: studentLearnUrl, icon: BookOpen }] : []),
     ];
