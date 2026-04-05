@@ -43,6 +43,11 @@ class StoreCourseRequest extends FormRequest
             'max_students' => ['nullable', 'integer', 'min:1'],
             'featured_on_home' => ['sometimes', 'boolean'],
             'public_spots_remaining' => ['nullable', 'integer', 'min:0'],
+            'theory_weekdays' => ['nullable', 'array'],
+            'theory_weekdays.*' => ['integer', 'between:1,7'],
+            'theory_start_time' => ['required_with:theory_weekdays', 'date_format:H:i'],
+            'theory_end_time' => ['required_with:theory_weekdays', 'date_format:H:i', 'after:theory_start_time'],
+            'theory_until' => ['required_with:theory_weekdays', 'date', 'after:start_at'],
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\Chat\ConversationMemberController;
 use App\Http\Controllers\Chat\MessageAttachmentController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\Courses\CourseAttendanceController;
+use App\Http\Controllers\Courses\CourseSessionController;
 use App\Http\Controllers\Curriculum\CurriculumMaterialUnlockController;
 use App\Http\Controllers\Curriculum\CurriculumTopicController;
 use App\Http\Controllers\DashboardController;
@@ -161,6 +162,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('courses/{course}', [App\Http\Controllers\Courses\CourseController::class, 'destroy'])->name('courses.destroy');
     Route::patch('courses/{course}/enrollments/{enrollment}/attendance', CourseAttendanceController::class)
         ->name('courses.enrollments.attendance');
+    Route::post('courses/{course}/sessions/{session}/cancel', [CourseSessionController::class, 'cancel'])
+        ->name('courses.sessions.cancel');
+    Route::patch('courses/{course}/sessions/{session}/attendance', [CourseSessionController::class, 'attendance'])
+        ->name('courses.sessions.attendance');
     Route::get('bookings/day/{date}', BookingDayController::class)->name('bookings.day');
     Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)
         ->name('bookings.attendance.store');

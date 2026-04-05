@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Courses;
 
+use App\Actions\Courses\CreateSessionBookings;
+use App\Actions\Courses\GenerateCourseSessions;
 use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\StoreCourseRequest;
 use App\Http\Requests\Courses\UpdateCourseRequest;
 use App\Models\Booking;
 use App\Models\Course;
+use App\Models\CourseSession;
 use App\Models\Offer;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -56,6 +59,24 @@ class CourseController extends Controller
 
         $course = $offer->courses()->create($validated);
 
+        if ($request->filled('theory_weekdays')) {
+            $course->update([
+                'theory_schedule' => [
+                    'weekdays' => array_map('intval', $request->input('theory_weekdays')),
+                    'start_time' => $request->input('theory_start_time'),
+                    'end_time' => $request->input('theory_end_time'),
+                    'until' => $request->input('theory_until'),
+                ],
+            ]);
+
+            app(GenerateCourseSessions::class)->handle($course);
+
+            $course->load('sessions');
+            $course->sessions->each(function ($session) {
+                app(CreateSessionBookings::class)->handle($session);
+            });
+        }
+
         if ($request->boolean('featured_on_home')) {
             Course::query()->whereKeyNot($course->id)->update(['featured_on_home' => false]);
         }
@@ -68,7 +89,7 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course->offer);
 
-        $course->load(['offer', 'enrollments.student.user']);
+        $course->load(['offer', 'enrollments.student.user', 'sessions.bookings']);
 
         return Inertia::render('courses/show', [
             'course' => [
@@ -101,6 +122,22 @@ class CourseController extends Controller
                         ->whereNotIn('status', [BookingStatus::Cancelled->value])
                         ->count(),
                 ]),
+                'sessions' => $course->sessions()
+                    ->orderBy('session_number')
+                    ->get()
+                    ->map(fn (CourseSession $s) => [
+                        'id' => $s->id,
+                        'session_number' => $s->session_number,
+                        'starts_at' => $s->starts_at->toIso8601String(),
+                        'ends_at' => $s->ends_at->toIso8601String(),
+                        'is_cancelled' => $s->isCancelled(),
+                        'is_past' => $s->starts_at->isPast(),
+                        'attendance' => $s->bookings->map(fn (Booking $b) => [
+                            'booking_id' => $b->id,
+                            'student_id' => $b->student_id,
+                            'attended' => $b->attended,
+                        ]),
+                    ]),
             ],
         ]);
     }
