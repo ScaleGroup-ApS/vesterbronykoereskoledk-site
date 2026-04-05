@@ -45,6 +45,7 @@ use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\Timeline\TimelineController;
 use App\Http\Controllers\Vehicles\VehicleController;
+use App\Livewire\Student\LearnPage;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 
@@ -96,8 +97,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Student learn
     Route::prefix('offers/{offer}/learn')->middleware('role:student')->name('student.learn.')->group(function () {
-        Route::get('{module}/{page?}', [StudentLearnController::class, 'show'])->name('page');
-        Route::post('{module}/{page}/complete', [StudentLearnController::class, 'markComplete'])->name('page.complete');
+        Route::get('{module}', [StudentLearnController::class, 'redirectToFirstPage'])->name('module');
+        Route::get('{module}/{page}', LearnPage::class)->name('page');
         Route::post('{module}/{page}/quiz', [StudentQuizAttemptController::class, 'store'])->name('page.quiz.attempt');
     });
 

@@ -12,8 +12,8 @@ it('student can view the materiale page', function () {
     Student::factory()->for($user)->create();
 
     $this->actingAs($user)
-        ->get(route('student.materiale'))
-        ->assertInertia(fn ($page) => $page->component('student/materiale'));
+        ->get(route('student.materials'))
+        ->assertInertia(fn ($page) => $page->component('student/materials'));
 });
 
 it('materials with unlock_at_lesson 0 are always unlocked', function () {
@@ -28,7 +28,7 @@ it('materials with unlock_at_lesson 0 are always unlocked', function () {
     $media->setCustomProperty('unlock_at_lesson', 0)->save();
 
     $this->actingAs($user)
-        ->get(route('student.materiale'))
+        ->get(route('student.materials'))
         ->assertInertia(fn ($page) => $page
             ->has('materials', 1, fn ($m) => $m
                 ->where('is_unlocked', true)
@@ -57,7 +57,7 @@ it('materials locked until a lesson count are shown as locked when student has n
     ]);
 
     $this->actingAs($user)
-        ->get(route('student.materiale'))
+        ->get(route('student.materials'))
         ->assertInertia(fn ($page) => $page
             ->has('materials', 1, fn ($m) => $m
                 ->where('is_unlocked', false)

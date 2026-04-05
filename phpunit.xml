@@ -36,5 +36,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="CI" value="true"/>
+        <env name="CRM_API_URL" value="http://api.test"/>
     </php>
 </phpunit>

@@ -9,10 +9,10 @@ test('student can visit calendar page', function () {
     Student::factory()->for($user)->create();
 
     $this->actingAs($user)
-        ->get(route('student.kalender'))
+        ->get(route('student.calendar'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('student/kalender')
+            ->component('student/calendar')
             ->has('events')
         );
 });
@@ -26,7 +26,7 @@ test('student calendar includes upcoming bookings', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('student.kalender'))
+        ->get(route('student.calendar'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('events', fn ($events) => $events
@@ -40,6 +40,6 @@ test('admin cannot visit student calendar', function () {
     $admin = User::factory()->create();
 
     $this->actingAs($admin)
-        ->get(route('student.kalender'))
+        ->get(route('student.calendar'))
         ->assertForbidden();
 });

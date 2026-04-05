@@ -10,12 +10,11 @@ use App\Models\MarketingTestimonial;
 use App\Models\MarketingValueBlock;
 use App\Models\Offer;
 use App\Models\Team;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class MarketingController extends Controller
 {
-    public function home(): Response
+    public function home(): View
     {
         $heroCourse = Course::query()
             ->with('offer')
@@ -34,7 +33,7 @@ class MarketingController extends Controller
             ? $nextOffer
             : Offer::query()->primary()->orderBy('name')->first();
 
-        return Inertia::render('welcome', [
+        return view('welcome', [
             'homeCopy' => MarketingHomeCopy::forHome(),
             'valueBlocks' => MarketingValueBlock::query()
                 ->where('is_active', true)
@@ -49,48 +48,52 @@ class MarketingController extends Controller
             'nextHoldStartAt' => $heroCourse?->start_at?->toIso8601String(),
             'heroHoldSpotsRemaining' => $heroCourse?->public_spots_remaining,
             'tilmeldHoldstartOfferSlug' => $offerForEnrollment?->slug,
+            'marketingOffers' => Offer::query()
+                ->where('type', OfferType::Primary)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
-    public function features(): Response
+    public function features(): View
     {
-        return Inertia::render('marketing/fordele');
+        return view('marketing.fordele');
     }
 
-    public function packages(): Response
+    public function packages(): View
     {
-        return Inertia::render('marketing/pakker', [
+        return view('marketing.pakker', [
             'offers' => Offer::query()->primary()->orderBy('name')->get(),
             'addons' => Offer::query()->addon()->orderBy('name')->get(),
         ]);
     }
 
-    public function packageShow(Offer $offer): Response
+    public function packageShow(Offer $offer): View
     {
         if ($offer->type !== OfferType::Primary) {
             abort(404);
         }
 
-        return Inertia::render('marketing/pakke-show', [
+        return view('marketing.pakke-show', [
             'offer' => $offer,
         ]);
     }
 
-    public function faq(): Response
+    public function faq(): View
     {
-        return Inertia::render('marketing/faq', [
+        return view('marketing.faq', [
             'items' => config('marketing.faq', []),
         ]);
     }
 
-    public function instructors(): Response
+    public function instructors(): View
     {
-        return Inertia::render('marketing/vores-korelaerere', [
+        return view('marketing.vores-korelaerere', [
             'teams' => Team::query()->orderBy('name')->get(['id', 'name', 'description']),
         ]);
     }
 
-    public function forStudents(string $slug): Response
+    public function forStudents(string $slug): View
     {
         $pages = config('marketing.til_elever', []);
         if (! isset($pages[$slug])) {
@@ -99,7 +102,7 @@ class MarketingController extends Controller
 
         $page = $pages[$slug];
 
-        return Inertia::render('marketing/for-students', [
+        return view('marketing.for-students', [
             'slug' => $slug,
             'metaTitle' => $page['metaTitle'],
             'heading' => $page['heading'],
@@ -108,34 +111,38 @@ class MarketingController extends Controller
         ]);
     }
 
-    public function about(): Response
+    public function about(): View
     {
-        return Inertia::render('marketing/om-os');
+        return view('marketing.om-os');
     }
 
-    public function contact(): Response
+    public function contact(): View
     {
-        return Inertia::render('marketing/kontakt', [
+        return view('marketing.kontakt', [
             'offers' => Offer::query()
                 ->primary()
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug', 'price']),
             'holdStartOptions' => config('marketing.hold_start_options', []),
+            'phone' => config('marketing.contact.phone'),
+            'phone_href' => config('marketing.contact.phone_href'),
+            'email' => config('marketing.contact.email'),
+            'success' => session('success'),
         ]);
     }
 
-    public function terms(): Response
+    public function terms(): View
     {
-        return Inertia::render('marketing/handelsbetingelser');
+        return view('marketing.handelsbetingelser');
     }
 
-    public function privacy(): Response
+    public function privacy(): View
     {
-        return Inertia::render('marketing/privatlivspolitik');
+        return view('marketing.privatlivspolitik');
     }
 
-    public function cookies(): Response
+    public function cookies(): View
     {
-        return Inertia::render('marketing/cookiepolitik');
+        return view('marketing.cookiepolitik');
     }
 }

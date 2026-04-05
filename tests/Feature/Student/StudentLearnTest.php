@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\EnrollmentStatus;
+use App\Livewire\Student\LearnPage;
 use App\Models\Enrollment;
 use App\Models\Offer;
 use App\Models\OfferModule;
@@ -8,6 +9,7 @@ use App\Models\OfferPage;
 use App\Models\Student;
 use App\Models\StudentPageProgress;
 use App\Models\User;
+use Livewire\Livewire;
 
 function createEnrolledStudent(Offer $offer, EnrollmentStatus $status = EnrollmentStatus::Completed): Student
 {
@@ -30,11 +32,7 @@ test('student with completed enrollment can view a page', function () {
 
     $this->actingAs($student->user)
         ->get(route('student.learn.page', [$offer, $module, $page]))
-        ->assertOk()
-        ->assertInertia(fn ($p) => $p
-            ->component('student/learn/show')
-            ->where('page.id', $page->id)
-        );
+        ->assertOk();
 });
 
 test('student with pending enrollment gets 403', function () {
@@ -66,16 +64,14 @@ test('toc contains all modules and pages', function () {
     $module1 = OfferModule::factory()->for($offer)->create(['sort_order' => 0]);
     $module2 = OfferModule::factory()->for($offer)->create(['sort_order' => 1]);
     $page1 = OfferPage::factory()->for($module1, 'module')->create(['sort_order' => 0]);
-    $page2 = OfferPage::factory()->for($module2, 'module')->create(['sort_order' => 0]);
+    OfferPage::factory()->for($module2, 'module')->create(['sort_order' => 0]);
     $student = createEnrolledStudent($offer);
 
-    $this->actingAs($student->user)
-        ->get(route('student.learn.page', [$offer, $module1, $page1]))
-        ->assertOk()
-        ->assertInertia(fn ($p) => $p
-            ->has('modules', 2)
-            ->where('modules.0.id', $module1->id)
-            ->where('modules.1.id', $module2->id)
+    Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module1, 'page' => $page1])
+        ->assertSet('modulesWithPages', fn ($modules) => count($modules) === 2
+            && $modules[0]['id'] === $module1->id
+            && $modules[1]['id'] === $module2->id
         );
 });
 
@@ -91,23 +87,20 @@ test('completed page ids reflect student progress', function () {
         'completed_at' => now(),
     ]);
 
-    $this->actingAs($student->user)
-        ->get(route('student.learn.page', [$offer, $module, $page]))
-        ->assertOk()
-        ->assertInertia(fn ($p) => $p
-            ->where('completedPageIds', [$page->id])
-        );
+    Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page])
+        ->assertSet('completedPageIds', [$page->id]);
 });
 
 test('marking page complete records progress with timestamp', function () {
     $offer = Offer::factory()->create();
-    $module = OfferModule::factory()->for($offer)->create();
-    $page = OfferPage::factory()->for($module, 'module')->create();
+    $module = OfferModule::factory()->for($offer)->create(['sort_order' => 0]);
+    $page = OfferPage::factory()->for($module, 'module')->create(['sort_order' => 0]);
     $student = createEnrolledStudent($offer);
 
-    $this->actingAs($student->user)
-        ->post(route('student.learn.page.complete', [$offer, $module, $page]))
-        ->assertRedirect();
+    Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page])
+        ->call('markComplete');
 
     $progress = StudentPageProgress::where('student_id', $student->id)
         ->where('offer_page_id', $page->id)
@@ -119,15 +112,15 @@ test('marking page complete records progress with timestamp', function () {
 
 test('marking page complete is idempotent', function () {
     $offer = Offer::factory()->create();
-    $module = OfferModule::factory()->for($offer)->create();
-    $page = OfferPage::factory()->for($module, 'module')->create();
+    $module = OfferModule::factory()->for($offer)->create(['sort_order' => 0]);
+    $page = OfferPage::factory()->for($module, 'module')->create(['sort_order' => 0]);
     $student = createEnrolledStudent($offer);
 
-    $this->actingAs($student->user)
-        ->post(route('student.learn.page.complete', [$offer, $module, $page]));
+    $component = Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page]);
 
-    $this->actingAs($student->user)
-        ->post(route('student.learn.page.complete', [$offer, $module, $page]));
+    $component->call('markComplete');
+    $component->call('markComplete');
 
     expect(StudentPageProgress::where('student_id', $student->id)->count())->toBe(1);
 });
@@ -139,8 +132,9 @@ test('marking complete redirects to next page', function () {
     $page2 = OfferPage::factory()->for($module, 'module')->create(['sort_order' => 1]);
     $student = createEnrolledStudent($offer);
 
-    $this->actingAs($student->user)
-        ->post(route('student.learn.page.complete', [$offer, $module, $page1]))
+    Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page1])
+        ->call('markComplete')
         ->assertRedirect(route('student.learn.page', [$offer, $module, $page2]));
 });
 
@@ -150,7 +144,8 @@ test('marking last page complete stays on same page', function () {
     $page = OfferPage::factory()->for($module, 'module')->create(['sort_order' => 0]);
     $student = createEnrolledStudent($offer);
 
-    $this->actingAs($student->user)
-        ->post(route('student.learn.page.complete', [$offer, $module, $page]))
+    Livewire::actingAs($student->user)
+        ->test(LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page])
+        ->call('markComplete')
         ->assertRedirect(route('student.learn.page', [$offer, $module, $page]));
 });

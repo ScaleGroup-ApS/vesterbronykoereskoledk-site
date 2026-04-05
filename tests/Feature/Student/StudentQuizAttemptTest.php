@@ -111,11 +111,9 @@ test('latest quiz attempt is included in page props', function () {
         'attempted_at' => now(),
     ]);
 
-    $this->actingAs($student->user)
-        ->get(route('student.learn.page', [$offer, $module, $page]))
-        ->assertOk()
-        ->assertInertia(fn ($p) => $p
-            ->where('latestQuizAttempt.score', 1)
-            ->where('latestQuizAttempt.total', 1)
-        );
+    Livewire\Livewire::actingAs($student->user)
+        ->test(\App\Livewire\Student\LearnPage::class, ['offer' => $offer, 'module' => $module, 'page' => $page])
+        ->assertSet('attempt.score', 1)
+        ->assertSet('attempt.total', 1)
+        ->assertSet('submitted', true);
 });
