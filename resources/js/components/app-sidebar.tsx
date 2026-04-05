@@ -5,6 +5,7 @@ import {
     CreditCard,
     GraduationCap,
     LayoutGrid,
+    Library,
     LifeBuoy,
     MessageSquare,
     ScrollText,

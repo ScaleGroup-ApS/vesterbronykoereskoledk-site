@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Courses;
 
+use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Courses\StoreCourseRequest;
 use App\Http\Requests\Courses\UpdateCourseRequest;
+use App\Models\Booking;
 use App\Models\Course;
 use App\Models\Offer;
 use Carbon\Carbon;
@@ -90,13 +92,13 @@ class CourseController extends Controller
                         'name' => $enrollment->student->user->name,
                         'email' => $enrollment->student->user->email,
                     ],
-                    'attended_count' => \App\Models\Booking::where('student_id', $enrollment->student_id)
-                        ->where('status', \App\Enums\BookingStatus::Completed->value)
+                    'attended_count' => Booking::where('student_id', $enrollment->student_id)
+                        ->where('status', BookingStatus::Completed->value)
                         ->whereNotNull('attended')
                         ->where('attended', true)
                         ->count(),
-                    'total_bookings' => \App\Models\Booking::where('student_id', $enrollment->student_id)
-                        ->whereNotIn('status', [\App\Enums\BookingStatus::Cancelled->value])
+                    'total_bookings' => Booking::where('student_id', $enrollment->student_id)
+                        ->whereNotIn('status', [BookingStatus::Cancelled->value])
                         ->count(),
                 ]),
             ],
@@ -139,9 +141,11 @@ class CourseController extends Controller
      */
     private function applyDefaultEndAt(array $validated): array
     {
-        $hours = (int) config('courses.default_duration_hours', 8);
-        $start = Carbon::parse($validated['start_at']);
-        $validated['end_at'] = $start->copy()->addHours($hours);
+        if (empty($validated['end_at'])) {
+            $hours = (int) config('courses.default_duration_hours', 8);
+            $start = Carbon::parse($validated['start_at']);
+            $validated['end_at'] = $start->copy()->addHours($hours);
+        }
 
         return $validated;
     }

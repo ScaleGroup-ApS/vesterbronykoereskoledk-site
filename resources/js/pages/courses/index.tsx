@@ -37,6 +37,7 @@ export default function CoursesIndex({ courses, offers }: { courses: CourseRow[]
     const createForm = useForm({
         offer_id: '',
         start_at: '',
+        end_at: '',
         max_students: '',
         public_spots_remaining: '',
         featured_on_home: false,
@@ -79,18 +80,30 @@ export default function CoursesIndex({ courses, offers }: { courses: CourseRow[]
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="grid max-w-md gap-2">
-                                <Label htmlFor="new_start_at">Start (dato og tid)</Label>
-                                <Input
-                                    id="new_start_at"
-                                    type="datetime-local"
-                                    value={createForm.data.start_at}
-                                    onChange={(e) => createForm.setData('start_at', e.target.value)}
-                                    required
-                                    min={new Date().toISOString().slice(0, 16)}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Sluttid beregnes automatisk ud fra standard kursuslængde (konfiguration).
+                            <div className="grid max-w-md grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="new_start_at">Starttidspunkt</Label>
+                                    <Input
+                                        id="new_start_at"
+                                        type="datetime-local"
+                                        value={createForm.data.start_at}
+                                        onChange={(e) => createForm.setData('start_at', e.target.value)}
+                                        required
+                                        min={new Date().toISOString().slice(0, 16)}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="new_end_at">Sluttidspunkt (valgfrit)</Label>
+                                    <Input
+                                        id="new_end_at"
+                                        type="datetime-local"
+                                        value={createForm.data.end_at}
+                                        onChange={(e) => createForm.setData('end_at', e.target.value)}
+                                        min={createForm.data.start_at || undefined}
+                                    />
+                                </div>
+                                <p className="col-span-2 text-xs text-muted-foreground">
+                                    Hvis sluttidspunkt ikke angives, beregnes det automatisk ud fra standard kursuslængde.
                                 </p>
                             </div>
                             <div className="grid max-w-[200px] gap-2">

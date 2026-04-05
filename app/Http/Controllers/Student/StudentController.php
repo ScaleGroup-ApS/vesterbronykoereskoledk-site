@@ -135,7 +135,7 @@ class StudentController extends Controller
                 ->map(fn (Booking $b) => [
                     'id' => $b->id,
                     'type_label' => $b->type->label(),
-                    'range_label' => $b->starts_at->translatedFormat('d. MMM yyyy').' · '.$b->starts_at->format('H:i'),
+                    'range_label' => $b->starts_at->translatedFormat('d. M Y').' · '.$b->starts_at->format('H:i'),
                     'status' => $b->status->value,
                     'attended' => $b->attended,
                     'instructor_note' => $b->instructor_note,

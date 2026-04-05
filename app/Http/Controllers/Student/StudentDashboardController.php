@@ -186,7 +186,7 @@ class StudentDashboardController extends Controller
             'title' => $booking->type->label(),
             'starts_at' => $booking->starts_at->toIso8601String(),
             'ends_at' => $booking->ends_at->toIso8601String(),
-            'range_label' => $start->translatedFormat('EEEE d. MMMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+            'range_label' => $start->translatedFormat('l d. F Y').' · '.$start->format('H:i').'–'.$end->format('H:i'),
             'instructor_name' => $booking->instructor?->name,
         ];
     }
@@ -205,7 +205,7 @@ class StudentDashboardController extends Controller
             'title' => $enrollment->offer->name,
             'starts_at' => $course->start_at->toIso8601String(),
             'ends_at' => $course->end_at->toIso8601String(),
-            'range_label' => $start->translatedFormat('EEEE d. MMMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+            'range_label' => $start->translatedFormat('l d. F Y').' · '.$start->format('H:i').'–'.$end->format('H:i'),
         ];
     }
 
@@ -306,7 +306,7 @@ class StudentDashboardController extends Controller
                     'status' => $b->status->value,
                     'starts_at' => $b->starts_at->toIso8601String(),
                     'ends_at' => $b->ends_at->toIso8601String(),
-                    'range_label' => $start->translatedFormat('d. MMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+                    'range_label' => $start->translatedFormat('d. M Y').' · '.$start->format('H:i').'–'.$end->format('H:i'),
                     'attended' => $b->attended,
                     'attendance_recorded_at' => $b->attendance_recorded_at?->toIso8601String(),
                 ];
@@ -338,7 +338,7 @@ class StudentDashboardController extends Controller
                     'status' => $b->status->value,
                     'starts_at' => $b->starts_at->toIso8601String(),
                     'ends_at' => $b->ends_at->toIso8601String(),
-                    'range_label' => $start->translatedFormat('d. MMM yyyy').' · '.$start->format('H:i').'–'.$end->format('H:i'),
+                    'range_label' => $start->translatedFormat('d. M Y').' · '.$start->format('H:i').'–'.$end->format('H:i'),
                     'attended' => $b->attended,
                     'attendance_recorded_at' => $b->attendance_recorded_at?->toIso8601String(),
                     'instructor_note' => $b->instructor_note,

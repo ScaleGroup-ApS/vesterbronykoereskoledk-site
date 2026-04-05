@@ -22,9 +22,21 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Test Bruger',
-            'email' => 'test@koreskole.dk',
+            'name' => 'Test Admin',
+            'email' => 'admin@koreskole.dk',
             'role' => UserRole::Admin,
+        ]);
+
+        User::factory()->create([
+            'name' => 'Test Instruktør',
+            'email' => 'instructor@koreskole.dk',
+            'role' => UserRole::Instructor,
+        ]);
+
+        User::factory()->create([
+            'name' => 'Test Elev',
+            'email' => 'student@koreskole.dk',
+            'role' => UserRole::Student,
         ]);
 
         $this->seedOffers();

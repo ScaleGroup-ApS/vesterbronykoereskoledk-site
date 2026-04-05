@@ -279,6 +279,12 @@ export default function StudentDashboard({
                     </div>
                 )}
 
+                {/* Quick navigation grid */}
+                <section className="space-y-4">
+                    <h2 className="text-base font-medium">Genveje</h2>
+                    <QuickNavGrid hasLearnUrl={!!studentLearnUrl} />
+                </section>
+
                 {/* Lesson progress */}
                 <section className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -302,12 +308,6 @@ export default function StudentDashboard({
                         </span>
                     </div>
                 )}
-
-                {/* Quick navigation grid */}
-                <section className="space-y-4">
-                    <h2 className="text-base font-medium">Genveje</h2>
-                    <QuickNavGrid hasLearnUrl={!!studentLearnUrl} />
-                </section>
 
                 {/* Full progression CTA */}
                 <Link

@@ -39,6 +39,7 @@ class StoreCourseRequest extends FormRequest
                 Rule::exists('offers', 'id')->where('type', OfferType::Primary->value),
             ],
             'start_at' => ['required', 'date', 'after:now'],
+            'end_at' => ['nullable', 'date', 'after:start_at'],
             'max_students' => ['nullable', 'integer', 'min:1'],
             'featured_on_home' => ['sometimes', 'boolean'],
             'public_spots_remaining' => ['nullable', 'integer', 'min:0'],
