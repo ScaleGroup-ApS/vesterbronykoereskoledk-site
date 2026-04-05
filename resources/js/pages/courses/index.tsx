@@ -41,6 +41,10 @@ export default function CoursesIndex({ courses, offers }: { courses: CourseRow[]
         max_students: '',
         public_spots_remaining: '',
         featured_on_home: false,
+        theory_weekdays: [] as number[],
+        theory_start_time: '',
+        theory_end_time: '',
+        theory_until: '',
     });
 
     function submitCreate(e: React.FormEvent) {
@@ -104,6 +108,80 @@ export default function CoursesIndex({ courses, offers }: { courses: CourseRow[]
                                 </div>
                                 <p className="col-span-2 text-xs text-muted-foreground">
                                     Hvis sluttidspunkt ikke angives, beregnes det automatisk ud fra standard kursuslængde.
+                                </p>
+                            </div>
+                            <div className="space-y-3">
+                                <Label>Teoritimer (valgfrit)</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        { day: 1, label: 'Man' },
+                                        { day: 2, label: 'Tirs' },
+                                        { day: 3, label: 'Ons' },
+                                        { day: 4, label: 'Tors' },
+                                        { day: 5, label: 'Fre' },
+                                        { day: 6, label: 'Lør' },
+                                        { day: 7, label: 'Søn' },
+                                    ].map(({ day, label }) => {
+                                        const selected = createForm.data.theory_weekdays.includes(day);
+                                        return (
+                                            <button
+                                                key={day}
+                                                type="button"
+                                                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition ${
+                                                    selected
+                                                        ? 'border-primary bg-primary text-primary-foreground'
+                                                        : 'border-border bg-background hover:bg-muted'
+                                                }`}
+                                                onClick={() => {
+                                                    const current = createForm.data.theory_weekdays;
+                                                    createForm.setData(
+                                                        'theory_weekdays',
+                                                        selected ? current.filter((d) => d !== day) : [...current, day].sort(),
+                                                    );
+                                                }}
+                                            >
+                                                {label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {createForm.data.theory_weekdays.length > 0 && (
+                                    <div className="grid max-w-md grid-cols-3 gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="theory_start_time">Fra</Label>
+                                            <Input
+                                                id="theory_start_time"
+                                                type="time"
+                                                value={createForm.data.theory_start_time}
+                                                onChange={(e) => createForm.setData('theory_start_time', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="theory_end_time">Til</Label>
+                                            <Input
+                                                id="theory_end_time"
+                                                type="time"
+                                                value={createForm.data.theory_end_time}
+                                                onChange={(e) => createForm.setData('theory_end_time', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="theory_until">Gentag indtil</Label>
+                                            <Input
+                                                id="theory_until"
+                                                type="date"
+                                                value={createForm.data.theory_until}
+                                                onChange={(e) => createForm.setData('theory_until', e.target.value)}
+                                                required
+                                                min={createForm.data.start_at?.split('T')[0] || undefined}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                    Vælg ugedage for at oprette teoritimer automatisk. Elever der tilmelder sig vil få dem i kalenderen.
                                 </p>
                             </div>
                             <div className="grid max-w-[200px] gap-2">
