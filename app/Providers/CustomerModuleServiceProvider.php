@@ -3,24 +3,30 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class CustomerModuleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $id = config('customer.id');
+        $slug = config('customer.slug');
 
-        if (! $id) {
+        if (! $slug) {
             return;
         }
 
-        $class = "App\\Customers\\{$id}\\ServiceProvider";
+        // Convert CUSTOMER_SLUG to StudlyCase for the PHP namespace:
+        // "koereskole-aarhus" → "KoereskoleAarhus"
+        // Directory: app/Customers/KoereskoleAarhus/ServiceProvider.php
+        $studly = Str::studly($slug);
+
+        $class = "App\\Customers\\{$studly}\\ServiceProvider";
 
         if (class_exists($class)) {
             $this->app->register($class);
         }
 
-        $viewPath = app_path("Customers/{$id}/resources/views");
+        $viewPath = app_path("Customers/{$studly}/resources/views");
 
         if (is_dir($viewPath)) {
             $this->callAfterResolving('view', function ($view) use ($viewPath) {

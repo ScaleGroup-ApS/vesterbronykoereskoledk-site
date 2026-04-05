@@ -4,14 +4,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Customer Identity
+    | Customer Slug
     |--------------------------------------------------------------------------
     |
-    | Set via CUSTOMER_ID in the Kubernetes ConfigMap. Used to load the
-    | matching customer module from app/Customers/{id}/ServiceProvider.php.
+    | Set via CUSTOMER_SLUG in the Kubernetes pod spec (inline env var, not a
+    | secret). Matches the k8s namespace, database prefix, and image name for
+    | this deployment. Used to load app/Customers/{slug}/ServiceProvider.php.
     |
     */
 
-    'id' => env('CUSTOMER_ID'),
+    'slug' => env('CUSTOMER_SLUG'),
 
 ];
