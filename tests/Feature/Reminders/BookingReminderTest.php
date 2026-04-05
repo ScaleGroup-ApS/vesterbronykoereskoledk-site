@@ -72,7 +72,7 @@ test('reminder mail links students to elevkalender and staff to bookings index',
 
     $notification = new BookingReminderNotification($booking);
 
-    expect($notification->toMail($student->user)->actionUrl)->toBe(url('/app'));
+    expect($notification->toMail($student->user)->actionUrl)->toBe(url('/student'));
     expect($notification->toMail($instructor)->actionUrl)->toBe(url('/admin'));
 });
 

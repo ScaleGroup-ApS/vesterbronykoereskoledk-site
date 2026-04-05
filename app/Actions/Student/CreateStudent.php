@@ -42,7 +42,7 @@ class CreateStudent
                 start_date: $student->start_date->toDateString(),
             );
 
-            $action = new LoginAction($user, redirect('/app'));
+            $action = new LoginAction($user, redirect('/student'));
             $url = MagicLink::create($action)->url;
 
             Mail::to($user)->send(

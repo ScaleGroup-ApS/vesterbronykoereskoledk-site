@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Pennant\Feature;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,7 +37,19 @@ class AppServiceProvider extends ServiceProvider
 
         Http::macro('crm', fn () => Http::baseUrl((string) config('services.crm.url'))->asJson());
 
+        $this->defineFeatureFlags();
         $this->configureDefaults();
+    }
+
+    /**
+     * Define feature flags via Laravel Pennant.
+     * Defaults fall back to env vars (k8s ConfigMap) when no DB override exists.
+     */
+    protected function defineFeatureFlags(): void
+    {
+        Feature::define('two-factor', fn () => (bool) env('FEATURE_TWO_FACTOR', true));
+        Feature::define('student-calendar', fn () => (bool) env('FEATURE_STUDENT_CALENDAR', true));
+        Feature::define('student-chat', fn () => (bool) env('FEATURE_STUDENT_CHAT', true));
     }
 
     /**

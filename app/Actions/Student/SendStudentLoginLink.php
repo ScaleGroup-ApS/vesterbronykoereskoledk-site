@@ -15,7 +15,7 @@ class SendStudentLoginLink
     {
         $user = $student->user;
 
-        $action = new LoginAction($user, redirect('/app'));
+        $action = new LoginAction($user, redirect('/student'));
         $url = MagicLink::create($action)->url;
 
         Mail::to($user)->send(

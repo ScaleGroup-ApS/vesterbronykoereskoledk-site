@@ -32,7 +32,7 @@ class BookingRescheduledNotification extends Notification implements ShouldQueue
             ->greeting("Hej {$notifiable->name}!")
             ->line("Tidspunktet for din {$label} er opdateret.")
             ->line("Nyt tidspunkt: {$when}")
-            ->action('Se kalenderen', url('/app'));
+            ->action('Se kalenderen', url('/student'));
     }
 
     /**
