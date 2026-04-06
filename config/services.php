@@ -40,4 +40,9 @@ return [
         'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
     ],
 
+    'crm' => [
+        'url' => env('CRM_API_URL'),
+        'customer_id' => env('CRM_CUSTOMER_ID'),
+    ],
+
 ];

@@ -13,11 +13,9 @@ test('guests can view contact page with offers and hold start options', function
 
     get(route('marketing.contact'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('marketing/kontakt')
-            ->has('offers', 1)
-            ->where('offers.0.name', 'Basis Pakke')
-            ->has('holdStartOptions'));
+        ->assertViewIs('marketing.kontakt')
+        ->assertViewHas('offers', fn ($offers) => $offers->count() === 1 && $offers->first()->name === 'Basis Pakke')
+        ->assertViewHas('holdStartOptions');
 });
 
 test('guests can submit contact form with valid data', function () {

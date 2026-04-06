@@ -1,9 +1,10 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "C:\\Users\\Jonas\\.config\\herd\\bin\\php84\\php.exe",
+            "command": "wsl.exe",
             "args": [
-                "C:\\Users\\Jonas\\Work\\Scaleweb\\koereskole-template\\artisan",
+                "/usr/bin/php8.4",
+                "/home/jonas/Scaleweb/koereskole-template/artisan",
                 "boost:mcp"
             ]
         }

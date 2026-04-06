@@ -31,8 +31,8 @@ class BookingReminderNotification extends Notification implements ShouldQueue
 
         $actionText = $isStudent ? 'Se kalenderen' : 'Se bookinger';
         $actionUrl = $isStudent
-            ? route('student.kalender')
-            : route('bookings.index');
+            ? url('/student')
+            : url('/admin');
 
         return (new MailMessage)
             ->subject('Påmindelse om booking i morgen')

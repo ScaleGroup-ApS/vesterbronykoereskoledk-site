@@ -72,8 +72,8 @@ test('reminder mail links students to elevkalender and staff to bookings index',
 
     $notification = new BookingReminderNotification($booking);
 
-    expect($notification->toMail($student->user)->actionUrl)->toBe(route('student.kalender'));
-    expect($notification->toMail($instructor)->actionUrl)->toBe(route('bookings.index'));
+    expect($notification->toMail($student->user)->actionUrl)->toBe(url('/student'));
+    expect($notification->toMail($instructor)->actionUrl)->toBe(url('/admin'));
 });
 
 test('reminder is not sent for cancelled bookings', function () {

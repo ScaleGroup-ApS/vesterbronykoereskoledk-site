@@ -22,6 +22,7 @@ class Student extends Model implements HasMedia
         'cpr',
         'status',
         'start_date',
+        'completed_skills',
     ];
 
     protected function casts(): array
@@ -30,6 +31,7 @@ class Student extends Model implements HasMedia
             'cpr' => 'encrypted',
             'status' => StudentStatus::class,
             'start_date' => 'date',
+            'completed_skills' => 'array',
         ];
     }
 
@@ -56,6 +58,26 @@ class Student extends Model implements HasMedia
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function pageProgress(): HasMany
+    {
+        return $this->hasMany(StudentPageProgress::class);
+    }
+
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(StudentQuizAttempt::class);
+    }
+
+    public function theoryPracticeAttempts(): HasMany
+    {
+        return $this->hasMany(TheoryPracticeAttempt::class);
+    }
+
+    public function bookingFeedback(): HasMany
+    {
+        return $this->hasMany(BookingFeedback::class);
     }
 
     public function registerMediaCollections(): void

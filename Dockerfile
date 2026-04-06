@@ -25,6 +25,8 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 ARG USER=laravel
 
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+
 RUN userdel --remove --force www-data || true \
     && groupadd --force -g ${GROUP_ID} ${USER} \
     && useradd -ms /bin/bash --no-log-init --no-user-group -g ${GROUP_ID} -u ${USER_ID} ${USER}

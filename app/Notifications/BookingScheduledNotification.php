@@ -32,7 +32,7 @@ class BookingScheduledNotification extends Notification implements ShouldQueue
             ->greeting("Hej {$notifiable->name}!")
             ->line("Der er booket en ny aktivitet: {$label}.")
             ->line("Tidspunkt: {$when}")
-            ->action('Se kalenderen', route('student.kalender'));
+            ->action('Se kalenderen', url('/student'));
     }
 
     /**

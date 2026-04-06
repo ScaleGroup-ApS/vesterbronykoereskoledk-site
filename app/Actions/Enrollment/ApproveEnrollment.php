@@ -2,6 +2,7 @@
 
 namespace App\Actions\Enrollment;
 
+use App\Actions\Courses\SyncNewEnrollmentBookings;
 use App\Actions\Offers\AssignOffer;
 use App\Actions\Payments\RecordPayment;
 use App\Enums\EnrollmentStatus;
@@ -16,6 +17,7 @@ class ApproveEnrollment
         private readonly AssignOffer $assignOffer,
         private readonly CreateEnrollmentBooking $createEnrollmentBooking,
         private readonly RecordPayment $recordPayment,
+        private readonly SyncNewEnrollmentBookings $syncBookings,
     ) {}
 
     public function handle(Enrollment $enrollment, User $approvedBy): Enrollment
@@ -43,6 +45,7 @@ class ApproveEnrollment
         ]);
 
         $this->createEnrollmentBooking->handle($enrollment);
+        $this->syncBookings->handle($enrollment);
 
         $enrollment->student->user->notify(new EnrollmentApprovedNotification($enrollment));
 

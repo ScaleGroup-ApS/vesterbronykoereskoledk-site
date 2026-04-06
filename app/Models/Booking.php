@@ -4,19 +4,22 @@ namespace App\Models;
 
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
+use Database\Factories\BookingFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
-    /** @use HasFactory<\Database\Factories\BookingFactory> */
+    /** @use HasFactory<BookingFactory> */
     use HasFactory;
 
     protected $fillable = [
         'student_id',
         'team_id',
+        'course_session_id',
         'instructor_id',
         'vehicle_id',
         'type',
@@ -67,6 +70,16 @@ class Booking extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function feedback(): HasOne
+    {
+        return $this->hasOne(BookingFeedback::class);
+    }
+
+    public function courseSession(): BelongsTo
+    {
+        return $this->belongsTo(CourseSession::class);
     }
 
     /**

@@ -49,43 +49,42 @@ class BuildStudentLessonProgress
             ->pluck('c', 'type')
             ->all();
 
-        $byType = [];
-
-        foreach ($readiness['required'] as $typeKey => $required) {
-            if ($required <= 0) {
-                continue;
-            }
-
-            $completed = (int) ($readiness['completed'][$typeKey] ?? 0);
-            $scheduled = (int) ($scheduledByType[$typeKey] ?? 0);
-            $remaining = max(0, $required - $completed - $scheduled);
-
-            $enumType = BookingType::tryFrom($typeKey);
-            $label = $enumType ? $enumType->label() : $typeKey;
-
-            $byType[$typeKey] = [
-                'type' => $typeKey,
-                'label' => $label,
-                'required' => $required,
-                'completed' => $completed,
-                'scheduled' => $scheduled,
-                'remaining' => $remaining,
-            ];
-        }
-
-        $ordered = [];
+        $required = $readiness['required'];
+        $rows = [];
 
         foreach (self::TYPE_ORDER as $typeKey) {
-            if (isset($byType[$typeKey])) {
-                $ordered[] = $byType[$typeKey];
-                unset($byType[$typeKey]);
+            if (($required[$typeKey] ?? 0) > 0) {
+                $rows[] = $this->buildRow($typeKey, $required[$typeKey], $readiness['completed'], $scheduledByType);
             }
         }
 
-        foreach ($byType as $row) {
-            $ordered[] = $row;
+        foreach (array_diff_key($required, array_flip(self::TYPE_ORDER)) as $typeKey => $req) {
+            if ($req > 0) {
+                $rows[] = $this->buildRow($typeKey, $req, $readiness['completed'], $scheduledByType);
+            }
         }
 
-        return $ordered;
+        return $rows;
+    }
+
+    /**
+     * @param  array<string, int>  $completed
+     * @param  array<string, int>  $scheduled
+     * @return array{type: string, label: string, required: int, completed: int, scheduled: int, remaining: int}
+     */
+    private function buildRow(string $typeKey, int $required, array $completed, array $scheduled): array
+    {
+        $done = (int) ($completed[$typeKey] ?? 0);
+        $sched = (int) ($scheduled[$typeKey] ?? 0);
+        $enumType = BookingType::tryFrom($typeKey);
+
+        return [
+            'type' => $typeKey,
+            'label' => $enumType ? $enumType->label() : $typeKey,
+            'required' => $required,
+            'completed' => $done,
+            'scheduled' => $sched,
+            'remaining' => max(0, $required - $done - $sched),
+        ];
     }
 }

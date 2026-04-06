@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Student;
 use App\Models\User;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class StudentPolicy
 {
@@ -34,5 +35,12 @@ class StudentPolicy
     public function delete(User $user, Student $student): bool
     {
         return $user->isAdmin();
+    }
+
+    public function download(User $user, Student $student, Media $media): bool
+    {
+        return $user->isAdmin()
+            || $user->isInstructor()
+            || ($user->isStudent() && $user->student?->id === $student->id);
     }
 }
