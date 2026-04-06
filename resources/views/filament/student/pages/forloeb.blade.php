@@ -1,3 +1,3 @@
 <x-filament-panels::page>
-    @livewire('student.forloeb')
+    <livewire:student.forloeb />
 </x-filament-panels::page>

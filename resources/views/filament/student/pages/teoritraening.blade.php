@@ -1,3 +1,3 @@
 <x-filament-panels::page>
-    <livewire:chat />
+    <livewire:student.teoritraening />
 </x-filament-panels::page>

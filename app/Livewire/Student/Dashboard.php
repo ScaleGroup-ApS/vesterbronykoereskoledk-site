@@ -2,67 +2,44 @@
 
 namespace App\Livewire\Student;
 
+use App\Actions\Payments\CalculateBalance;
+use App\Actions\Student\FindNextStudentEvent;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
-use App\Models\Booking;
+use App\Enums\EnrollmentStatus;
 use App\Models\CurriculumTopic;
+use App\Models\Enrollment;
 use App\Models\Student;
 use Illuminate\View\View;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
-    public function render(): View
-    {
-        $student = $this->student();
+    public function render(
+        FindNextStudentEvent $findNextEvent,
+        CalculateBalance $calculateBalance,
+    ): View {
+        $student = auth()->user()?->student;
 
-        if (! $student) {
+        if (! $student instanceof Student) {
             return view('livewire.student.dashboard', [
                 'student' => null,
-                'nextBooking' => null,
+                'nextEvent' => null,
                 'nextTheoryTopic' => null,
+                'pendingEnrollment' => null,
+                'balance' => null,
                 'userName' => auth()->user()?->name,
             ]);
         }
 
         return view('livewire.student.dashboard', [
             'student' => $student,
-            'nextBooking' => $this->nextBooking($student),
+            'nextEvent' => $findNextEvent->handle($student),
             'nextTheoryTopic' => $this->nextTheoryTopic($student),
+            'pendingEnrollment' => $this->pendingEnrollment($student),
+            'balance' => $calculateBalance->handle($student),
             'userName' => auth()->user()?->name,
         ]);
-    }
-
-    private function student(): ?Student
-    {
-        return auth()->user()?->student;
-    }
-
-    /**
-     * @return array{title: string, range_label: string}|null
-     */
-    private function nextBooking(Student $student): ?array
-    {
-        $tz = config('app.timezone');
-
-        $booking = Booking::query()
-            ->where('student_id', $student->id)
-            ->where('starts_at', '>=', now())
-            ->whereNotIn('status', [BookingStatus::Cancelled->value, BookingStatus::NoShow->value])
-            ->orderBy('starts_at')
-            ->first();
-
-        if (! $booking) {
-            return null;
-        }
-
-        $start = $booking->starts_at->timezone($tz);
-        $end = $booking->ends_at->timezone($tz);
-
-        return [
-            'title' => $booking->type->label(),
-            'range_label' => $start->translatedFormat('l j. F Y').' · '.$start->format('H:i').'–'.$end->format('H:i'),
-        ];
     }
 
     /**
@@ -82,5 +59,27 @@ class Dashboard extends Component
             ->first(['lesson_number', 'title', 'description']);
 
         return $topic ? $topic->only(['lesson_number', 'title', 'description']) : null;
+    }
+
+    /**
+     * @return array{status: string, payment_method: string, offer_price: float}|null
+     */
+    private function pendingEnrollment(Student $student): ?array
+    {
+        $enrollment = Enrollment::query()
+            ->where('student_id', $student->id)
+            ->whereIn('status', [EnrollmentStatus::PendingPayment->value, EnrollmentStatus::PendingApproval->value])
+            ->with('offer')
+            ->first();
+
+        if (! $enrollment) {
+            return null;
+        }
+
+        return [
+            'status' => $enrollment->status->value,
+            'payment_method' => $enrollment->payment_method->value,
+            'offer_price' => (float) $enrollment->offer->price,
+        ];
     }
 }

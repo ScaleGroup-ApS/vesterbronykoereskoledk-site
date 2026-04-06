@@ -15,5 +15,5 @@ class Historik extends Page
 
     protected string $view = 'filament.student.pages.historik';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 }

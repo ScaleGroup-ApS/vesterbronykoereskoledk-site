@@ -1,3 +1,3 @@
 <x-filament-panels::page>
-    <livewire:chat />
+    <livewire:student.betalinger />
 </x-filament-panels::page>

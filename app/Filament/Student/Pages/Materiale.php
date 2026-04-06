@@ -15,5 +15,5 @@ class Materiale extends Page
 
     protected string $view = 'filament.student.pages.materiale';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 }
