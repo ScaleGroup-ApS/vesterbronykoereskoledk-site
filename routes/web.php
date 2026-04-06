@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\RequestMagicLinkController;
 use App\Http\Controllers\Bookings\BookingAttendanceController;
 use App\Http\Controllers\Bookings\BookingDayController;
 use App\Http\Controllers\Bookings\BookingNoteController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Chat\ConversationMemberController;
 use App\Http\Controllers\Chat\MessageAttachmentController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\Courses\CourseAttendanceController;
+use App\Http\Controllers\Courses\CourseSessionController;
 use App\Http\Controllers\Curriculum\CurriculumMaterialUnlockController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\Marketing\ContactInquiryController;
@@ -20,10 +22,13 @@ use App\Http\Controllers\Offers\OfferPageQuizController;
 use App\Http\Controllers\Offers\OfferPageVideoController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Student\BookingFeedbackController;
 use App\Http\Controllers\Student\BulkStudentLoginLinkController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentLearnController;
+use App\Http\Controllers\Student\StudentNotificationController;
 use App\Http\Controllers\Student\StudentQuizAttemptController;
+use App\Http\Controllers\Student\TheoryPracticeController;
 use App\Http\Controllers\Students\StudentSkillController;
 use App\Http\Controllers\TicketController;
 use App\Livewire\Student\LearnPage;
@@ -46,6 +51,10 @@ Route::get('handelsbetingelser', [MarketingController::class, 'terms'])->name('m
 Route::get('privatlivspolitik', [MarketingController::class, 'privacy'])->name('marketing.privacy');
 Route::get('cookiepolitik', [MarketingController::class, 'cookies'])->name('marketing.cookies');
 
+Route::post('login/magic-link', RequestMagicLinkController::class)
+    ->middleware('throttle:5,1')
+    ->name('login.magic-link');
+
 Route::get('dashboard', fn () => redirect('/admin'))->middleware(['auth'])->name('dashboard');
 
 Route::get('book/return', [EnrollmentController::class, 'stripeReturn'])->name('enrollment.stripe-return')->middleware('auth');
@@ -53,11 +62,22 @@ Route::get('book/{offer}', [EnrollmentController::class, 'show'])->name('enrollm
 Route::post('book/{offer}', [EnrollmentController::class, 'store'])->name('enrollment.store')->middleware(HandlePrecognitiveRequests::class);
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Student learn
+    // Student learn (offer module pages — Blade/Livewire)
     Route::prefix('offers/{offer}/learn')->middleware('role:student')->name('student.learn.')->group(function () {
         Route::get('{module}', [StudentLearnController::class, 'redirectToFirstPage'])->name('module');
         Route::get('{module}/{page}', LearnPage::class)->name('page');
         Route::post('{module}/{page}/quiz', [StudentQuizAttemptController::class, 'store'])->name('page.quiz.attempt');
+    });
+
+    // Student panel mutation routes (Filament pages pending for GET equivalents)
+    Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
+        Route::post('/teoritraening', [TheoryPracticeController::class, 'store'])->name('theory-practice.store');
+        Route::get('/teoritraening/{attempt}', [TheoryPracticeController::class, 'result'])->name('theory-practice.result');
+
+        Route::post('/notifikationer/{id}/read', [StudentNotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifikationer/read-all', [StudentNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+        Route::post('/feedback/{booking}', [BookingFeedbackController::class, 'store'])->name('feedback.store');
     });
 
     Route::get('student/offers/{offer}/materials/{media}', [MediaController::class, 'show'])
@@ -86,6 +106,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::patch('courses/{course}/enrollments/{enrollment}/attendance', CourseAttendanceController::class)
         ->name('courses.enrollments.attendance');
+
+    Route::post('courses/{course}/sessions/{session}/cancel', [CourseSessionController::class, 'cancel'])
+        ->name('courses.sessions.cancel');
+    Route::patch('courses/{course}/sessions/{session}/attendance', [CourseSessionController::class, 'attendance'])
+        ->name('courses.sessions.attendance');
 
     Route::get('bookings/day/{date}', BookingDayController::class)->name('bookings.day');
     Route::post('bookings/{booking}/attendance', BookingAttendanceController::class)

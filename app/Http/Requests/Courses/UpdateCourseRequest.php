@@ -29,6 +29,7 @@ class UpdateCourseRequest extends FormRequest
     {
         return [
             'start_at' => ['required', 'date', 'after:now'],
+            'end_at' => ['nullable', 'date', 'after:start_at'],
             'max_students' => ['nullable', 'integer', 'min:1'],
             'featured_on_home' => ['sometimes', 'boolean'],
             'public_spots_remaining' => ['nullable', 'integer', 'min:0'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Course extends Model
 {
-    /** @use HasFactory<\Database\Factories\CourseFactory> */
+    /** @use HasFactory<CourseFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -20,6 +21,7 @@ class Course extends Model
         'max_students',
         'featured_on_home',
         'public_spots_remaining',
+        'theory_schedule',
     ];
 
     protected function casts(): array
@@ -30,6 +32,7 @@ class Course extends Model
             'max_students' => 'integer',
             'featured_on_home' => 'boolean',
             'public_spots_remaining' => 'integer',
+            'theory_schedule' => 'array',
         ];
     }
 
@@ -41,6 +44,11 @@ class Course extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(CourseSession::class);
     }
 
     /** @param Builder<Course> $query */
